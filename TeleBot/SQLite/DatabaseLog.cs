@@ -16,7 +16,7 @@ namespace TeleBot.SQLite
             {
                 if (_db != null) return;
                 
-                _db = new SQLiteAsyncConnection(Program.FilePathInData("logs.db"));
+                _db = new SQLiteAsyncConnection(Program.FilePathInData("Logs.db"));
                 _db.SetBusyTimeoutAsync(TimeSpan.FromSeconds(20));
                 _db.CreateTableAsync<LogData>();
             }
