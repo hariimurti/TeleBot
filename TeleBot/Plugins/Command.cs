@@ -6,7 +6,7 @@ using Telegram.Bot.Types;
 
 namespace TeleBot.Plugins
 {
-    public class Command
+    public static class Command
     {
         private static Log _log = new Log("Command");
         

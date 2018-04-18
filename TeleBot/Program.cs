@@ -10,7 +10,7 @@ using TeleBot.Classes;
 
 namespace TeleBot
 {
-    class Program
+    internal class Program
     {
         public static readonly string AppName = "TeleBot";
         public static readonly string AppVersion = GetVersion();
@@ -21,8 +21,8 @@ namespace TeleBot
 
         public static readonly string BotToken = "551843695:AAG5WTEIxEJKln6A49OsHW-OWceGthzDHZA";
         public static readonly DateTime StartTime = DateTime.Now;
-        
-        static void Main(string[] args)
+
+        private static void Main(string[] args)
         {
             // set debug level
             foreach(var arg in args)

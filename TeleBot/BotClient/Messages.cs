@@ -6,7 +6,7 @@ using Telegram.Bot.Types.Enums;
 
 namespace TeleBot.BotClient
 {
-    public class Messages
+    public static class Messages
     {
         private static Log _log = new Log("Messages");
         private static Database _db = new Database();

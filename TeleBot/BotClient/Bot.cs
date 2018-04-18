@@ -9,7 +9,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TeleBot.BotClient
 {
-    public class Bot
+    public static class Bot
     {
         private static Log _log = new Log("Bot");
         private static TelegramBotClient _bot = Client();
