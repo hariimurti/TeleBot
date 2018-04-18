@@ -2,7 +2,6 @@
 using TeleBot.Plugins;
 using TeleBot.SQLite;
 using Telegram.Bot.Args;
-using Telegram.Bot.Types.Enums;
 
 namespace TeleBot.BotClient
 {
@@ -14,8 +13,8 @@ namespace TeleBot.BotClient
         public static async void OnMessage(object sender, MessageEventArgs e)
         {
             var message = e.Message;
-            if (message.Type != MessageType.Text) return;
-            if (message.Chat.Type != ChatType.Private) return;
+            if (!message.IsTextMessage()) return;
+            if (!message.IsPrivateChat()) return;
             
             var already = await _db.InsertMessageIncoming(message);
             if (already) return;
