@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TeleBot.Classes;
 using Telegram.Bot;
@@ -27,6 +28,14 @@ namespace TeleBot.BotClient
                 client.Timeout = TimeSpan.FromMinutes(timeout);
             }
             return client;
+        }
+
+        public static string ReplaceWithBotValue(this string text)
+        {
+            var alias = Keys.Alias.Replace("|", ", ");
+            return text.Replace("{name}", Name)
+                .Replace("{username}", Username)
+                .Replace("{alias}", alias);
         }
 
         public static async void StartReceivingMessage()

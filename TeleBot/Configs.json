@@ -1,9 +1,16 @@
 {
 	"Token": "",
 	"Alias": "inem|pelayan|isyana",
-	"AliasExcept": "nem(?:\\W)?(?:pitu|wolu|songo|sepuluh)",
+	"AliasExcept": "inem(?:\\W)?(?:pitu|wolu|songo|sepuluh)",
 	"BadWords": "ml|bercinta|entot|sex|ngewe|sange|bokep|bugil|telanjang|nungging|jengking|emut|isep|jilat|jilmek|seph?ong|peli|konth?ol|peler|meki|memek|vagina|perek|anal|oral|bj|blowjob|crot|payudara|tetek?|toket|threesome|nude|wudh?o|penth?il|horn[i|y]",
-	"BadWordResponse": null,
+	"BadWordResponse": [
+		"{name} gak mau diajak nakal!",
+		"Inget umur!",
+		"Jomblo ya?",
+		"Ngacaaa dulu wooyyy!!",
+		"No comment",
+		"Gak mau ahh"
+	],
 	"SupportedBy": "*Developer* : Harimurti ( @harimurti )\n*Donatur* :\n — Karno ( @Isoen )\n — Arif ( @arifkur )\n*Grup Dev* : @paijemdev",
 	"OwnerId": 7703322,
 	"AdminIds": [
@@ -40,7 +47,7 @@
 		"Bentar, baru keluar...",
 		"Diem luu.. Udah jelek, keriput lagi"
 	],
-	"SayHello": "Hai.. Salam kenal ya 😘\nNama ku *{name}*, bisa dipanggil _{nickname}_.\nUntuk bantuan klik /help\nMau godain aku juga boleh 😘",
+	"SayHello": "Hai.. Salam kenal ya 😘\nNama ku *{name}*, bisa dipanggil _{alias}_.\nUntuk bantuan klik /help\nMau godain aku juga boleh 😘",
 	"SayHelloNewMember": "Hai, {member}!\nSelamat bergabung di *{group}*...\nGodain aku juga boleh loh 😘",
 	"SimsimiNoResponse": [
 		"{name} bingung",

@@ -33,6 +33,9 @@ namespace TeleBot.Plugins
             switch (cmd)
             {
                 case "start":
+                    Start(message);
+                    break;
+                
                 case "help":
                     Help(message);
                     break;
@@ -47,9 +50,15 @@ namespace TeleBot.Plugins
             }
         }
 
+        private static async void Start(Message message)
+        {
+            var respon = Bot.Keys.SayHello.ReplaceWithBotValue();
+            await Bot.SendTextAsync(message, respon);
+        }
+
         private static async void Help(Message message)
         {
-            await Bot.SendTextAsync(message, "Ini adalah pesan /start atau /help");
+            await Bot.SendTextAsync(message, "Ini adalah pesan help");
         }
         
         private static async void Echo(Message message, string data)
