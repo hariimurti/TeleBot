@@ -17,10 +17,11 @@ namespace TeleBot.BotClient
         private static bool _isReceiving;
         public static string Name = string.Empty;
         public static string Username = string.Empty;
+        public static ConfigKeys Keys = Configs.LoadKeys();
         
         private static TelegramBotClient Client(int timeout = 0)
         {
-            var client = new TelegramBotClient(Program.BotToken);
+            var client = new TelegramBotClient(Keys.Token);
             if (timeout > 0)
             {
                 client.Timeout = TimeSpan.FromMinutes(timeout);

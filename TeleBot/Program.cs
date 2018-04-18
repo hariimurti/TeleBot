@@ -19,7 +19,6 @@ namespace TeleBot
         public static readonly string WorkingDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
         public static readonly string DataDirectory = GetDataDirectory();
 
-        public static readonly string BotToken = "551843695:AAG5WTEIxEJKln6A49OsHW-OWceGthzDHZA";
         public static readonly DateTime StartTime = DateTime.Now;
 
         private static void Main(string[] args)
