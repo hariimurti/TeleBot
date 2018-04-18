@@ -33,7 +33,7 @@ namespace TeleBot.SQLite
 
         public async Task<bool> InsertMessageIncoming(Message data)
         {
-            var result = false;
+            var result = true;
             
             try
             {
@@ -41,7 +41,7 @@ namespace TeleBot.SQLite
                 var exists = await _db.Table<MessageIncoming>()
                     .Where(m => m.MessageId == data.MessageId && m.ChatId == data.Chat.Id)
                     .ToListAsync();
-                if (exists.Count > 0) return false;
+                if (exists.Count > 0) return true;
                 
                 // MessageIncoming
                 var message = new MessageIncoming()
@@ -57,7 +57,7 @@ namespace TeleBot.SQLite
                 
                 // insert message
                 await _db.InsertAsync(message);
-                result = true;
+                result = false;
                 
                 // Contact
                 var contact = new Contact()
@@ -82,7 +82,7 @@ namespace TeleBot.SQLite
             catch (Exception e)
             {
                 _log.Error(e.Message);
-                result = false;
+                result = true;
             }
 
             return result;

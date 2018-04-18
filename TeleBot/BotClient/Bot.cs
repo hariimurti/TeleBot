@@ -15,6 +15,8 @@ namespace TeleBot.BotClient
         private static TelegramBotClient _bot = Client();
         private static TelegramBotClient _botFile = Client(30);
         private static bool _isReceiving;
+        public static string Name = string.Empty;
+        public static string Username = string.Empty;
         
         private static TelegramBotClient Client(int timeout = 0)
         {
@@ -31,8 +33,11 @@ namespace TeleBot.BotClient
             if (_isReceiving) return;
             
             var me = await _bot.GetMeAsync();
-            Console.Title = string.Format("{0} » {1} — @{2}", Program.AppName, me.FirstName, me.Username);
-            _log.Info("Akun bot: {0} — @{1}", me.FirstName, me.Username);
+            Name = me.FirstName;
+            Username = me.Username;
+            
+            Console.Title = string.Format("{0} » {1} — @{2}", Program.AppName, Name, Username);
+            _log.Info("Akun bot: {0} — @{1}", Name, Username);
 
             _bot.OnMessage += Messages.OnMessage;
             _bot.OnCallbackQuery += Messages.OnCallbackQuery;
@@ -44,12 +49,12 @@ namespace TeleBot.BotClient
             _isReceiving = true;
         }
 
-        public static void OnReceiveGeneralError(object sender, ReceiveGeneralErrorEventArgs e)
+        private static void OnReceiveGeneralError(object sender, ReceiveGeneralErrorEventArgs e)
         {
             _log.Error("OnReceiveGeneralError: " + e.Exception.Message);
         }
 
-        public static void OnReceiveError(object sender, ReceiveErrorEventArgs e)
+        private static void OnReceiveError(object sender, ReceiveErrorEventArgs e)
         {
             _log.Error("OnReceiveError: " + e.ApiRequestException.Message);
         }
