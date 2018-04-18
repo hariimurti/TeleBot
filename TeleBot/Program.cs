@@ -4,6 +4,8 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
+using TeleBot.BotClient;
 using TeleBot.Classes;
 
 namespace TeleBot
@@ -13,8 +15,11 @@ namespace TeleBot
         public static readonly string AppName = "TeleBot";
         public static readonly string AppVersion = GetVersion();
         public static readonly string AppNameWithVersion = string.Format("{0} v{1}", AppName, AppVersion);
+        
         public static readonly string WorkingDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
         public static readonly string DataDirectory = GetDataDirectory();
+
+        public static readonly string BotToken = "551843695:AAG5WTEIxEJKln6A49OsHW-OWceGthzDHZA";
         public static readonly DateTime StartTime = DateTime.Now;
         
         static void Main(string[] args)
@@ -32,6 +37,21 @@ namespace TeleBot
             log.Info(AppNameWithVersion);
             log.Debug("Working Directory: {0}", WorkingDirectory);
             log.Debug("Data Directory: {0}", DataDirectory);
+            
+            // bot menerima pesan
+            while (true)
+            {
+                try
+                {
+                    Bot.StartReceivingMessage();
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    log.Error(ex.Message);
+                    Task.Delay(10000).Wait();
+                }
+            }
             
             // tunggu key ctrl+c untuk keluar dari console
             var exitEvent = new ManualResetEvent(false);
