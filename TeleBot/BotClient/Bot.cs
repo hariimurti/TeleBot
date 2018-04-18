@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TeleBot.Classes;
 using Telegram.Bot;
@@ -70,23 +69,21 @@ namespace TeleBot.BotClient
             _log.Error("OnReceiveError: " + e.ApiRequestException.Message);
         }
         
-        public static async Task<Message> SendTextAsync(Message msg, string text, bool reply = false, bool parse = false, IReplyMarkup button = null, bool preview = true)
+        public static async Task<Message> SendTextAsync(Message msg, string text, bool reply = false, ParseMode parse = ParseMode.Default, IReplyMarkup button = null, bool preview = true)
         {
             var replyId = reply ? msg.MessageId : 0;
             return await SendTextAsync(msg.Chat.Id, text, replyId, parse, button, preview);
         }
 
-        public static async Task<Message> SendTextAsync(ChatId chatId, string text, int replyId = 0, bool parse = false, IReplyMarkup button = null, bool preview = true)
+        public static async Task<Message> SendTextAsync(ChatId chatId, string text, int replyId = 0, ParseMode parse = ParseMode.Default, IReplyMarkup button = null, bool preview = true)
         {
             try
             {
-                var parseMode = parse ? ParseMode.Html : ParseMode.Default;
-                
                 await _bot.SendChatActionAsync(chatId, ChatAction.Typing);
                 await Task.Delay(500);
                 
                 _log.Debug("Kirim pesan ke {0}: {1}", chatId, text.SingleLine());
-                return await _bot.SendTextMessageAsync(chatId, text, parseMode, !preview, replyToMessageId: replyId, replyMarkup: button);
+                return await _bot.SendTextMessageAsync(chatId, text, parse, !preview, replyToMessageId: replyId, replyMarkup: button);
             }
             catch (Exception ex)
             {
@@ -95,19 +92,17 @@ namespace TeleBot.BotClient
             }
         }
 
-        public static async Task<Message> EditOrSendTextAsync(Message msg, int messageId, string text, bool parse = false, InlineKeyboardMarkup keyboard = null, bool preview = true)
+        public static async Task<Message> EditOrSendTextAsync(Message msg, int messageId, string text, ParseMode parse = ParseMode.Default, InlineKeyboardMarkup keyboard = null, bool preview = true)
         {
             return await EditOrSendTextAsync(msg.Chat.Id, messageId, text, parse, keyboard, preview);
         }
 
-        public static async Task<Message> EditOrSendTextAsync(ChatId chatId, int messageId, string text, bool parse = false, InlineKeyboardMarkup keyboard = null, bool preview = true)
+        public static async Task<Message> EditOrSendTextAsync(ChatId chatId, int messageId, string text, ParseMode parse = ParseMode.Default, InlineKeyboardMarkup keyboard = null, bool preview = true)
         {
             try
             {
-                var parseMode = parse ? ParseMode.Html : ParseMode.Default;
-                
                 _log.Debug("Edit pesan {0}: {1}", messageId, text.SingleLine());
-                return await _bot.EditMessageTextAsync(chatId, messageId, text, parseMode, !preview, keyboard);
+                return await _bot.EditMessageTextAsync(chatId, messageId, text, parse, !preview, keyboard);
             }
             catch (Exception ex)
             {

@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using TeleBot.BotClient;
 using TeleBot.Classes;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace TeleBot.Plugins
 {
@@ -53,7 +54,7 @@ namespace TeleBot.Plugins
         private static async void Start(Message message)
         {
             var respon = Bot.Keys.SayHello.ReplaceWithBotValue();
-            await Bot.SendTextAsync(message, respon);
+            await Bot.SendTextAsync(message, respon, parse: ParseMode.Markdown);
         }
 
         private static async void Help(Message message)
