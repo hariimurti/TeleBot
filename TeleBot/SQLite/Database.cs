@@ -48,7 +48,7 @@ namespace TeleBot.SQLite
                 {
                     MessageId = data.MessageId,
                     ChatId = data.Chat.Id,
-                    ChatName = data.Chat.FirstName,
+                    ChatName = data.ChatName(),
                     FromId = data.From.Id,
                     FromName = data.From.FirstName,
                     Text = data.Text,
@@ -63,7 +63,7 @@ namespace TeleBot.SQLite
                 var contact = new Contact()
                 {
                     Id = data.Chat.Id,
-                    Name = data.Chat.FirstName,
+                    Name = data.ChatName(),
                     UserName = data.Chat.Username,
                     Private = (data.Chat.Type == ChatType.Private)
                 };
@@ -96,7 +96,7 @@ namespace TeleBot.SQLite
                 {
                     MessageId = data.MessageId,
                     ChatId = data.Chat.Id,
-                    ChatName = data.Chat.FirstName,
+                    ChatName = data.ChatName(),
                     Text = data.Text,
                     DateTime = data.Date
                 };

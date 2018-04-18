@@ -14,7 +14,7 @@ namespace TeleBot.BotClient
             var pesan = e.Message;
             if (pesan.Type != MessageType.Text) return;
             if (pesan.Chat.Type != ChatType.Private) return;
-            _log.Ignore("{0}: Dari {1}: Pesan: {2}", pesan.Date.ToLocalTime(), pesan.From.FirstName, pesan.Text);
+            _log.Ignore("{0}: Dari {1}: Pesan: {2}", pesan.Date.ToLocalTime(), pesan.FromName(), pesan.Text);
             var db = new Database();
             await db.InsertMessageIncoming(pesan);
             var kirim = await Bot.SendTextAsync(pesan, $"{pesan.Text}, juga.");
