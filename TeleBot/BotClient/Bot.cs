@@ -13,12 +13,13 @@ namespace TeleBot.BotClient
     public static class Bot
     {
         private static Log _log = new Log("Bot");
-        private static TelegramBotClient _bot = Client();
-        private static TelegramBotClient _botFile = Client(30);
-        private static bool _isReceiving;
+        public static ConfigKeys Keys = Configs.LoadKeys();
         public static string Name = string.Empty;
         public static string Username = string.Empty;
-        public static ConfigKeys Keys = Configs.LoadKeys();
+        private static bool _isReceiving;
+        
+        private static TelegramBotClient _bot = Client();
+        private static TelegramBotClient _botFile = Client(30);
         
         private static TelegramBotClient Client(int timeout = 0)
         {
