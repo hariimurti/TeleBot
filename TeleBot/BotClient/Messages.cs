@@ -1,4 +1,5 @@
 ﻿using TeleBot.Classes;
+using TeleBot.SQLite;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types.Enums;
 
@@ -14,7 +15,10 @@ namespace TeleBot.BotClient
             if (pesan.Type != MessageType.Text) return;
             if (pesan.Chat.Type != ChatType.Private) return;
             _log.Ignore("{0}: Dari {1}: Pesan: {2}", pesan.Date.ToLocalTime(), pesan.From.FirstName, pesan.Text);
-            await Bot.SendTextAsync(pesan, $"{pesan.Text}, juga.");
+            var db = new Database();
+            await db.InsertMessageIncoming(pesan);
+            var kirim = await Bot.SendTextAsync(pesan, $"{pesan.Text}, juga.");
+            await db.InsertMessageOutgoing(kirim);
         }
 
         public static void OnCallbackQuery(object sender, CallbackQueryEventArgs e)
