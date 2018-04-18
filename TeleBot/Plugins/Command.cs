@@ -21,7 +21,7 @@ namespace TeleBot.Plugins
                 return;
             }
 
-            var cmd = regexCmd.Groups[1].Value.ToLower();
+            var cmd = regexCmd.Groups[1].Value;
             var mention = regexCmd.Groups[2].Value;
             var data = regexCmd.Groups[3].Value;
 
@@ -31,7 +31,7 @@ namespace TeleBot.Plugins
                 return;
             }
 
-            switch (cmd)
+            switch (cmd.ToLower())
             {
                 case "start":
                     Start(message);
