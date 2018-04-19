@@ -34,7 +34,8 @@ namespace TeleBot.Plugins
             
             var greeting = Bot.Keys.SayHelloNewMember
                 .ReplaceWithBotValue()
-                .Replace("{member}", mention.TrimEnd(','));
+                .Replace("{member}", mention.TrimEnd(','))
+                .Replace("{group}", message.ChatName());
             
             await Bot.SendTextAsync(message, greeting, parse: ParseMode.Markdown);
         }
