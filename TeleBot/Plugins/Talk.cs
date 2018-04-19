@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 using TeleBot.BotClient;
 using TeleBot.Classes;
 using TeleBot.SQLite;
@@ -27,6 +28,12 @@ namespace TeleBot.Plugins
             // pesan dari grup
             else if (message.IsGroupChat())
             {
+                if (Regex.IsMatch(message.Text, @"^(diam|shut ?up)!?$", RegexOptions.IgnoreCase))
+                {
+                    _log.Debug("Pesan {0} menyuruh diam!", message.MessageId);
+                    return;
+                }
+                
                 // tdk panggil bot
                 if (!message.IsCallMe())
                 {
@@ -37,7 +44,7 @@ namespace TeleBot.Plugins
                     if (lastIn == null && lastOut == null) return;
                     
                     // bandingakan fromId dan messageId
-                    if ((message.From.Id != lastIn.FromId) || (message.MessageId != lastOut.MessageId + 1)) return;
+                    if ((message.From.Id != lastIn?.FromId) || (message.MessageId != lastOut?.MessageId + 1)) return;
                     
                     // skip pesan lbh dari 20detik
                     if (message.Date > lastOut.DateTime.AddSeconds(20)) return;
