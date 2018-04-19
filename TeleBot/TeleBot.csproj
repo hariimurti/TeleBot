@@ -2,6 +2,12 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <AssemblyVersion>2018.4.19</AssemblyVersion>
+    <FileVersion>2018.4.19</FileVersion>
+    <Version>2.0</Version>
+    <Authors>Harimurti</Authors>
+    <Company>Harimurti.net</Company>
+    <Description>Telegram Bot</Description>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
