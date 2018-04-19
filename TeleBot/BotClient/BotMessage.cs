@@ -6,9 +6,9 @@ using Telegram.Bot.Types.Enums;
 
 namespace TeleBot.BotClient
 {
-    public static class Messages
+    public static class BotMessage
     {
-        private static Log _log = new Log("Messages");
+        private static Log _log = new Log("Message");
         private static Database _db = new Database();
         
         public static async void OnMessage(object sender, MessageEventArgs e)
@@ -18,6 +18,7 @@ namespace TeleBot.BotClient
             // member baru di grup: bot maupun user lain
             if (message.Type == MessageType.ChatMembersAdded)
             {
+                _log.Info("{0} | Id: {1} | Dari: {2} | Pesan: Member baru!", message.Date.ToLocalTime(), message.MessageId, message.ChatName());
                 Welcome.SendGreeting(message);
                 return;
             }

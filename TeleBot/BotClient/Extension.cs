@@ -5,7 +5,7 @@ using Telegram.Bot.Types.Enums;
 
 namespace TeleBot.BotClient
 {
-    public static class MessageExtension
+    public static class Extension
     {
         public static string ChatName(this Message message, bool full = false)
         {

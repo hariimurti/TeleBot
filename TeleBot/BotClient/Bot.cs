@@ -52,8 +52,8 @@ namespace TeleBot.BotClient
             Console.Title = string.Format("{0} » {1} — @{2}", Program.AppName, Name, Username);
             _log.Info("Akun bot: {0} — @{1}", Name, Username);
 
-            _bot.OnMessage += Messages.OnMessage;
-            _bot.OnCallbackQuery += Messages.OnCallbackQuery;
+            _bot.OnMessage += BotMessage.OnMessage;
+            _bot.OnCallbackQuery += BotMessage.OnCallbackQuery;
             _bot.OnReceiveError += OnReceiveError;
             _bot.OnReceiveGeneralError += OnReceiveGeneralError;
 
