@@ -110,6 +110,25 @@ namespace TeleBot.BotClient
                 return null;
             }
         }
+
+        public static async Task<Message> ForwardMessageAsync(Message message)
+        {
+            return await ForwardMessageAsync(message.Chat.Id, message.Chat.Id, message.MessageId);
+        }
+
+        public static async Task<Message> ForwardMessageAsync(ChatId toChatId, ChatId fromChatId, int messageId)
+        {
+            try
+            {
+                _log.Debug("Forward pesan {0} dari {1}", messageId, toChatId);
+                return await _bot.ForwardMessageAsync(toChatId, fromChatId, messageId);
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Gagal forward pesan: {0}", ex.Message);
+                return null;
+            }
+        }
         
         public static async Task<Message> SendTextAsync(Message msg, string text, bool reply = false, ParseMode parse = ParseMode.Default, IReplyMarkup button = null, bool preview = true)
         {
