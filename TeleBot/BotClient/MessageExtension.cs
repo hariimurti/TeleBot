@@ -7,10 +7,14 @@ namespace TeleBot.BotClient
 {
     public static class MessageExtension
     {
-        public static string ChatName(this Message message)
+        public static string ChatName(this Message message, bool full = false)
         {
             var chat = message.Chat;
-            var name = (chat.FirstName + " " + chat.LastName).Trim();
+            var name = chat.FirstName;
+            if (string.IsNullOrWhiteSpace(name))
+                name = chat.LastName;
+            if (full)
+                name = (chat.FirstName + " " + chat.LastName).Trim();
             if (message.IsPrivateChat())
                 name = chat.Title;
             if (string.IsNullOrWhiteSpace(name))
@@ -21,10 +25,14 @@ namespace TeleBot.BotClient
             return name;
         }
 
-        public static string FromName(this Message message)
+        public static string FromName(this Message message, bool full = false)
         {
             var from = message.From;
-            var name = (from.FirstName + " " + from.LastName).Trim();
+            var name = from.FirstName;
+            if (string.IsNullOrWhiteSpace(name))
+                name = from.LastName;
+            if (full)
+                name = (from.FirstName + " " + from.LastName).Trim();
             if (string.IsNullOrWhiteSpace(name))
                 name = from.Username;
             if (string.IsNullOrWhiteSpace(name))
