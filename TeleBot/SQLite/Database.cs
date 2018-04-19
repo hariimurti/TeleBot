@@ -64,6 +64,63 @@ namespace TeleBot.SQLite
             }
         }
 
+        public async Task<MessageIncoming> FindLastMessageIncoming(long chatId, bool secondLast = false)
+        {
+            try
+            {
+                var list = await _con.Table<MessageIncoming>()
+                    .Where(m => m.ChatId == chatId)
+                    .OrderByDescending(m => m.DateTime)
+                    .ToListAsync();
+
+                if (list.Count > 1 && secondLast)
+                {
+                    return list[1];
+                }
+
+                return list.FirstOrDefault();
+            }
+            catch (Exception e)
+            {
+                _log.Error(e.Message);
+                return null;
+            }
+        }
+
+        public async Task<MessageOutgoing> FindLastMessageOutgoing(long chatId)
+        {
+            try
+            {
+                var list = await _con.Table<MessageOutgoing>()
+                    .Where(m => m.ChatId == chatId)
+                    .OrderByDescending(m => m.DateTime)
+                    .ToListAsync();
+
+                return list.FirstOrDefault();
+            }
+            catch (Exception e)
+            {
+                _log.Error(e.Message);
+                return null;
+            }
+        }
+
+        public async Task<Token> FindToken(string key)
+        {
+            var list = await _con.Table<Token>()
+                .Where(t => t.Key == key)
+                .ToListAsync();
+            
+            return list.FirstOrDefault();
+        }
+
+        public async Task<List<Token>> GetTokens()
+        {
+            return await _con.Table<Token>()
+                .Where(t => t.Expired > DateTime.Now)
+                .ToListAsync();
+        }
+
         public async Task<bool> InsertOrReplaceContact(Message data)
         {
             try
@@ -149,22 +206,6 @@ namespace TeleBot.SQLite
         public async Task InsertOrReplaceToken(Token token)
         {
             await _con.InsertOrReplaceAsync(token);
-        }
-
-        public async Task<Token> FindToken(string key)
-        {
-            var list = await _con.Table<Token>()
-                .Where(t => t.Key == key)
-                .ToListAsync();
-            
-            return list.FirstOrDefault();
-        }
-
-        public async Task<List<Token>> GetTokens()
-        {
-            return await _con.Table<Token>()
-                .Where(t => t.Expired > DateTime.Now)
-                .ToListAsync();
         }
     }
 }
