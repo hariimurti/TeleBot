@@ -51,13 +51,13 @@ namespace TeleBot.Plugins
             }
         }
 
-        private static async void Start(Message message)
+        public static async void Start(Message message)
         {
             var respon = Bot.Keys.SayHello.ReplaceWithBotValue();
             await Bot.SendTextAsync(message, respon, parse: ParseMode.Markdown);
         }
 
-        private static async void Help(Message message)
+        public static async void Help(Message message)
         {
             await Bot.SendTextAsync(message, "Ini adalah pesan help");
         }

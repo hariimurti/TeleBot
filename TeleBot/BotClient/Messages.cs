@@ -2,6 +2,7 @@
 using TeleBot.Plugins;
 using TeleBot.SQLite;
 using Telegram.Bot.Args;
+using Telegram.Bot.Types.Enums;
 
 namespace TeleBot.BotClient
 {
@@ -13,9 +14,18 @@ namespace TeleBot.BotClient
         public static async void OnMessage(object sender, MessageEventArgs e)
         {
             var message = e.Message;
+
+            // member baru di grup: bot maupun user lain
+            if (message.Type == MessageType.ChatMembersAdded)
+            {
+                Welcome.SendGreeting(message);
+                return;
+            }
+            
             if (!message.IsTextMessage()) return;
             if (!message.IsPrivateChat()) return;
             
+            // cek apakah sudah ada dieksekusi?
             var already = await _db.InsertMessageIncoming(message);
             if (already) return;
             
@@ -23,10 +33,12 @@ namespace TeleBot.BotClient
 
             if (message.Text.StartsWith("/"))
             {
+                // pesan perintah
                 Command.Execute(message);
             }
             else
             {
+                // pesan teks lain
                 var kirim = await Bot.SendTextAsync(message, $"{message.Text}, juga.");
                 await _db.InsertMessageOutgoing(kirim);
             }
