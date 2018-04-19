@@ -1,4 +1,5 @@
-﻿using TeleBot.Classes;
+﻿using System;
+using TeleBot.Classes;
 using TeleBot.Plugins;
 using TeleBot.SQLite;
 using Telegram.Bot.Args;
@@ -14,6 +15,18 @@ namespace TeleBot.BotClient
         public static async void OnMessage(object sender, MessageEventArgs e)
         {
             var message = e.Message;
+            
+            // pesan lebih dari 1 menit tdk akan direspon
+            if (message.Date.AddMinutes(1) <= DateTime.Now.ToUniversalTime())
+            {
+                if (message.IsTextMessage())
+                {
+                    _log.Ignore("{0} | Id: {1} | Dari: {2} | Pesan: {3} | Alasan: Pesan lama!",
+                        message.Date.ToLocalTime(), message.MessageId, message.FromName(), message.Text);
+                }
+                
+                return;
+            }
 
             // member baru di grup: bot maupun user lain
             if (message.Type == MessageType.ChatMembersAdded)
@@ -32,7 +45,8 @@ namespace TeleBot.BotClient
             var result = await _db.FindMessageIncoming(message.MessageId, message.Chat.Id);
             if (result != null)
             {
-                _log.Ignore("Pesan {0} dari {1} sudah dibaca!", message.MessageId, message.FromName());
+                _log.Ignore("{0} | Id: {1} | Dari: {2} | Pesan: {3} | Alasan: Pesan sudah dibaca!",
+                    message.Date.ToLocalTime(), message.MessageId, message.FromName(), message.Text);
                 return;
             }
             
