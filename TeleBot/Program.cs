@@ -52,6 +52,9 @@ namespace TeleBot
                 }
             }
             
+            // reSchedule
+            Schedule.ReSchedule();
+            
             // tunggu key ctrl+c untuk keluar dari console
             var exitEvent = new ManualResetEvent(false);
             Console.CancelKeyPress += (sender, eventArgs) =>

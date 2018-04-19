@@ -67,4 +67,21 @@ namespace TeleBot.SQLite
         public DateTime Expired { get; set; }
         public DateTime LimitExceed { get; set; }
     }
+    
+    [Table("Schedules")]
+    public class ScheduleData
+    {
+        public enum Type { Delete, Edit, Done }
+
+        [PrimaryKey, AutoIncrement]
+        public int Id { get; set; }
+        
+        [NotNull]
+        public long ChatId { get; set; }
+        [NotNull]
+        public int MessageId { get; set; }
+        public Type Operation { get; set; }
+        public DateTime DateTime { get; set; }
+        public string Text { get; set; }
+    }
 }

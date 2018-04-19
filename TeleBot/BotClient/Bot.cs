@@ -71,6 +71,26 @@ namespace TeleBot.BotClient
         {
             _log.Error("OnReceiveError: " + e.ApiRequestException.Message);
         }
+
+        public static async Task<bool> DeleteMessageAsync(Message msg)
+        {
+            return await DeleteMessageAsync(msg.Chat.Id, msg.MessageId);
+        }
+
+        public static async Task<bool> DeleteMessageAsync(ChatId chatId, int messageId)
+        {
+            try
+            {
+                _log.Debug("Hapus pesan {0} dari {1}", messageId, chatId);
+                await _bot.DeleteMessageAsync(chatId, messageId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Tidak bisa menghapus pesan: {0}", ex.Message);
+                return false;
+            }
+        }
         
         public static async Task<Message> SendTextAsync(Message msg, string text, bool reply = false, ParseMode parse = ParseMode.Default, IReplyMarkup button = null, bool preview = true)
         {

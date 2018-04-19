@@ -27,6 +27,7 @@ namespace TeleBot.SQLite
                 _con.CreateTableAsync<MessageIncoming>();
                 _con.CreateTableAsync<MessageOutgoing>();
                 _con.CreateTableAsync<Token>();
+                _con.CreateTableAsync<ScheduleData>();
             }
             catch(SQLiteException ex)
             {
@@ -206,6 +207,47 @@ namespace TeleBot.SQLite
         public async Task InsertOrReplaceToken(Token token)
         {
             await _con.InsertOrReplaceAsync(token);
+        }
+
+        public async Task<List<ScheduleData>> GetAllSchedule()
+        {
+            try
+            {
+                return await _con.Table<ScheduleData>()
+                    .Where(s => s.Operation != ScheduleData.Type.Done)
+                    .ToListAsync();
+            }
+            catch (Exception e)
+            {
+                _log.Error(e.Message);
+                return null;
+            }
+        }
+
+        public async Task<bool> InsertOrReplaceSchedule(ScheduleData data)
+        {
+            try
+            {
+                var list = await GetAllSchedule();
+                var schedule = list.Where(s => s.ChatId == data.ChatId && s.MessageId == data.MessageId)
+                    .ToList()
+                    .FirstOrDefault();
+                if (schedule != null)
+                {
+                    data.Id = schedule.Id;
+                    await _con.InsertOrReplaceAsync(data);
+                }
+                else
+                {
+                    await _con.InsertAsync(data);
+                }
+                return true;
+            }
+            catch (Exception e)
+            {
+                _log.Error(e.Message);
+                return false;
+            }
         }
     }
 }
