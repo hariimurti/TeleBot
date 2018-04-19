@@ -18,7 +18,9 @@ namespace TeleBot.BotClient
             // member baru di grup: bot maupun user lain
             if (message.Type == MessageType.ChatMembersAdded)
             {
-                _log.Info("{0} | Id: {1} | Dari: {2} | Pesan: Member baru!", message.Date.ToLocalTime(), message.MessageId, message.ChatName());
+                _log.Info("{0} | Id: {1} | Dari: {2} | Pesan: Member baru!",
+                    message.Date.ToLocalTime(), message.MessageId, message.ChatName());
+                
                 Welcome.SendGreeting(message);
                 return;
             }
@@ -26,20 +28,28 @@ namespace TeleBot.BotClient
             if (!message.IsTextMessage()) return;
             if (!message.IsPrivateChat()) return;
             
-            // cek apakah sudah ada dieksekusi?
-            var result = await _db.InsertMessageIncoming(message);
-            if (!result) return;
+            // cari pesan yg sama
+            var result = await _db.FindMessageIncoming(message.MessageId, message.Chat.Id);
+            if (result != null)
+            {
+                _log.Ignore("Pesan {0} dari {1} sudah dibaca!", message.MessageId, message.FromName());
+                return;
+            }
             
-            _log.Info("{0} | Id: {1} | Dari: {2} | Pesan: {3}", message.Date.ToLocalTime(), message.MessageId, message.FromName(), message.Text);
+            // tambah pesan masuk
+            await _db.InsertMessageIncoming(message);
+            
+            _log.Info("{0} | Id: {1} | Dari: {2} | Pesan: {3}",
+                message.Date.ToLocalTime(), message.MessageId, message.FromName(), message.Text);
 
+            // pesan perintah
             if (message.Text.StartsWith("/"))
             {
-                // pesan perintah
                 Command.Execute(message);
             }
+            // pesan teks lain
             else
             {
-                // pesan teks lain
                 var respon = message.GetReplyResponse().ReplaceWithBotValue();
                 await Bot.SendTextAsync(message, respon);
             }

@@ -34,7 +34,37 @@ namespace TeleBot.SQLite
             }
         }
 
-        public async Task InsertOrReplaceContact(Message data)
+        public async Task<Contact> FindContact(long chatId)
+        {
+            try
+            {
+                var list = await _con.Table<Contact>().Where(c => c.Id == chatId).ToListAsync();
+                return list.FirstOrDefault();
+            }
+            catch (Exception e)
+            {
+                _log.Error(e.Message);
+                return null;
+            }
+        }
+
+        public async Task<MessageIncoming> FindMessageIncoming(int messageId, long chatId)
+        {
+            try
+            {
+                var list = await _con.Table<MessageIncoming>()
+                    .Where(m => m.MessageId == messageId && m.ChatId == chatId)
+                    .ToListAsync();
+                return list.FirstOrDefault();
+            }
+            catch (Exception e)
+            {
+                _log.Error(e.Message);
+                return null;
+            }
+        }
+
+        public async Task<bool> InsertOrReplaceContact(Message data)
         {
             try
             {
@@ -47,19 +77,20 @@ namespace TeleBot.SQLite
                 };
                 
                 // cari kontak yg sudah ada
-                var findContacts = await _con.Table<Contact>().Where(c => c.Id == data.Chat.Id).ToListAsync();
-                if (findContacts.Count > 0)
+                var exist = await FindContact(data.Chat.Id);
+                if (exist != null)
                 {
-                    var isBlocked = findContacts.FirstOrDefault()?.Blocked;
-                    contact.Blocked = isBlocked == true;
+                    contact.Blocked = exist.Blocked;
                 }
                 
                 // update contacts
                 await _con.InsertOrReplaceAsync(contact);
+                return true;
             }
             catch (Exception e)
             {
                 _log.Error(e.Message);
+                return false;
             }
         }
 
@@ -69,12 +100,6 @@ namespace TeleBot.SQLite
             {
                 // tambah/perbarui contact
                 await InsertOrReplaceContact(data);
-                
-                // cari pesan yg sama
-                var exists = await _con.Table<MessageIncoming>()
-                    .Where(m => m.MessageId == data.MessageId && m.ChatId == data.Chat.Id)
-                    .ToListAsync();
-                if (exists.Count > 0) return false;
                 
                 // MessageIncoming
                 var message = new MessageIncoming()
