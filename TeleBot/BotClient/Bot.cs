@@ -41,7 +41,7 @@ namespace TeleBot.BotClient
                 .Replace("{alias}", alias);
         }
 
-        public static async void StartReceivingMessage()
+        public static async Task StartReceivingMessage()
         {
             if (_isReceiving) return;
             

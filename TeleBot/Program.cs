@@ -42,7 +42,7 @@ namespace TeleBot
             {
                 try
                 {
-                    Bot.StartReceivingMessage();
+                    Bot.StartReceivingMessage().GetAwaiter();
                     break;
                 }
                 catch (Exception ex)
