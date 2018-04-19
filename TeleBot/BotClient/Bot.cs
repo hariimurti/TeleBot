@@ -12,7 +12,7 @@ namespace TeleBot.BotClient
     public static class Bot
     {
         private static Log _log = new Log("Bot");
-        public static ConfigKeys Keys = Configs.LoadKeys();
+        public static BotKeys Keys = Configs.LoadKeys();
         public static string Name = string.Empty;
         public static string Username = string.Empty;
         private static bool _isReceiving;
