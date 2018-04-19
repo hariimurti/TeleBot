@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using TeleBot.BotClient;
 using TeleBot.Classes;
+using TeleBot.SQLite;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -10,6 +12,7 @@ namespace TeleBot.Plugins
     public static class Command
     {
         private static Log _log = new Log("Command");
+        private static Database _db = new Database();
         
         public static void Execute(Message message)
         {
@@ -61,7 +64,7 @@ namespace TeleBot.Plugins
             await Bot.SendTextAsync(message, respon, parse: ParseMode.Markdown);
         }
 
-        public static async void Help(Message message)
+        private static async void Help(Message message)
         {
             await Bot.SendTextAsync(message, "Ini adalah pesan help");
         }
@@ -83,9 +86,26 @@ namespace TeleBot.Plugins
             var runtime = DateTime.Now - Program.StartTime;
             var tfs = TimeSpan.FromSeconds(runtime.TotalSeconds);
             var timespan = new TimeSpan(tfs.Days, tfs.Hours, tfs.Minutes, tfs.Seconds);
-            
+
             var respon =
-                $"*{Program.AppName}*\n—— —— —— ——\n*Version* : {Program.AppVersion}\n*UpTime* : {timespan}\n—— —— —— ——\n{Bot.Keys.SupportedBy}";
+                $"*{Program.AppName}*\n—— —— —— ——\n" +
+                $"*Version* : {Program.AppVersion}\n" +
+                $"*UpTime* : {timespan}\n";
+            
+            // cek token
+            try
+            {
+                var tokens = await _db.GetTokens();
+                var tokenActive = tokens.Where(t => t.LimitExceed <= DateTime.Now).ToList();
+                respon += $"*Token* : {tokenActive.Count}/{tokens.Count}\n";
+            }
+            catch (Exception ex)
+            {
+                _log.Error(ex.Message);
+            }
+            
+            // tambah supportedby
+            respon += $"—— —— —— ——\n{Bot.Keys.SupportedBy}";
             await Bot.SendTextAsync(message, respon, parse: ParseMode.Markdown);
         }
     }
