@@ -65,15 +65,14 @@ namespace TeleBot.Plugins
                 }
                 else
                 {
-                    var hash = list.FirstOrDefault();
-                    hash.MessageId = message.ReplyToMessage.MessageId;
-                    hash.KeyName = hashtag;
+                    query.MessageId = message.ReplyToMessage.MessageId;
+                    query.KeyName = hashtag;
                 
-                    _log.Debug("Ganti #{0} ({1}) dari {2}", hash.MessageId, hashtag, message.ChatName());
+                    _log.Debug("Ganti #{0} ({1}) dari {2}", query.MessageId, hashtag, message.ChatName());
                     
-                    await _db.InsertBookmark(hash, true);
+                    await _db.InsertBookmark(query, true);
                     await Bot.SendTextAsync(message,
-                        $"*Bookmark* : {hash.MessageId}\n*Hashtag* : #{hashtag}\n—— —— —— ——\n*Hasil* : Telah diganti!",
+                        $"*Bookmark* : {query.MessageId}\n*Hashtag* : #{hashtag}\n—— —— —— ——\n*Hasil* : Telah diganti!",
                         parse: ParseMode.Markdown);
                 }
             }
@@ -89,12 +88,12 @@ namespace TeleBot.Plugins
             hashtag = hashtag.TrimStart('#');
             if (string.IsNullOrWhiteSpace(hashtag)) return;
             
-            var list = await _db.GetBookmarks(message.Chat.Id, hashtag);
-            if (list.Count == 0)
             // checking
             var pass = await Checking(message, hashtag);
             if (!pass) return;
             
+            var query = await _db.GetBookmarkByHashtag(message.Chat.Id, hashtag);
+            if (query == null)
             {
                 _log.Ignore("Tidak ada #{0} di {1}", hashtag, message.ChatName());
                 
@@ -106,8 +105,7 @@ namespace TeleBot.Plugins
             {
                 _log.Debug("Hapus #{0} dari {1}", hashtag, message.ChatName());
                 
-                var hash = list.FirstOrDefault();
-                await _db.DeleteBookmark(hash);
+                await _db.DeleteBookmark(query);
                 
                 await Bot.SendTextAsync(message, $"Berhasil menghapus #{hashtag}");
             }

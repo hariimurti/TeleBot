@@ -262,7 +262,7 @@ namespace TeleBot.SQLite
            await _con.DeleteAsync(data);
         }
 
-        public async Task<List<Hashtag>> GetBookmarks(long chatId = 0, string keyName = null)
+        public async Task<List<Hashtag>> GetBookmarks(long chatId = 0)
         {
             try
             {
@@ -270,11 +270,27 @@ namespace TeleBot.SQLite
                 if (chatId == 0) return list;
 
                 // filter by chatId
-                var filter = list.Where(h => h.ChatId == chatId).ToList();
-                if (string.IsNullOrWhiteSpace(keyName)) return filter;
+                return list.Where(h => h.ChatId == chatId).ToList();
+            }
+            catch (Exception e)
+            {
+                _log.Error(e.Message);
+                return null;
+            }
+        }
+
+        public async Task<Hashtag> GetBookmarkByHashtag(long chatId, string keyName)
+        {
+            try
+            {
+                var filter = await GetBookmarks(chatId);
+                if (string.IsNullOrWhiteSpace(keyName)) return null;
 
                 // filter with keyname
-                return filter.Where(h => string.Equals(h.KeyName, keyName, StringComparison.OrdinalIgnoreCase)).ToList();
+                return filter
+                    .Where(h => string.Equals(h.KeyName, keyName, StringComparison.OrdinalIgnoreCase))
+                    .ToList()
+                    .FirstOrDefault();
             }
             catch (Exception e)
             {
