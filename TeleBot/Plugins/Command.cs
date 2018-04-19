@@ -41,12 +41,12 @@ namespace TeleBot.Plugins
                     Help(message);
                     break;
                 
-                case "echo":
-                    Echo(message, data);
-                    break;
-                
                 case "status":
                     Status(message);
+                    break;
+                
+                case "token":
+                    Token(message, data);
                     break;
                 
                 default:
@@ -66,9 +66,16 @@ namespace TeleBot.Plugins
             await Bot.SendTextAsync(message, "Ini adalah pesan help");
         }
         
-        private static async void Echo(Message message, string data)
+        private static async void Token(Message message, string data)
         {
-            await Bot.SendTextAsync(message, data);
+            if (!string.IsNullOrWhiteSpace(data))
+            {
+                new Simsimi(message).SaveToken(data);
+            }
+            else
+            {
+                await Bot.SendTextAsync(message, Bot.Keys.HowToGetToken, parse: ParseMode.Markdown);
+            }
         }
         
         private static async void Status(Message message)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SQLite;
@@ -25,6 +26,7 @@ namespace TeleBot.SQLite
                 _db.CreateTableAsync<Contact>();
                 _db.CreateTableAsync<MessageIncoming>();
                 _db.CreateTableAsync<MessageOutgoing>();
+                _db.CreateTableAsync<Token>();
             }
             catch(SQLiteException ex)
             {
@@ -109,6 +111,27 @@ namespace TeleBot.SQLite
             {
                 _log.Error(e.Message);
             }
+        }
+
+        public async Task InsertOrReplaceToken(Token token)
+        {
+            await _db.InsertOrReplaceAsync(token);
+        }
+
+        public async Task<Token> FindToken(string key)
+        {
+            var list = await _db.Table<Token>()
+                .Where(t => t.Key == key)
+                .ToListAsync();
+            
+            return list.FirstOrDefault();
+        }
+
+        public async Task<List<Token>> GetTokens()
+        {
+            return await _db.Table<Token>()
+                .Where(t => t.Expired > DateTime.Now)
+                .ToListAsync();
         }
     }
 }

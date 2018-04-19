@@ -57,4 +57,14 @@ namespace TeleBot.SQLite
         public string Text { get; set; }
         public DateTime DateTime { get; set; }
     }
+    
+    [Table("Simsimi")]
+    public class Token
+    {
+        [PrimaryKey, NotNull]
+        public string Key { get; set; }
+
+        public DateTime Expired { get; set; }
+        public DateTime LimitExceed { get; set; }
+    }
 }
