@@ -38,8 +38,13 @@ namespace TeleBot.BotClient
                 return;
             }
             
-            if (!message.IsTextMessage()) return;
-            if (!message.IsPrivateChat()) return;
+            // abaikan pesan selain teks
+            if (!message.IsTextMessage())
+            {
+                _log.Ignore("{0} | Id: {1} | Dari: {2} | Pesan: {3} | Alasan: Pesan bukan text!",
+                    message.Date.ToLocalTime(), message.MessageId, message.FromName(), message.Text);
+                return;
+            }
             
             // cari pesan yg sama
             var result = await _db.FindMessageIncoming(message.MessageId, message.Chat.Id);
