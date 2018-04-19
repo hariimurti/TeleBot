@@ -91,6 +91,25 @@ namespace TeleBot.BotClient
                 return false;
             }
         }
+
+        public static async Task<ChatMember[]> GetChatAdministratorsAsync(Message message)
+        {
+            return await GetChatAdministratorsAsync(message.Chat.Id);
+        }
+
+        public static async Task<ChatMember[]> GetChatAdministratorsAsync(ChatId chatId)
+        {
+            try
+            {
+                _log.Debug("Chat admins dari {0}", chatId);
+                return await _bot.GetChatAdministratorsAsync(chatId);
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Gagal mendapatkan chat admins: {0}", ex.Message);
+                return null;
+            }
+        }
         
         public static async Task<Message> SendTextAsync(Message msg, string text, bool reply = false, ParseMode parse = ParseMode.Default, IReplyMarkup button = null, bool preview = true)
         {
