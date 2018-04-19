@@ -6,6 +6,7 @@ using Telegram.Bot;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TeleBot.BotClient
@@ -116,6 +117,41 @@ namespace TeleBot.BotClient
             {
                 _log.Error("Tidak bisa mengedit pesan: {0}", ex.Message);
                 return await SendTextAsync(chatId, text, 0, parse, keyboard, preview);
+            }
+        }
+
+        public static async Task<Message> SendPhotoAsync(Message msg, InputOnlineFile file, string caption = null, ParseMode parse = ParseMode.Default, bool reply = false)
+        {
+            var replyId = reply ? msg.MessageId : 0;
+            return await SendPhotoAsync(msg.Chat.Id, file, caption, parse, replyId);
+        }
+
+        public static async Task<Message> SendPhotoAsync(ChatId chatId, InputOnlineFile file, string caption = null, ParseMode parse = ParseMode.Default, int replyId = 0)
+        {
+            try
+            {
+                Message message;
+                await _bot.SendChatActionAsync(chatId, ChatAction.UploadPhoto);
+
+                _log.Debug("Kirim photo ke {0}", chatId);
+                
+                if (caption?.Length > 200)
+                {
+                    message = await _botFile.SendPhotoAsync(chatId, file, replyToMessageId: replyId);
+                    await _bot.SendTextMessageAsync(chatId, caption, parse, true, replyToMessageId: message.MessageId);
+                }
+                else
+                {
+                    message = await _botFile.SendPhotoAsync(chatId, file, caption, parse, replyToMessageId: replyId);
+                }
+
+                await _db.InsertMessageOutgoing(message);
+                return message;
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Tidak bisa kirim photo: {0}", ex.Message);
+                return null;
             }
         }
     }

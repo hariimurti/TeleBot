@@ -98,7 +98,7 @@ namespace TeleBot.SQLite
                     MessageId = data.MessageId,
                     ChatId = data.Chat.Id,
                     ChatName = data.ChatName(),
-                    Text = data.Text,
+                    Text = data.Type == MessageType.Text ? data.Text : data.Type.ToString(),
                     DateTime = data.Date
                 };
                 
