@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 using TeleBot.BotClient;
@@ -10,17 +9,23 @@ namespace TeleBot.Classes
     {
         private static Log _log = new Log("Configs");
         private static readonly string ConfigFile = Program.FilePathInData("Configs.json");
+        private static BotKeys _keys;
 
         public static BotKeys LoadKeys()
         {
             try
             {
+                if (_keys != null) return _keys;
+                
+                // buka file Configs.json
                 var configsRaw = File.ReadAllText(ConfigFile);
-                var json = JsonConvert.DeserializeObject<BotKeys>(configsRaw);
+                
+                // parsing ke BotKeys
+                _keys = JsonConvert.DeserializeObject<BotKeys>(configsRaw);
                 
                 _log.Debug("Sukses membaca pengaturan...");
                 
-                return json;
+                return _keys;
             }
             catch (Exception ex)
             {
