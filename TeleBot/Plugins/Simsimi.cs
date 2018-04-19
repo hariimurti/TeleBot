@@ -14,7 +14,7 @@ namespace TeleBot.Plugins
 {
     public class Simsimi
     {
-        private static Log _log = new Log("Messages");
+        private static Log _log = new Log("Simsimi");
         private static Database _db = new Database();
         private Message _message;
         
@@ -94,7 +94,7 @@ namespace TeleBot.Plugins
                 var token = new Token()
                 {
                     Key = key,
-                    Expired = DateTime.Now,
+                    Expired = DateTime.Now.AddDays(7),
                     LimitExceed = DateTime.Now
                 };
                 
