@@ -45,6 +45,10 @@ namespace TeleBot.Plugins
                     Echo(message, data);
                     break;
                 
+                case "status":
+                    Status(message);
+                    break;
+                
                 default:
                     _log.Ignore("Perintah: {0} -- tdk ada", cmd);
                     break;
@@ -65,6 +69,17 @@ namespace TeleBot.Plugins
         private static async void Echo(Message message, string data)
         {
             await Bot.SendTextAsync(message, data);
+        }
+        
+        private static async void Status(Message message)
+        {
+            var runtime = DateTime.Now - Program.StartTime;
+            var tfs = TimeSpan.FromSeconds(runtime.TotalSeconds);
+            var timespan = new TimeSpan(tfs.Days, tfs.Hours, tfs.Minutes, tfs.Seconds);
+            
+            var respon =
+                $"*{Program.AppName}*\n—— —— —— ——\n*Version* : {Program.AppVersion}\n*UpTime* : {timespan}\n—— —— —— ——\n{Bot.Keys.SupportedBy}";
+            await Bot.SendTextAsync(message, respon, parse: ParseMode.Markdown);
         }
     }
 }
