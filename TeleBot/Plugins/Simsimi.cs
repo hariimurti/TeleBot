@@ -110,6 +110,8 @@ namespace TeleBot.Plugins
 
         public async void SendResponse(string text)
         {
+            var replied = false;
+            
             try
             {
                 var tokens = await _db.GetTokens();
@@ -135,6 +137,12 @@ namespace TeleBot.Plugins
                         if (result.Result == 100 && !string.IsNullOrWhiteSpace(result.Response))
                         {
                             _log.Debug("Response: {0}", result.Response);
+
+                            // rubah simsimi jadi nama bot
+                            var respon = result.Response.ReplaceSimsimiWithBotName();
+                            await Bot.SendTextAsync(_message, respon);
+                            replied = true;
+                            
                             break;
                         }
                         
@@ -168,12 +176,9 @@ namespace TeleBot.Plugins
             {
                 _log.Error(ex.Message);
             }
-            
-            SimsimiNoResponse();
-        }
 
-        private async void SimsimiNoResponse()
-        {
+            if (replied) return;
+            
             var respons = Bot.Keys.SimsimiNoResponse;
             var rand = new Random().Next(0, respons.Count - 1);
             await Bot.SendTextAsync(_message, respons[rand]);

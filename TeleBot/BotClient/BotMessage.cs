@@ -69,8 +69,7 @@ namespace TeleBot.BotClient
             // pesan teks lain
             else
             {
-                var respon = message.GetReplyResponse().ReplaceWithBotValue();
-                await Bot.SendTextAsync(message, respon);
+                Talk.Response(message);
             }
         }
 

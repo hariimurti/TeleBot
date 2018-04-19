@@ -90,14 +90,16 @@ namespace TeleBot.BotClient
 
         public static bool IsCallMe(this Message message)
         {
+            // cari nama alias + username
+            var alias = Bot.Keys.Alias + "|" + Bot.Username;
+            return Regex.IsMatch(message.Text, $"\\b({alias})\\b", RegexOptions.IgnoreCase);
+        }
+
+        public static bool IsCallMeNotProper(this Message message)
+        {
             // cari nama yg tdk seharusnya
             var aliasExcept = Bot.Keys.AliasExcept;
-            var isMatch = Regex.IsMatch(message.Text, $"\\b({aliasExcept})\\b", RegexOptions.IgnoreCase);
-            if (isMatch) return false;
-            
-            // cari nama alias
-            var alias = Bot.Keys.Alias;
-            return Regex.IsMatch(message.Text, $"\\b({alias})\\b", RegexOptions.IgnoreCase);
+            return Regex.IsMatch(message.Text, $"\\b({aliasExcept})\\b", RegexOptions.IgnoreCase);
         }
 
         public static bool IsForwardMessage(this Message message)
@@ -166,7 +168,7 @@ namespace TeleBot.BotClient
                 RegexOptions.IgnoreCase);
         }
 
-        public static bool IsReplyMessage(this Message message)
+        public static bool IsReplyToMessage(this Message message)
         {
             return (message.ReplyToMessage != null);
         }
