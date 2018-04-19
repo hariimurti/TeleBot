@@ -42,7 +42,7 @@ namespace TeleBot.BotClient
             if (!message.IsTextMessage())
             {
                 _log.Ignore("{0} | Id: {1} | Dari: {2} | Pesan: {3} | Alasan: Pesan bukan text!",
-                    message.Date.ToLocalTime(), message.MessageId, message.FromName(), message.Text);
+                    message.Date.ToLocalTime(), message.MessageId, message.FromName(), message.Type);
                 return;
             }
             

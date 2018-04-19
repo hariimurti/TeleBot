@@ -33,15 +33,14 @@ namespace TeleBot.Plugins
                     var lastIn = await _db.FindLastMessageIncoming(message.Chat.Id, true);
                     var lastOut = await _db.FindLastMessageOutgoing(message.Chat.Id);
                     
+                    // skip jika null semua
                     if (lastIn == null && lastOut == null) return;
                     
                     // bandingakan fromId dan messageId
-                    if ((message.From.Id == lastIn.FromId) && (message.MessageId == lastOut.MessageId + 1))
-                    {
-                        if (message.Date > lastOut.DateTime.AddSeconds(20))
-                            return;
-                    }
-                    return;
+                    if ((message.From.Id != lastIn.FromId) || (message.MessageId != lastOut.MessageId + 1)) return;
+                    
+                    // skip pesan lbh dari 20detik
+                    if (message.Date > lastOut.DateTime.AddSeconds(20)) return;
                 }
                 
                 // panggilan tdk baik
@@ -54,6 +53,7 @@ namespace TeleBot.Plugins
             // respon panggilan
             if (text == "simi")
             {
+                _log.Debug("Respon pesan {0} dgn kalimat template", message.MessageId);
                 var respon = message.GetReplyResponse().ReplaceWithBotValue();
                 await Bot.SendTextAsync(message, respon);
                 return;
@@ -62,6 +62,7 @@ namespace TeleBot.Plugins
             // respon pesan mesum
             if (message.IsTextMesum())
             {
+                _log.Debug("Pesan {0} terindikasi mesum!", message.MessageId);
                 var respon = message.GetBadWordResponse().ReplaceWithBotValue();
                 await Bot.SendTextAsync(message, respon);
                 return;
@@ -76,6 +77,7 @@ namespace TeleBot.Plugins
             }
             
             // respon dgn simsimi
+            _log.Debug("Respon pesan {0} dgn simsimi", message.MessageId);
             new Simsimi(message).SendResponse(text);
         }
     }
