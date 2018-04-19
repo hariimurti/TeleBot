@@ -27,8 +27,8 @@ namespace TeleBot.BotClient
             if (!message.IsPrivateChat()) return;
             
             // cek apakah sudah ada dieksekusi?
-            var already = await _db.InsertMessageIncoming(message);
-            if (already) return;
+            var result = await _db.InsertMessageIncoming(message);
+            if (!result) return;
             
             _log.Info("{0} | Id: {1} | Dari: {2} | Pesan: {3}", message.Date.ToLocalTime(), message.MessageId, message.FromName(), message.Text);
 

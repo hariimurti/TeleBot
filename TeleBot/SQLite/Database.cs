@@ -34,35 +34,10 @@ namespace TeleBot.SQLite
             }
         }
 
-        public async Task<bool> InsertMessageIncoming(Message data)
+        public async Task InsertOrReplaceContact(Message data)
         {
-            var result = true;
-            
             try
             {
-                // cari pesan yg sama
-                var exists = await _con.Table<MessageIncoming>()
-                    .Where(m => m.MessageId == data.MessageId && m.ChatId == data.Chat.Id)
-                    .ToListAsync();
-                if (exists.Count > 0) return true;
-                
-                // MessageIncoming
-                var message = new MessageIncoming()
-                {
-                    MessageId = data.MessageId,
-                    ChatId = data.Chat.Id,
-                    ChatName = data.ChatName(),
-                    FromId = data.From.Id,
-                    FromName = data.From.FirstName,
-                    Text = data.Text,
-                    DateTime = data.Date
-                };
-                
-                // insert message
-                await _con.InsertAsync(message);
-                result = false;
-                
-                // Contact
                 var contact = new Contact()
                 {
                     Id = data.Chat.Id,
@@ -85,10 +60,43 @@ namespace TeleBot.SQLite
             catch (Exception e)
             {
                 _log.Error(e.Message);
-                result = true;
             }
+        }
 
-            return result;
+        public async Task<bool> InsertMessageIncoming(Message data)
+        {
+            try
+            {
+                // tambah/perbarui contact
+                await InsertOrReplaceContact(data);
+                
+                // cari pesan yg sama
+                var exists = await _con.Table<MessageIncoming>()
+                    .Where(m => m.MessageId == data.MessageId && m.ChatId == data.Chat.Id)
+                    .ToListAsync();
+                if (exists.Count > 0) return false;
+                
+                // MessageIncoming
+                var message = new MessageIncoming()
+                {
+                    MessageId = data.MessageId,
+                    ChatId = data.Chat.Id,
+                    ChatName = data.ChatName(),
+                    FromId = data.From.Id,
+                    FromName = data.FromName(),
+                    Text = data.Text,
+                    DateTime = data.Date
+                };
+                
+                // insert message
+                await _con.InsertAsync(message);
+                return true;
+            }
+            catch (Exception e)
+            {
+                _log.Error(e.Message);
+                return false;
+            }
         }
 
         public async Task InsertMessageOutgoing(Message data)
