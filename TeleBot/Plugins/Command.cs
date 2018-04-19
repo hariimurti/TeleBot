@@ -52,6 +52,20 @@ namespace TeleBot.Plugins
                     Token(message, data);
                     break;
                 
+                case "save":
+                    Bookmark.Save(message, data);
+                    break;
+                
+                case "delete":
+                    Bookmark.Delete(message, data);
+                    break;
+                
+                case "bookmark":
+                case "list":
+                case "hashtag":
+                    Bookmark.List(message);
+                    break;
+                
                 default:
                     _log.Ignore("Perintah: {0} -- tdk ada", cmd);
                     break;

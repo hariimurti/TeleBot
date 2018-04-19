@@ -28,6 +28,7 @@ namespace TeleBot.SQLite
                 _con.CreateTableAsync<MessageOutgoing>();
                 _con.CreateTableAsync<Token>();
                 _con.CreateTableAsync<ScheduleData>();
+                _con.CreateTableAsync<Hashtag>();
             }
             catch(SQLiteException ex)
             {
@@ -247,6 +248,38 @@ namespace TeleBot.SQLite
             {
                 _log.Error(e.Message);
                 return false;
+            }
+        }
+
+        public async Task InsertBookmark(Hashtag data, bool replace = false)
+        {
+            if (!replace) await _con.InsertAsync(data);
+            else await _con.InsertOrReplaceAsync(data);
+        }
+
+        public async Task DeleteBookmark(Hashtag data)
+        {
+           await _con.DeleteAsync(data);
+        }
+
+        public async Task<List<Hashtag>> GetBookmarks(long chatId = 0, string keyName = null)
+        {
+            try
+            {
+                var list = await _con.Table<Hashtag>().ToListAsync();
+                if (chatId == 0) return list;
+
+                // filter by chatId
+                var filter = list.Where(h => h.ChatId == chatId).ToList();
+                if (string.IsNullOrWhiteSpace(keyName)) return filter;
+
+                // filter with keyname
+                return filter.Where(h => string.Equals(h.KeyName, keyName, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+            catch (Exception e)
+            {
+                _log.Error(e.Message);
+                return null;
             }
         }
     }

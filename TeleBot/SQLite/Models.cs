@@ -1,6 +1,5 @@
 ﻿using System;
 using SQLite;
-using Telegram.Bot.Types;
 
 namespace TeleBot.SQLite
 {
@@ -83,5 +82,19 @@ namespace TeleBot.SQLite
         public Type Operation { get; set; }
         public DateTime DateTime { get; set; }
         public string Text { get; set; }
+    }
+    
+    [Table("Bookmark")]
+    public class Hashtag
+    {
+        [PrimaryKey, AutoIncrement]
+        public int Id { get; set; }
+
+        [NotNull]
+        public long ChatId { get; set; }
+        [NotNull]
+        public int MessageId { get; set; }
+
+        public string KeyName { get; set; }
     }
 }
