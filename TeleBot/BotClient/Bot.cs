@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using TeleBot.Classes;
+using TeleBot.SQLite;
 using Telegram.Bot;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types;
@@ -12,6 +13,7 @@ namespace TeleBot.BotClient
     public static class Bot
     {
         private static Log _log = new Log("Bot");
+        private static Database _db = new Database();
         public static BotKeys Keys = Configs.LoadKeys();
         public static string Name = string.Empty;
         public static string Username = string.Empty;
@@ -83,7 +85,10 @@ namespace TeleBot.BotClient
                 await Task.Delay(500);
                 
                 _log.Debug("Kirim pesan ke {0}: {1}", chatId, text.SingleLine());
-                return await _bot.SendTextMessageAsync(chatId, text, parse, !preview, replyToMessageId: replyId, replyMarkup: button);
+                var message = await _bot.SendTextMessageAsync(chatId, text, parse, !preview, replyToMessageId: replyId, replyMarkup: button);
+                
+                await _db.InsertMessageOutgoing(message);
+                return message;
             }
             catch (Exception ex)
             {
@@ -102,7 +107,10 @@ namespace TeleBot.BotClient
             try
             {
                 _log.Debug("Edit pesan {0}: {1}", messageId, text.SingleLine());
-                return await _bot.EditMessageTextAsync(chatId, messageId, text, parse, !preview, keyboard);
+                var message = await _bot.EditMessageTextAsync(chatId, messageId, text, parse, !preview, keyboard);
+                
+                await _db.InsertMessageOutgoing(message);
+                return message;
             }
             catch (Exception ex)
             {

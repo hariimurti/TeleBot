@@ -73,8 +73,8 @@ namespace TeleBot.SQLite
                 var findContacts = await _db.Table<Contact>().Where(c => c.Id == data.Chat.Id).ToListAsync();
                 if (findContacts.Count > 0)
                 {
-                    var exist = findContacts.FirstOrDefault();
-                    contact.Blocked = exist.Blocked;
+                    var isBlocked = findContacts.FirstOrDefault()?.Blocked;
+                    contact.Blocked = isBlocked == true;
                 }
                 
                 // update contacts

@@ -29,7 +29,7 @@ namespace TeleBot.BotClient
             var already = await _db.InsertMessageIncoming(message);
             if (already) return;
             
-            _log.Info("{0}: Dari {1}: Pesan: {2}", message.Date.ToLocalTime(), message.FromName(), message.Text);
+            _log.Info("{0} | Id: {1} | Dari: {2} | Pesan: {3}", message.Date.ToLocalTime(), message.MessageId, message.FromName(), message.Text);
 
             if (message.Text.StartsWith("/"))
             {
@@ -39,8 +39,8 @@ namespace TeleBot.BotClient
             else
             {
                 // pesan teks lain
-                var kirim = await Bot.SendTextAsync(message, $"{message.Text}, juga.");
-                await _db.InsertMessageOutgoing(kirim);
+                var respon = message.GetReplyResponse().ReplaceWithBotValue();
+                await Bot.SendTextAsync(message, respon);
             }
         }
 
