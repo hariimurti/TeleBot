@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using TeleBot.BotClient;
 using TeleBot.Classes;
 using TeleBot.SQLite;
@@ -9,10 +10,30 @@ using Telegram.Bot.Types.Enums;
 
 namespace TeleBot.Plugins
 {
-    public class Bookmark
+    public static class Bookmark
     {
         private static Log _log = new Log("Bookmark");
         private static Database _db = new Database();
+
+        private static async Task<bool> Checking(Message message, string hashtag = null)
+        {
+            if (hashtag != null)
+            {
+                if (!Regex.IsMatch(hashtag, @"^#?([\w]+)$"))
+                {
+                    _log.Warning("Format hashtag \"{0}\" salah!", hashtag);
+                    await Bot.SendTextAsync(message, $"Hashtag \"{hashtag}\" pakai format ilegal!");
+                    return false;
+                }
+            }
+            
+            if (message.IsGroupChat()) return true;
+            
+            _log.Warning("Khusus digunakan didalam grup!");
+            await Bot.SendTextAsync(message, $"Perintah bookmark hanya bisa dipakai didalam grup!");
+            return false;
+
+        }
 
         public static async void Save(Message message, string hashtag)
         {
@@ -20,15 +41,13 @@ namespace TeleBot.Plugins
             {
                 hashtag = hashtag.TrimStart('#');
                 if (string.IsNullOrWhiteSpace(hashtag)) return;
-                if (!Regex.IsMatch(hashtag, @"^#?([\w]+)$"))
-                {
-                    _log.Warning("Format hashtag \"{0}\" salah!", hashtag);
-                    await Bot.SendTextAsync(message, $"Hashtag \"{hashtag}\" pakai format ilegal!");
-                    return;
-                }
                 
-                var list = await _db.GetBookmarks(message.Chat.Id, hashtag);
-                if (list.Count == 0)
+                // checking
+                var pass = await Checking(message, hashtag);
+                if (!pass) return;
+                
+                var query = await _db.GetBookmarkByHashtag(message.Chat.Id, hashtag);
+                if (query == null)
                 {
                     var hash = new Hashtag()
                     {
@@ -72,6 +91,10 @@ namespace TeleBot.Plugins
             
             var list = await _db.GetBookmarks(message.Chat.Id, hashtag);
             if (list.Count == 0)
+            // checking
+            var pass = await Checking(message, hashtag);
+            if (!pass) return;
+            
             {
                 _log.Ignore("Tidak ada #{0} di {1}", hashtag, message.ChatName());
                 
@@ -97,6 +120,10 @@ namespace TeleBot.Plugins
 
         public static async void List(Message message)
         {
+            // checking
+            var pass = await Checking(message);
+            if (!pass) return;
+            
             var list = await _db.GetBookmarks(message.Chat.Id);
             if (list.Count == 0)
             {
