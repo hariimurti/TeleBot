@@ -30,7 +30,7 @@ namespace TeleBot.Classes
             Register(data);
         }
         
-        public static void Register(ScheduleData data)
+        private static void Register(ScheduleData data)
         {
             var interval = (data.DateTime - DateTime.Now).TotalMilliseconds;
             if (interval <= 0)
