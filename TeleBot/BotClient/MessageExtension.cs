@@ -15,7 +15,7 @@ namespace TeleBot.BotClient
                 name = chat.LastName;
             if (full)
                 name = (chat.FirstName + " " + chat.LastName).Trim();
-            if (message.IsPrivateChat())
+            if (!message.IsPrivateChat())
                 name = chat.Title;
             if (string.IsNullOrWhiteSpace(name))
                 name = chat.Username;
