@@ -66,6 +66,11 @@ namespace TeleBot.BotClient
             {
                 Command.Execute(message);
             }
+            // pesan berisi hashtag
+            else if (message.Text.Contains("#"))
+            {
+                Bookmark.GetAllFromText(message);
+            }
             // pesan teks lain
             else
             {

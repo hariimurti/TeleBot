@@ -145,5 +145,45 @@ namespace TeleBot.Plugins
             
             await Bot.SendTextAsync(message, respon);
         }
+
+        public static async void GetAllFromText(Message message)
+        {
+            if (string.IsNullOrWhiteSpace(message.Text)) return;
+            
+            // checking
+            if (message.IsGroupChat()) return;
+            
+            var matches = Regex.Matches(message.Text, @"#([\w\d]+)");
+            foreach (Match match in matches)
+            {
+                var hashtag = match.Groups[1].Value;
+                
+                _log.Debug("Cari hashtag #{0}", hashtag);
+                
+                // panggil admin/mimin
+                if (hashtag == "admin" || hashtag == "mimin")
+                {
+                    var admins = await Bot.GetChatAdministratorsAsync(message);
+                    admins = admins.OrderBy(x => x.User.FirstName).ToArray();
+                    var respon = "Panggilan kepada :";
+                    foreach (var x in admins)
+                    {
+                        var user = x.User.FirstName + " " + x.User.LastName;
+                        if (string.IsNullOrWhiteSpace(user)) user = x.User.Username;
+                        if (string.IsNullOrWhiteSpace(user)) user = x.User.Id.ToString();
+                        respon += $"\n• <a href=\"tg://user?id={x.User.Id}\">{user.Trim()}</a>";
+                    }
+                    
+                    await Bot.SendTextAsync(message, respon, parse: ParseMode.Html);
+                    continue;
+                }
+
+                // cari hashtag
+                var query = await _db.GetBookmarkByHashtag(message.Chat.Id, hashtag);
+                if (query == null) continue;
+
+                await Bot.ForwardMessageAsync(message.Chat.Id, query.ChatId, query.MessageId);
+            }
+        }
     }
 }
