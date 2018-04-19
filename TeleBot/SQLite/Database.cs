@@ -13,20 +13,20 @@ namespace TeleBot.SQLite
     public class Database
     {
         private static Log _log = new Log("Database");
-        private static SQLiteAsyncConnection _db;
+        private static SQLiteAsyncConnection _con;
 
         public Database()
         {
             try
             {
-                if (_db != null) return;
+                if (_con != null) return;
                 
-                _db = new SQLiteAsyncConnection(Program.FilePathInData("Database.db"));
-                _db.SetBusyTimeoutAsync(TimeSpan.FromSeconds(20));
-                _db.CreateTableAsync<Contact>();
-                _db.CreateTableAsync<MessageIncoming>();
-                _db.CreateTableAsync<MessageOutgoing>();
-                _db.CreateTableAsync<Token>();
+                _con = new SQLiteAsyncConnection(Program.FilePathInData("Database.db"));
+                _con.SetBusyTimeoutAsync(TimeSpan.FromSeconds(20));
+                _con.CreateTableAsync<Contact>();
+                _con.CreateTableAsync<MessageIncoming>();
+                _con.CreateTableAsync<MessageOutgoing>();
+                _con.CreateTableAsync<Token>();
             }
             catch(SQLiteException ex)
             {
@@ -41,7 +41,7 @@ namespace TeleBot.SQLite
             try
             {
                 // cari pesan yg sama
-                var exists = await _db.Table<MessageIncoming>()
+                var exists = await _con.Table<MessageIncoming>()
                     .Where(m => m.MessageId == data.MessageId && m.ChatId == data.Chat.Id)
                     .ToListAsync();
                 if (exists.Count > 0) return true;
@@ -59,7 +59,7 @@ namespace TeleBot.SQLite
                 };
                 
                 // insert message
-                await _db.InsertAsync(message);
+                await _con.InsertAsync(message);
                 result = false;
                 
                 // Contact
@@ -72,7 +72,7 @@ namespace TeleBot.SQLite
                 };
                 
                 // cari kontak yg sudah ada
-                var findContacts = await _db.Table<Contact>().Where(c => c.Id == data.Chat.Id).ToListAsync();
+                var findContacts = await _con.Table<Contact>().Where(c => c.Id == data.Chat.Id).ToListAsync();
                 if (findContacts.Count > 0)
                 {
                     var isBlocked = findContacts.FirstOrDefault()?.Blocked;
@@ -80,7 +80,7 @@ namespace TeleBot.SQLite
                 }
                 
                 // update contacts
-                await _db.InsertOrReplaceAsync(contact);
+                await _con.InsertOrReplaceAsync(contact);
             }
             catch (Exception e)
             {
@@ -105,7 +105,7 @@ namespace TeleBot.SQLite
                 };
                 
                 // insert message
-                await _db.InsertAsync(message);
+                await _con.InsertAsync(message);
             }
             catch (Exception e)
             {
@@ -115,12 +115,12 @@ namespace TeleBot.SQLite
 
         public async Task InsertOrReplaceToken(Token token)
         {
-            await _db.InsertOrReplaceAsync(token);
+            await _con.InsertOrReplaceAsync(token);
         }
 
         public async Task<Token> FindToken(string key)
         {
-            var list = await _db.Table<Token>()
+            var list = await _con.Table<Token>()
                 .Where(t => t.Key == key)
                 .ToListAsync();
             
@@ -129,7 +129,7 @@ namespace TeleBot.SQLite
 
         public async Task<List<Token>> GetTokens()
         {
-            return await _db.Table<Token>()
+            return await _con.Table<Token>()
                 .Where(t => t.Expired > DateTime.Now)
                 .ToListAsync();
         }

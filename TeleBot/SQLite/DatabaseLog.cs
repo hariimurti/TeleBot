@@ -6,7 +6,7 @@ namespace TeleBot.SQLite
 {
     public class DatabaseLog
     {
-        private static SQLiteAsyncConnection _db;
+        private static SQLiteAsyncConnection _con;
         private static Queue<LogData> _queueLog = new Queue<LogData>();
         private static bool _queueStart;
 
@@ -14,11 +14,11 @@ namespace TeleBot.SQLite
         {
             try
             {
-                if (_db != null) return;
+                if (_con != null) return;
                 
-                _db = new SQLiteAsyncConnection(Program.FilePathInData("Logs.db"));
-                _db.SetBusyTimeoutAsync(TimeSpan.FromSeconds(20));
-                _db.CreateTableAsync<LogData>();
+                _con = new SQLiteAsyncConnection(Program.FilePathInData("Logs.db"));
+                _con.SetBusyTimeoutAsync(TimeSpan.FromSeconds(20));
+                _con.CreateTableAsync<LogData>();
             }
             catch(SQLiteException ex)
             {
@@ -43,7 +43,7 @@ namespace TeleBot.SQLite
                 while (_queueLog.Count > 0)
                 {
                     var data = _queueLog.Dequeue();
-                    await _db.InsertAsync(data);
+                    await _con.InsertAsync(data);
                 }
 
                 _queueStart = false;
