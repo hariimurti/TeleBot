@@ -15,13 +15,14 @@ namespace TeleBot.BotClient
     {
         private static Log _log = new Log("Bot");
         private static Database _db = new Database();
+        
         public static BotKeys Keys = Configs.LoadKeys();
         public static string Name = string.Empty;
         public static string Username = string.Empty;
-        private static bool _isReceiving;
         
         private static TelegramBotClient _bot = Client();
         private static TelegramBotClient _botFile = Client(30);
+        private static bool _isReceiving;
         
         private static TelegramBotClient Client(int timeout = 0)
         {
@@ -41,6 +42,8 @@ namespace TeleBot.BotClient
                 .Replace("{alias}", alias);
         }
 
+        #region StartReceivingMessage
+        
         public static async Task StartReceivingMessage()
         {
             if (_isReceiving) return;
@@ -71,6 +74,10 @@ namespace TeleBot.BotClient
         {
             _log.Error("OnReceiveError: " + e.ApiRequestException.Message);
         }
+        
+        #endregion
+
+        #region DeleteMessageAsync
 
         public static async Task<bool> DeleteMessageAsync(Message msg)
         {
@@ -92,6 +99,10 @@ namespace TeleBot.BotClient
             }
         }
 
+        #endregion
+
+        #region GetChatAdministratorsAsync
+
         public static async Task<ChatMember[]> GetChatAdministratorsAsync(Message message)
         {
             return await GetChatAdministratorsAsync(message.Chat.Id);
@@ -111,6 +122,10 @@ namespace TeleBot.BotClient
             }
         }
 
+        #endregion
+
+        #region ForwardMessageAsync
+
         public static async Task<Message> ForwardMessageAsync(Message message)
         {
             return await ForwardMessageAsync(message.Chat.Id, message.Chat.Id, message.MessageId);
@@ -129,7 +144,11 @@ namespace TeleBot.BotClient
                 return null;
             }
         }
-        
+
+        #endregion
+
+        #region SendTextAsync
+
         public static async Task<Message> SendTextAsync(Message msg, string text, bool reply = false, ParseMode parse = ParseMode.Default, IReplyMarkup button = null, bool preview = true)
         {
             var replyId = reply ? msg.MessageId : 0;
@@ -156,6 +175,10 @@ namespace TeleBot.BotClient
             }
         }
 
+        #endregion
+
+        #region EditOrSendTextAsync
+
         public static async Task<Message> EditOrSendTextAsync(Message msg, int messageId, string text, ParseMode parse = ParseMode.Default, InlineKeyboardMarkup keyboard = null, bool preview = true)
         {
             return await EditOrSendTextAsync(msg.Chat.Id, messageId, text, parse, keyboard, preview);
@@ -177,6 +200,10 @@ namespace TeleBot.BotClient
                 return await SendTextAsync(chatId, text, 0, parse, keyboard, preview);
             }
         }
+
+        #endregion
+
+        #region SendPhotoAsync
 
         public static async Task<Message> SendPhotoAsync(Message msg, InputOnlineFile file, string caption = null, ParseMode parse = ParseMode.Default, bool reply = false)
         {
@@ -212,5 +239,7 @@ namespace TeleBot.BotClient
                 return null;
             }
         }
+
+        #endregion
     }
 }
