@@ -9,9 +9,12 @@ namespace TeleBot.Classes
     {
         private static Log _log = new Log("Schedule");
         private static Database _db = new Database();
+        private static bool _oneTime;
 
         public static async void ReSchedule()
         {
+            if (_oneTime) return;
+            
             var list = await _db.GetAllSchedule();
             if (list.Count > 0)
                 _log.Debug("ReSchedule: {0} items", list.Count);
@@ -20,6 +23,8 @@ namespace TeleBot.Classes
             {
                 Register(data);
             }
+
+            _oneTime = true;
         }
 
         public static async void RegisterNew(ScheduleData data)
