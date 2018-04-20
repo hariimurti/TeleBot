@@ -77,6 +77,22 @@ namespace TeleBot.BotClient
         
         #endregion
 
+        #region AnswerCallbackQueryAsync
+
+        public static async Task AnswerCallbackQueryAsync(string queryId, string text, bool showAlert = false)
+        {
+            try
+            {
+                await _bot.AnswerCallbackQueryAsync(queryId, text, showAlert);
+            }
+            catch (Exception ex)
+            {
+                _log.Error("AnswerCallbackQueryAsync: {0} » {1}", queryId, ex.Message);
+            }
+        }
+
+        #endregion
+        
         #region DeleteMessageAsync
 
         public static async Task<bool> DeleteMessageAsync(Message msg)
