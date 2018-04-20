@@ -60,10 +60,13 @@ namespace TeleBot.Plugins
                     Bookmark.Delete(message, data);
                     break;
                 
-                case "bookmark":
                 case "list":
                 case "hashtag":
                     Bookmark.List(message);
+                    break;
+                
+                case "bookmark":
+                    Bookmark.List(message, true);
                     break;
                 
                 default:

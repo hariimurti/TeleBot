@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using TeleBot.Classes;
 using TeleBot.SQLite;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TeleBot.Plugins
 {
@@ -116,7 +118,7 @@ namespace TeleBot.Plugins
             }
         }
 
-        public static async void List(Message message)
+        public static async void List(Message message, bool useButton = false)
         {
             // checking
             var pass = await Checking(message);
@@ -133,17 +135,37 @@ namespace TeleBot.Plugins
                 return;
             }
 
-            var count = 1;
-            var mod = list.Count % 10;
-            var respon = "Bookmark grup ini :\n—— —— —— ——";
-            foreach (var hashtag in list.OrderBy(h => h.KeyName))
+            if (!useButton)
             {
-                var num = count.ToString().PadLeft(mod, '0');
-                respon += $"\n{num}. #{hashtag.KeyName}";
-                count++;
-            }
+                var count = 1;
+                var mod = list.Count % 10;
+                var respon = $"Bookmark : <b>{message.ChatName()}</b>\nGenerated : {DateTime.Now}\nTotal : {list.Count}\n—— —— —— ——";
+                foreach (var hashtag in list.OrderBy(h => h.KeyName))
+                {
+                    var num = count.ToString().PadLeft(mod, '0');
+                    respon += $"\n{num}. #{hashtag.KeyName}";
+                    count++;
+                }
             
-            await Bot.SendTextAsync(message, respon);
+                await Bot.SendTextAsync(message, respon, parse: ParseMode.Html);
+            }
+            else
+            {
+                var respon = $"Bookmark : <b>{message.ChatName()}</b>\nGenerated : {DateTime.Now}\nTotal : {list.Count}";
+                var buttonRows = new List<List<InlineKeyboardButton>>();
+                foreach (var hashtag in list.OrderBy(h => h.KeyName))
+                {
+                    var buttonColumns = new List<InlineKeyboardButton>()
+                    {
+                        InlineKeyboardButton.WithCallbackData(hashtag.KeyName, $"cmd=call&hashtag=" + hashtag.KeyName),
+                        InlineKeyboardButton.WithCallbackData("Hapus", $"cmd=remove&hashtag=" + hashtag.KeyName)
+                    };
+                    buttonRows.Add(buttonColumns);
+                }
+                
+                var buttons = new InlineKeyboardMarkup(buttonRows.ToArray());
+                await Bot.SendTextAsync(message, respon, parse: ParseMode.Html, button: buttons);
+            }
         }
 
         public static async void GetAllFromText(Message message)
