@@ -45,6 +45,14 @@ namespace TeleBot.Plugins
                 // harus grup chat
                 if (!await CheckingGroup(message)) return;
 
+                // harus mereply pesan
+                if (!message.IsReplyToMessage())
+                {
+                    _log.Warning("Tidak ada pesan yang akan disimpan!");
+                    await Bot.SendTextAsync(message, $"Tidak ada pesan yg akan disimpan!");
+                    return;
+                }
+                
                 // cek format hashtag
                 if (!await CheckingHashtag(message, hashtag)) return;
                 
