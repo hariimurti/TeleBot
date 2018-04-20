@@ -53,10 +53,12 @@ namespace TeleBot.Plugins
                     break;
                 
                 case "save":
+                case "simpan":
                     Bookmark.Save(message, data);
                     break;
                 
                 case "delete":
+                case "hapus":
                     Bookmark.Delete(message, data);
                     break;
                 

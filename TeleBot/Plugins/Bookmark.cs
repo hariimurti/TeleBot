@@ -62,7 +62,7 @@ namespace TeleBot.Plugins
                 
                     await _db.InsertBookmark(hash);
                     await Bot.SendTextAsync(message.Chat.Id,
-                        $"<b>Bookmark</b> : {hash.MessageId}\n<b>Hashtag</b> : #{hashtag}\n—— —— —— ——\n<b>Hasil</b> : Telah tersimpan!",
+                        $"<b>Simpan Bookmark!</b>\nMessageId : {hash.MessageId}\nHashtag : #{hashtag}\n—— —— —— ——\nHasil : Telah tersimpan.",
                         message.ReplyToMessage.MessageId,
                         parse: ParseMode.Html);
                 }
@@ -75,7 +75,7 @@ namespace TeleBot.Plugins
                     
                     await _db.InsertBookmark(query, true);
                     await Bot.SendTextAsync(message.Chat.Id,
-                        $"<b>Bookmark</b> : {query.MessageId}\n<b>Hashtag</b> : #{hashtag}\n—— —— —— ——\n<b>Hasil</b> : Telah diganti!",
+                        $"<b>Simpan Bookmark!</b>\nMessageId : {query.MessageId}\nHashtag : #{hashtag}\n—— —— —— ——\nHasil : Telah diganti.",
                         message.ReplyToMessage.MessageId,
                         parse: ParseMode.Html);
                 }
