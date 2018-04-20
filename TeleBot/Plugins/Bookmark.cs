@@ -138,11 +138,11 @@ namespace TeleBot.Plugins
             if (!useButton)
             {
                 var count = 1;
-                var mod = list.Count % 10;
+                var padding = list.Count.ToString().Length;
                 var respon = $"Bookmark : <b>{message.ChatName()}</b>\nGenerated : {DateTime.Now}\nTotal : {list.Count}\n—— —— —— ——";
                 foreach (var hashtag in list.OrderBy(h => h.KeyName))
                 {
-                    var num = count.ToString().PadLeft(mod, '0');
+                    var num = count.ToString().PadLeft(padding, '0');
                     respon += $"\n{num}. #{hashtag.KeyName}";
                     count++;
                 }
