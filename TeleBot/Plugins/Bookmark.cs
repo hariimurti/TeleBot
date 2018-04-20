@@ -60,8 +60,8 @@ namespace TeleBot.Plugins
                 
                     await _db.InsertBookmark(hash);
                     await Bot.SendTextAsync(message,
-                        $"*Bookmark* : {hash.MessageId}\n*Hashtag* : #{hashtag}\n—— —— —— ——\n*Hasil* : Telah tersimpan!",
-                        parse: ParseMode.Markdown);
+                        $"<b>Bookmark</b> : {hash.MessageId}\n<b>Hashtag</b> : #{hashtag}\n—— —— —— ——\n<b>Hasil</b> : Telah tersimpan!",
+                        parse: ParseMode.Html);
                 }
                 else
                 {
@@ -72,8 +72,8 @@ namespace TeleBot.Plugins
                     
                     await _db.InsertBookmark(query, true);
                     await Bot.SendTextAsync(message,
-                        $"*Bookmark* : {query.MessageId}\n*Hashtag* : #{hashtag}\n—— —— —— ——\n*Hasil* : Telah diganti!",
-                        parse: ParseMode.Markdown);
+                        $"<b>Bookmark</b> : {query.MessageId}\n<b>Hashtag</b> : #{hashtag}\n—— —— —— ——\n<b>Hasil</b> : Telah diganti!",
+                        parse: ParseMode.Html);
                 }
             }
             catch (Exception e)
