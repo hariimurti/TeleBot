@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 using TeleBot.Classes;
 using TeleBot.Plugins;
 using TeleBot.SQLite;
@@ -78,9 +79,39 @@ namespace TeleBot.BotClient
             }
         }
 
-        public static void OnCallbackQuery(object sender, CallbackQueryEventArgs e)
+        public static async void OnCallbackQuery(object sender, CallbackQueryEventArgs e)
         {
-            //handle
+            var callback = e.CallbackQuery;
+            var message = e.CallbackQuery.Message;
+            message.From = callback.From;
+            
+            var query = Regex.Match(callback.Data, @"cmd=(\S+)&data=(\S+)");
+            if (!query.Success)
+            {
+                _log.Error("Unknown: {0}", callback.Data);
+                return;
+            }
+            
+            var cmd = query.Groups[1].Value;
+            var data = query.Groups[2].Value;
+
+            switch (cmd)
+            {
+                case "call":
+                    await Bot.AnswerCallbackQueryAsync(callback.Id, "Tunggu sebentar...");
+                    Bookmark.GetHashtag(message, data);
+                    break;
+                
+                case "remove":
+                    await Bot.AnswerCallbackQueryAsync(callback.Id, "Tunggu sebentar...");
+                    Bookmark.Delete(message, data, true);
+                    break;
+                
+                default:
+                    await Bot.AnswerCallbackQueryAsync(callback.Id, "Perintah error!");
+                    _log.Ignore("Unknown: {0}", callback.Data);
+                    break;
+            }
         }
     }
 }

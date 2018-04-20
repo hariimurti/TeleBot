@@ -95,7 +95,7 @@ namespace TeleBot.Plugins
             }
         }
 
-        public static async void Delete(Message message, string hashtag)
+        public static async void Delete(Message message, string hashtag, bool editList = false)
         {
             hashtag = hashtag.TrimStart('#');
             if (string.IsNullOrWhiteSpace(hashtag)) return;
@@ -121,16 +121,23 @@ namespace TeleBot.Plugins
                 
                 await _db.DeleteBookmark(query);
                 
-                await Bot.SendTextAsync(message, $"Berhasil menghapus #{hashtag}");
+                await Bot.SendTextAsync(message,
+                    $"Berhasil menghapus #{hashtag}!" +
+                    (editList ? $"\nDihapus oleh : {message.FromName(true)}" : ""));
+                
+                if (editList) List(message, true, true);
             }
             catch (Exception e)
             {
                 _log.Error(e.Message);
-                await Bot.SendTextAsync(message, $"Gagal hapus #{hashtag}.\nError : {e.Message}");
+                await Bot.SendTextAsync(message,
+                    $"Gagal hapus #{hashtag}!" +
+                    (editList ? $"\nDihapus oleh : {message.FromName(true)}.\n" : "\n") +
+                    $"Error : {e.Message}");
             }
         }
 
-        public static async void List(Message message, bool useButton = false)
+        public static async void List(Message message, bool useButton = false, bool editMessage = false)
         {
             // harus grup chat
             if (!await CheckingGroup(message)) return;
@@ -177,14 +184,17 @@ namespace TeleBot.Plugins
                 {
                     var buttonColumns = new List<InlineKeyboardButton>()
                     {
-                        InlineKeyboardButton.WithCallbackData(hashtag.KeyName, $"cmd=call&hashtag=" + hashtag.KeyName),
-                        InlineKeyboardButton.WithCallbackData("Hapus", $"cmd=remove&hashtag=" + hashtag.KeyName)
+                        InlineKeyboardButton.WithCallbackData(hashtag.KeyName, $"cmd=call&data=" + hashtag.KeyName),
+                        InlineKeyboardButton.WithCallbackData("Hapus", $"cmd=remove&data=" + hashtag.KeyName)
                     };
                     buttonRows.Add(buttonColumns);
                 }
                 
                 var buttons = new InlineKeyboardMarkup(buttonRows.ToArray());
-                await Bot.SendTextAsync(message, respon, parse: ParseMode.Html, button: buttons);
+                if (!editMessage)
+                    await Bot.SendTextAsync(message, respon, parse: ParseMode.Html, button: buttons);
+                else
+                    await Bot.EditOrSendTextAsync(message, message.MessageId, respon, ParseMode.Html, buttons);
             }
         }
 
@@ -222,13 +232,18 @@ namespace TeleBot.Plugins
                 }
 
                 // cari hashtag
-                var query = await _db.GetBookmarkByHashtag(message.Chat.Id, hashtag);
-                if (query == null) continue;
-                
-                _log.Debug("Panggil hashtag #{0}", hashtag);
-
-                await Bot.ForwardMessageAsync(message.Chat.Id, query.ChatId, query.MessageId);
+                GetHashtag(message, hashtag);
             }
+        }
+
+        public static async void GetHashtag(Message message, string hashtag)
+        {
+            var query = await _db.GetBookmarkByHashtag(message.Chat.Id, hashtag);
+            if (query == null) return;
+                
+            _log.Debug("Panggil hashtag #{0}", hashtag);
+
+            await Bot.ForwardMessageAsync(message.Chat.Id, query.ChatId, query.MessageId);
         }
     }
 }
