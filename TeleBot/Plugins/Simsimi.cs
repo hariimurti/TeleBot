@@ -16,6 +16,7 @@ namespace TeleBot.Plugins
     {
         private static Log _log = new Log("Simsimi");
         private static Database _db = new Database();
+        private static Random _random = new Random();
         private Message _message;
         
         private class ResponseModel
@@ -180,7 +181,7 @@ namespace TeleBot.Plugins
             if (replied) return;
             
             var respons = Bot.Keys.SimsimiNoResponse;
-            var rand = new Random().Next(0, respons.Count - 1);
+            var rand = _random.Next(0, respons.Count - 1);
             await Bot.SendTextAsync(_message, respons[rand]);
         }
     }

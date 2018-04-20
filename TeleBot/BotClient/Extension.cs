@@ -7,6 +7,8 @@ namespace TeleBot.BotClient
 {
     public static class Extension
     {
+        private static Random _random = new Random();
+        
         public static string ChatName(this Message message, bool full = false)
         {
             var chat = message.Chat;
@@ -44,7 +46,7 @@ namespace TeleBot.BotClient
         public static string GetBadWordResponse(this Message message)
         {
             var respon = Bot.Keys.BadWordResponse;
-            var rand = new Random().Next(0, respon.Count - 1);
+            var rand = _random.Next(0, respon.Count - 1);
             return respon[rand];
         }
 
@@ -61,7 +63,7 @@ namespace TeleBot.BotClient
                 respon = Bot.Keys.ReplyAdmins;
             }
 
-            var rand = new Random().Next(0, respon.Count - 1);
+            var rand = _random.Next(0, respon.Count - 1);
             return respon[rand];
         }
 
