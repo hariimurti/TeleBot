@@ -61,8 +61,9 @@ namespace TeleBot.Plugins
                     _log.Debug("Simpan #{0} ({1}) ke {2}", hash.MessageId, hashtag, message.ChatName());
                 
                     await _db.InsertBookmark(hash);
-                    await Bot.SendTextAsync(message,
+                    await Bot.SendTextAsync(message.Chat.Id,
                         $"<b>Bookmark</b> : {hash.MessageId}\n<b>Hashtag</b> : #{hashtag}\n—— —— —— ——\n<b>Hasil</b> : Telah tersimpan!",
+                        message.ReplyToMessage.MessageId,
                         parse: ParseMode.Html);
                 }
                 else
@@ -73,8 +74,9 @@ namespace TeleBot.Plugins
                     _log.Debug("Ganti #{0} ({1}) dari {2}", query.MessageId, hashtag, message.ChatName());
                     
                     await _db.InsertBookmark(query, true);
-                    await Bot.SendTextAsync(message,
+                    await Bot.SendTextAsync(message.Chat.Id,
                         $"<b>Bookmark</b> : {query.MessageId}\n<b>Hashtag</b> : #{hashtag}\n—— —— —— ——\n<b>Hasil</b> : Telah diganti!",
+                        message.ReplyToMessage.MessageId,
                         parse: ParseMode.Html);
                 }
             }
