@@ -65,19 +65,6 @@ namespace TeleBot.Plugins
             _log.Info("New SID: {0}", newSid);
         }
 
-        private static void DumpToFile(string fileName, string content)
-        {
-            try
-            {
-                var filePath = Program.FilePathInData(fileName);
-                File.WriteAllText(filePath, content);
-            }
-            catch (Exception e)
-            {
-                _log.Error(e.Message);
-            }
-        }
-
         public static async Task Login()
         {
             try
@@ -87,7 +74,7 @@ namespace TeleBot.Plugins
                 {
                     // buka homepage
                     var homepage = await WebClient.GetOrPostStringAsync(new WebRequest() {Url = BaseAddress});
-                    DumpToFile("Mobilism.html", homepage);
+                    Dump.ToFile("Mobilism.html", homepage);
                     
                     GetSidFromCookies();
 
@@ -126,7 +113,7 @@ namespace TeleBot.Plugins
                 };
                 
                 var loginpage = await WebClient.GetOrPostStringAsync(loginRequest);
-                DumpToFile("Mobilism-Login.html", loginpage);
+                Dump.ToFile("Mobilism-Login.html", loginpage);
                 
                 GetSidFromCookies();
                 
