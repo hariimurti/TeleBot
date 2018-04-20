@@ -175,18 +175,19 @@ namespace TeleBot.Plugins
             if (string.IsNullOrWhiteSpace(message.Text)) return;
             
             // checking
-            if (message.IsGroupChat()) return;
+            if (!message.IsGroupChat()) return;
             
+            _log.Debug("Cari hashtag dalam teks : {0}", message.Text);
             var matches = Regex.Matches(message.Text, @"#([\w\d]+)");
             foreach (Match match in matches)
             {
                 var hashtag = match.Groups[1].Value;
                 
-                _log.Debug("Cari hashtag #{0}", hashtag);
-                
                 // panggil admin/mimin
                 if (hashtag == "admin" || hashtag == "mimin")
                 {
+                    _log.Debug("Panggil admins grup!", hashtag);
+                    
                     var admins = await Bot.GetChatAdministratorsAsync(message);
                     admins = admins.OrderBy(x => x.User.FirstName).ToArray();
                     var respon = "Panggilan kepada :";
@@ -205,6 +206,8 @@ namespace TeleBot.Plugins
                 // cari hashtag
                 var query = await _db.GetBookmarkByHashtag(message.Chat.Id, hashtag);
                 if (query == null) continue;
+                
+                _log.Debug("Panggil hashtag #{0}", hashtag);
 
                 await Bot.ForwardMessageAsync(message.Chat.Id, query.ChatId, query.MessageId);
             }
