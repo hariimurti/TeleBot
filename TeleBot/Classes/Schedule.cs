@@ -71,7 +71,7 @@ namespace TeleBot.Classes
                     break;
 
                 case ScheduleData.Type.Edit:
-                    await Bot.EditOrSendTextAsync(data.ChatId, data.MessageId, data.Text);
+                    await Bot.EditOrSendTextAsync(data.ChatId, data.MessageId, data.Text, data.ParseMode);
                     break;
                 
                 case ScheduleData.Type.Done:

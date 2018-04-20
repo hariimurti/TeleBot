@@ -1,5 +1,6 @@
 ﻿using System;
 using SQLite;
+using Telegram.Bot.Types.Enums;
 
 namespace TeleBot.SQLite
 {
@@ -82,6 +83,7 @@ namespace TeleBot.SQLite
         public Type Operation { get; set; }
         public DateTime DateTime { get; set; }
         public string Text { get; set; }
+        public ParseMode ParseMode { get; set; }
     }
     
     [Table("Bookmark")]
