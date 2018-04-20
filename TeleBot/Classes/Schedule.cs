@@ -73,8 +73,14 @@ namespace TeleBot.Classes
                 case ScheduleData.Type.Edit:
                     await Bot.EditOrSendTextAsync(data.ChatId, data.MessageId, data.Text);
                     break;
-            }
                 
+                case ScheduleData.Type.Done:
+                    return;
+                
+                default:
+                    return;
+            }
+            
             data.Operation = ScheduleData.Type.Done;
             await _db.InsertOrReplaceSchedule(data);
         }
