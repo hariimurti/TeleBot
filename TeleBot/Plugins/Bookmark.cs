@@ -17,24 +17,22 @@ namespace TeleBot.Plugins
         private static Log _log = new Log("Bookmark");
         private static Database _db = new Database();
 
-        private static async Task<bool> Checking(Message message, string hashtag = null)
+        private static async Task<bool> CheckingHashtag(Message message, string hashtag)
         {
-            if (hashtag != null)
-            {
-                if (!Regex.IsMatch(hashtag, @"^#?([\w]+)$"))
-                {
-                    _log.Warning("Format hashtag \"{0}\" salah!", hashtag);
-                    await Bot.SendTextAsync(message, $"Hashtag \"{hashtag}\" pakai format ilegal!");
-                    return false;
-                }
-            }
+            if (Regex.IsMatch(hashtag, @"^#?([\w]+)$")) return true;
             
+            _log.Warning("Format hashtag \"{0}\" salah!", hashtag);
+            await Bot.SendTextAsync(message, $"Hashtag \"{hashtag}\" pakai format ilegal!");
+            return false;
+        }
+        
+        private static async Task<bool> CheckingGroup(Message message)
+        {
             if (message.IsGroupChat()) return true;
             
             _log.Warning("Khusus digunakan didalam grup!");
             await Bot.SendTextAsync(message, $"Perintah bookmark hanya bisa dipakai didalam grup!");
             return false;
-
         }
 
         public static async void Save(Message message, string hashtag)
@@ -44,9 +42,11 @@ namespace TeleBot.Plugins
                 hashtag = hashtag.TrimStart('#');
                 if (string.IsNullOrWhiteSpace(hashtag)) return;
                 
-                // checking
-                var pass = await Checking(message, hashtag);
-                if (!pass) return;
+                // harus grup chat
+                if (!await CheckingGroup(message)) return;
+
+                // cek format hashtag
+                if (!await CheckingHashtag(message, hashtag)) return;
                 
                 var query = await _db.GetBookmarkByHashtag(message.Chat.Id, hashtag);
                 if (query == null)
@@ -64,7 +64,7 @@ namespace TeleBot.Plugins
                     await Bot.SendTextAsync(message.Chat.Id,
                         $"<b>Simpan Bookmark!</b>\nMessageId : {hash.MessageId}\nHashtag : #{hashtag}\n—— —— —— ——\nHasil : Telah tersimpan.",
                         message.ReplyToMessage.MessageId,
-                        parse: ParseMode.Html);
+                        ParseMode.Html);
                 }
                 else
                 {
@@ -77,7 +77,7 @@ namespace TeleBot.Plugins
                     await Bot.SendTextAsync(message.Chat.Id,
                         $"<b>Simpan Bookmark!</b>\nMessageId : {query.MessageId}\nHashtag : #{hashtag}\n—— —— —— ——\nHasil : Telah diganti.",
                         message.ReplyToMessage.MessageId,
-                        parse: ParseMode.Html);
+                        ParseMode.Html);
                 }
             }
             catch (Exception e)
@@ -92,9 +92,11 @@ namespace TeleBot.Plugins
             hashtag = hashtag.TrimStart('#');
             if (string.IsNullOrWhiteSpace(hashtag)) return;
             
-            // checking
-            var pass = await Checking(message, hashtag);
-            if (!pass) return;
+            // harus grup chat
+            if (!await CheckingGroup(message)) return;
+                
+            // cek format hashtag
+            if (!await CheckingHashtag(message, hashtag)) return;
             
             var query = await _db.GetBookmarkByHashtag(message.Chat.Id, hashtag);
             if (query == null)
@@ -122,9 +124,8 @@ namespace TeleBot.Plugins
 
         public static async void List(Message message, bool useButton = false)
         {
-            // checking
-            var pass = await Checking(message);
-            if (!pass) return;
+            // harus grup chat
+            if (!await CheckingGroup(message)) return;
             
             var list = await _db.GetBookmarks(message.Chat.Id);
             if (list.Count == 0)
@@ -174,7 +175,7 @@ namespace TeleBot.Plugins
         {
             if (string.IsNullOrWhiteSpace(message.Text)) return;
             
-            // checking
+            // harus grup chat
             if (!message.IsGroupChat()) return;
             
             _log.Debug("Cari hashtag dalam teks : {0}", message.Text);
