@@ -29,7 +29,7 @@ namespace TeleBot.Classes
 
         public static async void RegisterNew(ScheduleData data)
         {
-            _log.Debug("Menambahkan schedule baru: {0}: {1}", data.DateTime, data.Operation);
+            _log.Debug("Menambahkan schedule baru: {0} -- Perintah: {1}", data.DateTime, data.Operation);
             
             if (!await _db.InsertOrReplaceSchedule(data)) return;
             
@@ -45,7 +45,7 @@ namespace TeleBot.Classes
                 return;
             }
             
-            _log.Debug("Menjalankan schedule: {0}: {1}", data.DateTime, data.Operation);
+            _log.Debug("Menjalankan schedule: {0} -- Perintah: {1}", data.DateTime, data.Operation);
             
             var timer = new Timer(interval);
             timer.Elapsed += (sender, e) => TimerElapsed(timer, data);
