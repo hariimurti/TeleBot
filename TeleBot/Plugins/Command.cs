@@ -71,6 +71,14 @@ namespace TeleBot.Plugins
                     Bookmark.List(message, true);
                     break;
                 
+                case "app":
+                    new Mobilism(message).Process(data);
+                    break;
+                
+                case "game":
+                    new Mobilism(message).Process(data, false);
+                    break;
+                
                 default:
                     _log.Ignore("Perintah: {0} -- tdk ada", cmd);
                     break;
