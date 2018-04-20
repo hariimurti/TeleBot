@@ -55,7 +55,7 @@ namespace TeleBot
             // reSchedule
             Schedule.ReSchedule();
             
-            // tunggu key ctrl+c untuk keluar dari console
+            // tunggu key ctrl+c untuk keluar dari aplikasi
             var exitEvent = new ManualResetEvent(false);
             Console.CancelKeyPress += (sender, eventArgs) =>
             {
@@ -63,6 +63,9 @@ namespace TeleBot
                 exitEvent.Set();
             };
             exitEvent.WaitOne();
+            
+            // keluar dari aplikasi
+            Terminate();
         }
 
         private static string GetVersion()
@@ -109,6 +112,12 @@ namespace TeleBot
         public static string FilePathInWorkingDir(string filename)
         {
             return Path.Combine(WorkingDirectory, filename);
+        }
+
+        public static void Terminate(int code = 0)
+        {
+            new Log("Main").Info("Keluar dari aplikasi...");
+            Environment.Exit(code);
         }
     }
 }

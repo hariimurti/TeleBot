@@ -9,6 +9,7 @@ namespace TeleBot.Classes
     {
         private static Log _log = new Log("Configs");
         private static readonly string ConfigFile = Program.FilePathInData("Configs.json");
+        private static readonly string ConfigFileExample = Program.FilePathInWorkingDir("Configs-Example.json");
         private static BotKeys _keys;
 
         public static BotKeys LoadKeys()
@@ -16,6 +17,12 @@ namespace TeleBot.Classes
             try
             {
                 if (_keys != null) return _keys;
+
+                if (!File.Exists(ConfigFile) && File.Exists(ConfigFileExample))
+                {
+                    _log.Debug("Menyalin file contoh configurasi...");
+                    File.Copy(ConfigFileExample, ConfigFile);
+                }
                 
                 // buka file Configs.json
                 var configsRaw = File.ReadAllText(ConfigFile);
@@ -30,7 +37,7 @@ namespace TeleBot.Classes
             catch (Exception ex)
             {
                 _log.Error(ex.Message);
-                return null;
+                return new BotKeys();
             }
         }
     }

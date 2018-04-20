@@ -26,12 +26,28 @@ namespace TeleBot.BotClient
         
         private static TelegramBotClient Client(int timeout = 0)
         {
-            var client = new TelegramBotClient(Keys.Token);
-            if (timeout > 0)
+            try
             {
-                client.Timeout = TimeSpan.FromMinutes(timeout);
+                var client = new TelegramBotClient(Keys.Token);
+                if (timeout > 0)
+                {
+                    client.Timeout = TimeSpan.FromMinutes(timeout);
+                }
+                return client;
             }
-            return client;
+            catch (Exception e)
+            {
+                if (e.Message.ToLower().Contains("token"))
+                {
+                    _log.Error("Silahkan isi Token dgn benar! Konfigurasi ada di file Configs.json");
+                    Program.Terminate(1);
+                }
+                else
+                {
+                    _log.Error(e.Message);
+                }
+                return null;
+            }
         }
 
         public static string ReplaceWithBotValue(this string text)
