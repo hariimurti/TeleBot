@@ -158,7 +158,16 @@ namespace TeleBot.Plugins
                     count++;
                 }
             
-                await Bot.SendTextAsync(message, respon, parse: ParseMode.Html);
+                var sentMessage = await Bot.SendTextAsync(message, respon, parse: ParseMode.Html);
+                var schedule = new ScheduleData()
+                {
+                    ChatId = message.Chat.Id,
+                    MessageId = sentMessage.MessageId,
+                    DateTime = DateTime.Now.AddMinutes(10),
+                    Operation = ScheduleData.Type.Edit,
+                    Text = "Bookmark kadaluarsa!\nGunakan /list untuk melihat daftar lagi."
+                };
+                Schedule.RegisterNew(schedule);
             }
             else
             {
