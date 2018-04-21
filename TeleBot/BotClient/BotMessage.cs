@@ -107,6 +107,11 @@ namespace TeleBot.BotClient
                     Bookmark.Delete(message, data, true);
                     break;
                 
+                case "mobilism":
+                    await Bot.AnswerCallbackQueryAsync(callback.Id, "Tunggu sebentar...");
+                    new Mobilism(message).OpenThread(data);
+                    break;
+                
                 default:
                     await Bot.AnswerCallbackQueryAsync(callback.Id, "Perintah error!");
                     _log.Ignore("Unknown: {0}", callback.Data);

@@ -156,7 +156,7 @@ namespace TeleBot.Plugins
             _message = message;
         }
 
-        public void Process(string data, bool isApp = true)
+        public void ThreadList(string data, bool isApp = true)
         {
             // default search mode
             var threadMode = false;
@@ -194,10 +194,22 @@ namespace TeleBot.Plugins
             };
 
             _log.Debug("Thread {0}{1}", isApp ? "aplikasi" : "permainan", threadMode ? "" : $" -- Cari: {data}");
-            GetThreads(threadRequest, threadMode, isApp, data);
+            GetThreadList(threadRequest, threadMode, isApp, data);
         }
 
-        private async void GetThreads(WebRequest threadRequest, bool threadMode, bool isApp, string keywords)
+        public void OpenThread(string data)
+        {
+            var threadRequest = new WebRequest()
+            {
+                Url = BaseAddress + data,
+                Method = WebMethod.Get
+            };
+            
+            _log.Debug("Buka thread: {0}", data);
+            GetThreadPost(threadRequest);
+        }
+
+        private async void GetThreadList(WebRequest threadRequest, bool threadMode, bool isApp, string keywords)
         {
             // search mode harus login
             if (!threadMode)
@@ -244,6 +256,8 @@ namespace TeleBot.Plugins
                 return;
             }
             
+            _log.Debug("Regex tabel...");
+            
             // regex tabel thread
             var findTable = Regex.Match(content, @"<table.+>([\s\S]+)<\/table>", RegexOptions.Multiline | RegexOptions.IgnoreCase);
             if (!findTable.Success)
@@ -252,6 +266,8 @@ namespace TeleBot.Plugins
                 await Bot.SendTextAsync(_message, "Mohon maaf...\nPlugin mobilism tidak bisa membaca threads.");
                 return;
             }
+            
+            _log.Debug("Regex list...");
             
             const string patternSearch = "<td>\n.+\n.+\n" +
                                          "<a.+href=\"(.+)\".+topictitle.+>(.+)<\\/a>.+\n.+" +
@@ -304,6 +320,8 @@ namespace TeleBot.Plugins
                 if (count < maximum) count++;
                 else break;
             }
+            
+            _log.Debug("Menyiapkan list...");
             
             var total = threads.Count;
             var padding = total.ToString().Length;
@@ -372,7 +390,7 @@ namespace TeleBot.Plugins
             var responWithButtons = respon + "—— —— —— —— —— ——\nLink download, pilih nomor dibawah :";
             var buttons = new InlineKeyboardMarkup(buttonRows.ToArray());
 
-            var sentMessage = await Bot.SendTextAsync(_message, responWithButtons, parse: ParseMode.Html, button: buttons);
+            var sentMessage = await Bot.SendTextAsync(_message, responWithButtons, parse: ParseMode.Html, button: buttons, preview: false);
             if (sentMessage == null) return;
             
             var schedule = new ScheduleData()
@@ -385,6 +403,55 @@ namespace TeleBot.Plugins
                 ParseMode = ParseMode.Html
             };
             Schedule.RegisterNew(schedule);
+        }
+
+        private async void GetThreadPost(WebRequest threadRequest)
+        {
+            string content;
+            try
+            {
+                // akses thread/search
+                content = await WebClient.GetOrPostStringAsync(threadRequest);
+                
+                // cek html atau kode alien?
+                if (!content.Contains("html"))
+                    throw new Exception("Result bukan html!");
+            }
+            catch (Exception e)
+            {
+                _log.Error(e.Message);
+                await Bot.SendTextAsync(_message, "Mohon maaf...\nPlugin mobilism sedang mengalami gangguan.\nCobalah beberapa saat lagi.");
+                return;
+            }
+            
+            _log.Debug("Regex link download...");
+
+            var pattern = "<div.*class=\"content\".*<span.*>(.+)<\\/span><br \\/>.*" +
+                          "Requirements.*<\\/span>(.+)<br \\/>.*Overview:.*" +
+                          "Instructions:(.+).*<\\/div>";
+            
+            var post = Regex.Match(content, pattern);
+            if (!post.Success)
+            {
+                _log.Error("Post download tidak ditemukan!");
+                await Bot.SendTextAsync(_message, "Mohon maaf...\nPlugin mobilism tidak bisa membaca thread.");
+                return;
+            }
+
+            _log.Debug("Menyiapkan link download...");
+            
+            var title = post.Groups[1].Value.RemoveHtmlTag();
+            var require = post.Groups[2].Value.RemoveHtmlTag();
+            var link = post.Groups[3].Value.Replace("<br />", "\n").RemoveHtmlTag();
+            var request = $"<a href=\"tg://user?id={_message.From.Id}\">" + _message.FromName(true) + "</a>";
+
+            var respon = $"<b>{title}</b>" +
+                         $"\n—— —— —— —— —— ——\n" +
+                         $"Requirements : {require}\n" +
+                         $"Download Instructions :\n{link}" +
+                         $"\n—— —— —— —— —— ——\n" +
+                         $"Requested By : {request}";
+            await Bot.SendTextAsync(_message, respon, parse: ParseMode.Html, preview: false);
         }
     }
 }

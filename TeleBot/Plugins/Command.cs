@@ -72,11 +72,11 @@ namespace TeleBot.Plugins
                     break;
                 
                 case "app":
-                    new Mobilism(message).Process(data);
+                    new Mobilism(message).ThreadList(data);
                     break;
                 
                 case "game":
-                    new Mobilism(message).Process(data, false);
+                    new Mobilism(message).ThreadList(data, false);
                     break;
                 
                 default:
