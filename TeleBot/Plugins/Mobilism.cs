@@ -455,7 +455,7 @@ namespace TeleBot.Plugins
             var title = post.Groups[1].Value.RemoveHtmlTag();
             var require = post.Groups[2].Value.RemoveHtmlTag();
             var link = post.Groups[3].Value.Replace("<br />", "\n").RemoveHtmlTag();
-            var request = $"<a href=\"tg://user?id={_message.From.Id}\">" + _message.FromName(true) + "</a>";
+            var request = _message.FromNameWithMention(ParseMode.Html, true);
 
             var respon = $"<b>{title}</b>" +
                          $"\n—— —— —— —— —— ——\n" +

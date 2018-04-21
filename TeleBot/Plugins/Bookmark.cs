@@ -138,7 +138,7 @@ namespace TeleBot.Plugins
                 if (!_callbackMode)
                 {
                     await Bot.SendTextAsync(_message,
-                        $"Maaf kakak <a href=\"tg://user?id={_message.From.Id}\">{_message.FromName()}</a>...\n" +
+                        $"Maaf kakak {_message.FromNameWithMention(ParseMode.Html)},\n" +
                         $"Kamu bukan admin grup ini, jadi tidak bisa hapus #{hashtag}.",
                         parse: ParseMode.Html);
                 }
@@ -167,7 +167,9 @@ namespace TeleBot.Plugins
                 
                 await _db.DeleteBookmark(query);
                 
-                await Bot.SendTextAsync(_message, $"{_message.FromName()} menghapus #{hashtag}!");
+                await Bot.SendTextAsync(_message,
+                    $"{_message.FromNameWithMention(ParseMode.Html)} menghapus #{hashtag}!",
+                    parse: ParseMode.Html);
             }
             catch (Exception e)
             {
@@ -294,7 +296,7 @@ namespace TeleBot.Plugins
 
             if (!_callbackMode) return;
             await Bot.SendTextAsync(_message,
-                $"Buat kaka <a href=\"tg://user?id={_message.From.Id}\">{_message.FromName()}</a>, " +
+                $"Buat kaka {_message.FromNameWithMention(ParseMode.Html)}, " +
                 $"itu pesenan-nya sudah tak siapin...", parse: ParseMode.Html);
         }
     }

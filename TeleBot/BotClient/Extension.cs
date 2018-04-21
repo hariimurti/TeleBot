@@ -28,13 +28,13 @@ namespace TeleBot.BotClient
             return name;
         }
 
-        public static string FromName(this Message message, bool full = false)
+        public static string FromName(this Message message, bool fullname = false)
         {
             var from = message.From;
             var name = from.FirstName;
             if (string.IsNullOrWhiteSpace(name))
                 name = from.LastName;
-            if (full)
+            if (fullname)
                 name = (from.FirstName + " " + from.LastName).Trim();
             if (string.IsNullOrWhiteSpace(name))
                 name = from.Username;
@@ -42,6 +42,26 @@ namespace TeleBot.BotClient
                 name = from.Id.ToString();
 
             return name;
+        }
+
+        public static string FromNameWithMention(this Message message, ParseMode parse, bool fullname = false)
+        {
+            var id = message.From.Id;
+            var name = message.FromName(fullname);
+            switch (parse)
+            {
+                case ParseMode.Html:
+                    return $"<a href=\"tg://user?id={id}\">{name}</a>";
+                 
+                case ParseMode.Markdown:
+                    return $"[{name}](tg://user?id={id})";
+                 
+                case ParseMode.Default:
+                    return name;
+                 
+                default:
+                    return name;
+            }
         }
 
         public static string GetBadWordResponse(this Message message)
@@ -66,29 +86,6 @@ namespace TeleBot.BotClient
 
             var rand = _random.Next(0, respon.Count - 1);
             return respon[rand];
-        }
-
-        public static string MentionFromName(this Message message)
-        {
-            var name = string.Format("{0} {1}", message.From.FirstName, message.From.LastName).Trim();
-            var username = message.From.Username;
-
-            if (!string.IsNullOrWhiteSpace(name))
-                return string.Format("[{0}](tg://user?id={1})", name, message.From.Id);
-            else if (!string.IsNullOrWhiteSpace(username))
-                return "@" + username;
-            else
-                return string.Format("[Mr/Ms. {0}](tg://user?id={0})", message.From.Id);
-        }
-
-        public static string MentionFromUsername(this Message message)
-        {
-            var username = message.From.Username;
-
-            if (!string.IsNullOrWhiteSpace(username))
-                return "@" + username;
-            else
-                return message.MentionFromName();
         }
 
         public static async Task<bool> IsAdminThisGroup(this Message message)
