@@ -23,11 +23,7 @@ namespace TeleBot.Plugins
                 if (string.IsNullOrWhiteSpace(username)) return;
                 
                 // username tdk sama dgn bot
-                if (!string.Equals(username, Bot.Username, StringComparison.OrdinalIgnoreCase))
-                {
-                    _log.Ignore("Pesan {0} | Alasan: me-reply pesan bukan dari bot", message.MessageId);
-                    return;
-                }
+                if (!string.Equals(username, Bot.Username, StringComparison.OrdinalIgnoreCase)) return;
                 
                 // mention user lain
                 var mention = Regex.IsMatch(message.Text, "@(\\w+)\\b");
