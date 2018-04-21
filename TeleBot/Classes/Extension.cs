@@ -38,7 +38,7 @@ namespace TeleBot.Classes
         
         public static string RemoveHtmlTag(this string text)
         {
-            return Regex.Replace(text, "<.*?>", string.Empty);
+            return Regex.Replace(text, "<.*?>", string.Empty).Trim();
         }
     }
 }
