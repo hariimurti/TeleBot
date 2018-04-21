@@ -99,11 +99,12 @@ namespace TeleBot.BotClient
         {
             try
             {
+                _log.Debug("AnswerCallbackQueryAsync: {0} » {1}", queryId, text);
                 await _bot.AnswerCallbackQueryAsync(queryId, text, showAlert);
             }
             catch (Exception ex)
             {
-                _log.Error("AnswerCallbackQueryAsync: {0} » {1}", queryId, ex.Message);
+                _log.Error(ex.Message);
             }
         }
 
@@ -120,13 +121,13 @@ namespace TeleBot.BotClient
         {
             try
             {
-                _log.Debug("Hapus pesan {0} dari {1}", messageId, chatId);
+                _log.Debug("DeleteMessageAsync: {0} » Dari: {1}", messageId, chatId);
                 await _bot.DeleteMessageAsync(chatId, messageId);
                 return true;
             }
             catch (Exception ex)
             {
-                _log.Error("Tidak bisa menghapus pesan: {0}", ex.Message);
+                _log.Error(ex.Message);
                 return false;
             }
         }
@@ -144,12 +145,12 @@ namespace TeleBot.BotClient
         {
             try
             {
-                _log.Debug("Chat admins dari {0}", chatId);
+                _log.Debug("GetChatAdministratorsAsync: {0}", chatId);
                 return await _bot.GetChatAdministratorsAsync(chatId);
             }
             catch (Exception ex)
             {
-                _log.Error("Gagal mendapatkan chat admins: {0}", ex.Message);
+                _log.Error(ex.Message);
                 return null;
             }
         }
@@ -167,12 +168,12 @@ namespace TeleBot.BotClient
         {
             try
             {
-                _log.Debug("Forward pesan {0} dari {1}", messageId, toChatId);
+                _log.Debug("ForwardMessageAsync: {0} » {1}", messageId, toChatId);
                 return await _bot.ForwardMessageAsync(toChatId, fromChatId, messageId);
             }
             catch (Exception ex)
             {
-                _log.Error("Gagal forward pesan: {0}", ex.Message);
+                _log.Error(ex.Message);
                 return null;
             }
         }
@@ -194,7 +195,7 @@ namespace TeleBot.BotClient
                 await _bot.SendChatActionAsync(chatId, ChatAction.Typing);
                 await Task.Delay(500);
                 
-                _log.Debug("Kirim pesan ke {0}: {1}", chatId, text.SingleLine());
+                _log.Debug("SendTextAsync: {0} » {1}", chatId, text.SingleLine());
                 var message = await _bot.SendTextMessageAsync(chatId, text, parse, !preview, replyToMessageId: replyId, replyMarkup: button);
                 
                 await _db.InsertMessageOutgoing(message);
@@ -202,7 +203,7 @@ namespace TeleBot.BotClient
             }
             catch (Exception ex)
             {
-                _log.Error("Tidak bisa mengirim pesan: {0}", ex.Message);
+                _log.Error(ex.Message);
                 return null;
             }
         }
@@ -220,7 +221,7 @@ namespace TeleBot.BotClient
         {
             try
             {
-                _log.Debug("Edit pesan {0}: {1}", messageId, text.SingleLine());
+                _log.Debug("EditOrSendTextAsync: {0} » {1}", messageId, text.SingleLine());
                 var message = await _bot.EditMessageTextAsync(chatId, messageId, text, parse, !preview, keyboard);
                 
                 await _db.InsertMessageOutgoing(message);
@@ -228,7 +229,7 @@ namespace TeleBot.BotClient
             }
             catch (Exception ex)
             {
-                _log.Error("Tidak bisa mengedit pesan: {0}", ex.Message);
+                _log.Error(ex.Message);
                 return await SendTextAsync(chatId, text, 0, parse, keyboard, preview);
             }
         }
@@ -250,7 +251,7 @@ namespace TeleBot.BotClient
                 Message message;
                 await _bot.SendChatActionAsync(chatId, ChatAction.UploadPhoto);
 
-                _log.Debug("Kirim photo ke {0}", chatId);
+                _log.Debug("SendPhotoAsync: {0}", chatId);
                 
                 if (caption?.Length > 200)
                 {
@@ -267,7 +268,7 @@ namespace TeleBot.BotClient
             }
             catch (Exception ex)
             {
-                _log.Error("Tidak bisa kirim photo: {0}", ex.Message);
+                _log.Error(ex.Message);
                 return null;
             }
         }
