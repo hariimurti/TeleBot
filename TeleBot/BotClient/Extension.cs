@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -88,6 +89,20 @@ namespace TeleBot.BotClient
                 return "@" + username;
             else
                 return message.MentionFromName();
+        }
+
+        public static async Task<bool> IsAdminThisGroup(this Message message)
+        {
+            if (!message.IsGroupChat()) return false;
+            
+            var admins = await Bot.GetChatAdministratorsAsync(message.Chat.Id);
+            foreach (var admin in admins)
+            {
+                if (admin.User.Id == message.From.Id)
+                    return true;
+            }
+
+            return false;
         }
 
         public static bool IsCallMe(this Message message)
