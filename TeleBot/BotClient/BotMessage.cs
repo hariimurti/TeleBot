@@ -70,7 +70,7 @@ namespace TeleBot.BotClient
             // pesan berisi hashtag
             else if (message.Text.Contains("#"))
             {
-                Bookmark.GetAllFromText(message);
+                new Bookmark(message).FindHashtags();
             }
             // pesan teks lain
             else
@@ -83,15 +83,12 @@ namespace TeleBot.BotClient
         {
             var callback = e.CallbackQuery;
             var message = e.CallbackQuery.Message;
-            message.From = callback.From;
-            
-            // jawab callbackquery
-            await Bot.AnswerCallbackQueryAsync(callback.Id, "Tunggu sebentar...");
             
             var query = Regex.Match(callback.Data, @"cmd=(\S+)&data=(\S+)");
             if (!query.Success)
             {
                 _log.Error("Unknown: {0}", callback.Data);
+                await Bot.AnswerCallbackQueryAsync(callback.Id, "Perintah tidak diketahui", true);
                 return;
             }
             
@@ -101,15 +98,15 @@ namespace TeleBot.BotClient
             switch (cmd)
             {
                 case "call":
-                    Bookmark.GetHashtag(message, data);
+                    new Bookmark(message, callback).FindHashtag(data);
                     break;
                 
                 case "remove":
-                    Bookmark.Delete(message, data, true);
+                    new Bookmark(message, callback).Delete(data, true);
                     break;
                 
                 case "mobilism":
-                    new Mobilism(message).OpenThread(data);
+                    new Mobilism(message, callback).OpenThread(data);
                     break;
                 
                 default:

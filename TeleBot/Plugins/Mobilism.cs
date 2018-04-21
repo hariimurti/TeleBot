@@ -28,6 +28,8 @@ namespace TeleBot.Plugins
         private static string _sid;
         private static bool _isLoggedIn;
         private Message _message;
+        private CallbackQuery _callback;
+        private bool _callbackMode;
         
         private static readonly string JsonPath = Program.FilePathInData("Mobilism.json");
         private static readonly JsonSerializerSettings JsonSettings = new JsonSerializerSettings
@@ -151,9 +153,15 @@ namespace TeleBot.Plugins
             }
         }
 
-        public Mobilism(Message message)
+        public Mobilism(Message message, CallbackQuery callback = null)
         {
             _message = message;
+            _callback = callback;
+            if (callback != null)
+            {
+                _message.From = callback.From;
+                _callbackMode = true;
+            }
         }
 
         public void ThreadList(string data, bool isApp = true)
@@ -407,7 +415,11 @@ namespace TeleBot.Plugins
 
         private async void GetThreadPost(WebRequest threadRequest)
         {
+            if (_callbackMode)
+                await Bot.AnswerCallbackQueryAsync(_callback.Id, "Tunggu sebentar...");
+
             string content;
+            
             try
             {
                 // akses thread/search

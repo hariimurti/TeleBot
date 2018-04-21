@@ -54,22 +54,20 @@ namespace TeleBot.Plugins
                 
                 case "save":
                 case "simpan":
-                    Bookmark.Save(message, data);
+                    new Bookmark(message).Save(data);
                     break;
                 
                 case "delete":
                 case "hapus":
-                    Bookmark.Delete(message, data);
+                    new Bookmark(message).Delete(data);
                     break;
                 
-                case "daftar":
                 case "hashtag":
-                case "list":
-                    Bookmark.List(message);
+                    new Bookmark(message).GenerateList();
                     break;
                 
                 case "bookmark":
-                    Bookmark.List(message, true);
+                    new Bookmark(message).GenerateList(true);
                     break;
                 
                 case "app":
