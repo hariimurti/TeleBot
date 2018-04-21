@@ -221,7 +221,7 @@ namespace TeleBot.Plugins
                     var respon = "Panggilan kepada :";
                     foreach (var x in admins)
                     {
-                        var user = x.User.FirstName + " " + x.User.LastName;
+                        var user = (x.User.FirstName + " " + x.User.LastName).Trim();
                         if (string.IsNullOrWhiteSpace(user)) user = x.User.Username;
                         if (string.IsNullOrWhiteSpace(user)) user = x.User.Id.ToString();
                         respon += $"\n• <a href=\"tg://user?id={x.User.Id}\">{user.Trim()}</a>";
