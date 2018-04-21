@@ -115,14 +115,14 @@ namespace TeleBot.Plugins
             if (!await CheckingHashtag(message, hashtag)) return;
             
             // cek admin atau bukan
-            if (!editList)
+            if (!await message.IsAdminThisGroup())
             {
-                if (!await message.IsAdminThisGroup())
-                {
-                    _log.Warning("User {0} bukan admin grup!", message.FromName());
-                    await Bot.SendTextAsync(message, $"Maaf kaka... Kamu bukan admin grup ini!");
-                    return;
-                }
+                _log.Warning("User {0} bukan admin grup!", message.FromName());
+                await Bot.SendTextAsync(message,
+                    $"Maaf kakak <a href=\"tg://user?id={message.From.Id}\">{message.FromName()}</a>...\n" +
+                    $"Kamu bukan admin grup ini, jadi tidak bisa hapus #{hashtag}.",
+                    parse: ParseMode.Html);
+                return;
             }
             
             var query = await _db.GetBookmarkByHashtag(message.Chat.Id, hashtag);
