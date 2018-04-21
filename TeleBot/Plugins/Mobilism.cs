@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -10,6 +11,7 @@ using TeleBot.Classes;
 using TeleBot.SQLite;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 using File = System.IO.File;
 using WebClient = TeleBot.Classes.WebClient;
 using WebRequest = TeleBot.Classes.WebRequest;
@@ -38,6 +40,14 @@ namespace TeleBot.Plugins
         {
             public string Username { get; set; }
             public string Password { get; set; }
+        }
+        
+        private class Thread
+        {
+            public string LinkPath { get; set; }
+            public string Title { get; set; }
+            public string Username { get; set; }
+            public string PostDate { get; set; }
         }
 
         private static Account ReadAccount()
@@ -266,41 +276,103 @@ namespace TeleBot.Plugins
             }
 
             var count = 1;
-            var total = rows.Count;
-            var padding = total.ToString().Length;
-            var respon = "Mobilism : " + (isApp ? "Aplikasi\n" : "Permainan\n") +
-                         (threadMode ? "" : $"Pencarian : {keywords}\n") +
-                         "Hasil : " + (total < 10 ? total.ToString() : "10") + "/" + total.ToString() + " threads\n" +
-                         "—— —— —— —— —— ——\n";
-            
+            var maximum = 10;
+            var threads = new List<Thread>();
             foreach (Match row in rows)
             {
-                // regex f= & t=
-                string f = null, t = null;
-                var mc = Regex.Matches(row.Groups[1].Value, @"([f|t]=[\d]+)");
-                foreach (Match m in mc)
+                var f = string.Empty;
+                var t = string.Empty;
+                
+                // regex f=number & t=number
+                var matches = Regex.Matches(row.Groups[1].Value, @"([f|t]=[\d]+)");
+                foreach (Match match in matches)
                 {
-                    var text = m.Groups[1].Value;
+                    var text = match.Groups[1].Value;
                     if (text.StartsWith("f")) f = text;
                     if (text.StartsWith("t")) t = text;
                 }
 
-                var link = $"http://forum.mobilism.org/viewtopic.php?{f}&{t}";
-                var title = row.Groups[2].Value;
-                var user = row.Groups[3].Value;
-                var date = row.Groups[4].Value;
-
-                // append result
-                var num = count.ToString().PadLeft(padding, '0');
-                respon += $"{num}. <a href=\"{link}\">{title}</a> by <b>{user}</b> — {date}.\n";
-
-                if (count < 10) count++;
+                var thread = new Thread
+                {
+                    LinkPath = $"/viewtopic.php?{f}&{t}",
+                    Title = row.Groups[2].Value,
+                    Username = row.Groups[3].Value,
+                    PostDate = row.Groups[4].Value
+                };
+                threads.Add(thread);
+                
+                if (count < maximum) count++;
                 else break;
             }
             
-            var responFinal = respon + "—— —— —— —— —— ——\nUntuk link download, klik nomor dibawah :";
+            var total = threads.Count;
+            var padding = total.ToString().Length;
+            var respon = "<b>Mobilism</b> : " + (isApp ? "Aplikasi\n" : "Permainan\n") +
+                         (threadMode ? "" : $"<b>Pencarian</b> : {keywords}\n") +
+                         "<b>Hasil</b> : " + (total < 10 ? total.ToString() : "10") + "/" + total.ToString() + " threads\n" +
+                         "—— —— —— —— —— ——\n";
 
-            var sentMessage = await Bot.SendTextAsync(_message, responFinal, parse: ParseMode.Html);
+            count = 1;
+            foreach (var thread in threads)
+            {
+                // tambahkan ke teks respon
+                var num = count.ToString().PadLeft(padding, '0');
+                respon += $"<b>{num}</b>. <a href=\"{BaseAddress}{thread.LinkPath}\">{thread.Title}</a> " +
+                          $"by <b>{thread.Username}</b> — {thread.PostDate}.\n";
+                count++;
+            }
+            
+            var buttonRows = new List<List<InlineKeyboardButton>>();
+            if (threads.Count > (maximum / 2))
+            {
+                // reset counter
+                count = 1;
+                
+                // button baris 1
+                var partOne = threads.Take(total / 2).ToList();
+                var buttonRowOne = new List<InlineKeyboardButton>();
+                foreach (var thread in partOne)
+                {
+                    var num = count.ToString().PadLeft(padding, '0');
+                    var button = InlineKeyboardButton.WithCallbackData(num, "cmd=mobilism&data=" + thread.LinkPath);
+                    buttonRowOne.Add(button);
+                    count++;
+                }
+                buttonRows.Add(buttonRowOne);
+                
+                // button baris 2
+                var partTwo = threads.Skip(total / 2).ToList();
+                var buttonRowTwo = new List<InlineKeyboardButton>();
+                foreach (var thread in partTwo)
+                {
+                    var num = count.ToString().PadLeft(padding, '0');
+                    var button = InlineKeyboardButton.WithCallbackData(num, "cmd=mobilism&data=" + thread.LinkPath);
+                    buttonRowTwo.Add(button);
+                    count++;
+                }
+                buttonRows.Add(buttonRowTwo);
+            }
+            else
+            {
+                // reset counter
+                count = 1;
+                
+                // button jadi 1 baris
+                var buttonRow = new List<InlineKeyboardButton>();
+                foreach (var thread in threads)
+                {
+                    var num = count.ToString().PadLeft(padding, '0');
+                    var buttonColumn = InlineKeyboardButton.WithCallbackData(num, "cmd=mobilism&data=" + thread.LinkPath);
+                    buttonRow.Add(buttonColumn);
+                    count++;
+                }
+                buttonRows.Add(buttonRow);
+            }
+            
+            var responWithButtons = respon + "—— —— —— —— —— ——\nLink download, pilih nomor dibawah :";
+            var buttons = new InlineKeyboardMarkup(buttonRows.ToArray());
+
+            var sentMessage = await Bot.SendTextAsync(_message, responWithButtons, parse: ParseMode.Html, button: buttons);
             if (sentMessage == null) return;
             
             var schedule = new ScheduleData()
