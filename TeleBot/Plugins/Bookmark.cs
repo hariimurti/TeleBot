@@ -176,7 +176,7 @@ namespace TeleBot.Plugins
             {
                 var count = 1;
                 var padding = list.Count.ToString().Length;
-                var respon = $"Bookmark : <b>{message.ChatName()}</b>\nGenerated : {DateTime.Now}\nTotal : {list.Count}\n—— —— —— ——";
+                var respon = $"<b>Daftar Bookmark</b>\nGenerated : {DateTime.Now}\nTotal : {list.Count}\n—— —— —— ——";
                 foreach (var hashtag in list.OrderBy(h => h.KeyName))
                 {
                     var num = count.ToString().PadLeft(padding, '0');
@@ -197,7 +197,7 @@ namespace TeleBot.Plugins
             }
             else
             {
-                var respon = $"Bookmark : <b>{message.ChatName()}</b>\nGenerated : {DateTime.Now}\nTotal : {list.Count}";
+                var respon = $"<b>Daftar Bookmark</b>\nGenerated : {DateTime.Now}\nTotal : {list.Count}";
                 var buttonRows = new List<List<InlineKeyboardButton>>();
                 foreach (var hashtag in list.OrderBy(h => h.KeyName))
                 {
