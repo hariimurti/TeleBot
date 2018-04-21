@@ -165,10 +165,13 @@ namespace TeleBot.Plugins
             if (list.Count == 0)
             {
                 _log.Ignore("Tidak ada list di {0}", message.ChatName());
+
+                var respon = "Bookmark *kosong*.\nTapi kamu bisa panggil semua admin di grup ini dengan #admin atau #mimin.";
+                if (!editMessage)
+                    await Bot.SendTextAsync(message, respon, parse: ParseMode.Markdown);
+                else
+                    await Bot.EditOrSendTextAsync(message, message.MessageId, respon, parse: ParseMode.Markdown);
                 
-                await Bot.SendTextAsync(message,
-                    "Bookmark *kosong*.\nTapi kamu bisa panggil semua admin di grup ini dengan #admin atau #mimin.",
-                    parse: ParseMode.Markdown);
                 return;
             }
 
