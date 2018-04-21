@@ -23,14 +23,26 @@ namespace TeleBot.Plugins
                 if (string.IsNullOrWhiteSpace(username)) return;
                 
                 // username tdk sama dgn bot
-                if (!string.Equals(username, Bot.Username, StringComparison.OrdinalIgnoreCase)) return;
+                if (!string.Equals(username, Bot.Username, StringComparison.OrdinalIgnoreCase))
+                {
+                    _log.Ignore("Pesan {0} | Alasan: me-reply pesan bukan dari bot", message.MessageId);
+                    return;
+                }
+                
+                // mention user lain
+                var mention = Regex.IsMatch(message.Text, "@(\\w+)\\b");
+                if (mention)
+                {
+                    _log.Ignore("Pesan {0} | Alasan: mention user lain", message.MessageId);
+                    return;
+                }
             }
             // pesan dari grup
             else if (message.IsGroupChat())
             {
                 if (Regex.IsMatch(message.Text, @"^(diam|shut ?up)!?$", RegexOptions.IgnoreCase))
                 {
-                    _log.Debug("Pesan {0} menyuruh diam!", message.MessageId);
+                    _log.Ignore("Pesan {0} | Alasan: disuruh diam...", message.MessageId);
                     return;
                 }
                 
@@ -60,7 +72,7 @@ namespace TeleBot.Plugins
             // respon panggilan
             if (text == "simi")
             {
-                _log.Debug("Respon pesan {0} dgn kalimat template", message.MessageId);
+                _log.Debug("Pesan {0} | Respon: kalimat template", message.MessageId);
                 var respon = message.GetReplyResponse().ReplaceWithBotValue();
                 await Bot.SendTextAsync(message, respon);
                 return;
@@ -69,7 +81,7 @@ namespace TeleBot.Plugins
             // respon pesan mesum
             if (message.IsTextMesum())
             {
-                _log.Debug("Pesan {0} terindikasi mesum!", message.MessageId);
+                _log.Debug("Pesan {0} | Alasan: terindikasi mesum!", message.MessageId);
                 var respon = message.GetBadWordResponse().ReplaceWithBotValue();
                 await Bot.SendTextAsync(message, respon);
                 return;
@@ -78,13 +90,12 @@ namespace TeleBot.Plugins
             // respon pesan pendek
             if (message.IsTextTooShort())
             {
-                _log.Ignore("{0} | Id: {1} | Dari: {2} | Pesan: {3} | Alasan: Pesan terlalu pendek!",
-                    message.Date.ToLocalTime(), message.MessageId, message.FromName(), message.Text);
+                _log.Ignore("Pesan: {0} | Alasan: text terlalu pendek!", message.MessageId);
                 return;
             }
             
             // respon dgn simsimi
-            _log.Debug("Respon pesan {0} dgn simsimi", message.MessageId);
+            _log.Debug("Pesan {0} | Respon: tanya simsimi", message.MessageId);
             new Simsimi(message).SendResponse(text);
         }
     }
