@@ -62,8 +62,9 @@ namespace TeleBot.Plugins
                     Bookmark.Delete(message, data);
                     break;
                 
-                case "list":
+                case "daftar":
                 case "hashtag":
+                case "list":
                     Bookmark.List(message);
                     break;
                 
@@ -72,10 +73,12 @@ namespace TeleBot.Plugins
                     break;
                 
                 case "app":
+                case "aplikasi":
                     new Mobilism(message).ThreadList(data);
                     break;
                 
                 case "game":
+                case "permainan":
                     new Mobilism(message).ThreadList(data, false);
                     break;
                 
