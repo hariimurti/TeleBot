@@ -85,6 +85,9 @@ namespace TeleBot.BotClient
             var message = e.CallbackQuery.Message;
             message.From = callback.From;
             
+            // jawab callbackquery
+            await Bot.AnswerCallbackQueryAsync(callback.Id, "Tunggu sebentar...");
+            
             var query = Regex.Match(callback.Data, @"cmd=(\S+)&data=(\S+)");
             if (!query.Success)
             {
@@ -98,27 +101,18 @@ namespace TeleBot.BotClient
             switch (cmd)
             {
                 case "call":
-                    await Bot.AnswerCallbackQueryAsync(callback.Id, "Tunggu sebentar...");
                     Bookmark.GetHashtag(message, data);
                     break;
                 
                 case "remove":
-                    await Bot.AnswerCallbackQueryAsync(callback.Id, "Tunggu sebentar...");
-                    if (!await message.IsAdminThisGroup())
-                    {
-                        await Bot.AnswerCallbackQueryAsync(callback.Id, "Kamu bukan admin grup!", true);
-                        return;
-                    }
                     Bookmark.Delete(message, data, true);
                     break;
                 
                 case "mobilism":
-                    await Bot.AnswerCallbackQueryAsync(callback.Id, "Tunggu sebentar...");
                     new Mobilism(message).OpenThread(data);
                     break;
                 
                 default:
-                    await Bot.AnswerCallbackQueryAsync(callback.Id, "Perintah error!");
                     _log.Ignore("Unknown: {0}", callback.Data);
                     break;
             }
