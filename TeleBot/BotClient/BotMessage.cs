@@ -104,6 +104,11 @@ namespace TeleBot.BotClient
                 
                 case "remove":
                     await Bot.AnswerCallbackQueryAsync(callback.Id, "Tunggu sebentar...");
+                    if (!await message.IsAdminThisGroup())
+                    {
+                        await Bot.AnswerCallbackQueryAsync(callback.Id, "Kamu bukan admin grup!", true);
+                        return;
+                    }
                     Bookmark.Delete(message, data, true);
                     break;
                 

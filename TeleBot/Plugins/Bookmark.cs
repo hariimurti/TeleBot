@@ -56,6 +56,14 @@ namespace TeleBot.Plugins
                 // cek format hashtag
                 if (!await CheckingHashtag(message, hashtag)) return;
                 
+                // cek admin atau bukan
+                if (!await message.IsAdminThisGroup())
+                {
+                    _log.Warning("User {0} bukan admin grup!", message.FromName());
+                    await Bot.SendTextAsync(message, $"Maaf kaka... Kamu bukan admin grup ini!");
+                    return;
+                }
+                
                 var query = await _db.GetBookmarkByHashtag(message.Chat.Id, hashtag);
                 if (query == null)
                 {
@@ -105,6 +113,17 @@ namespace TeleBot.Plugins
                 
             // cek format hashtag
             if (!await CheckingHashtag(message, hashtag)) return;
+            
+            // cek admin atau bukan
+            if (!editList)
+            {
+                if (!await message.IsAdminThisGroup())
+                {
+                    _log.Warning("User {0} bukan admin grup!", message.FromName());
+                    await Bot.SendTextAsync(message, $"Maaf kaka... Kamu bukan admin grup ini!");
+                    return;
+                }
+            }
             
             var query = await _db.GetBookmarkByHashtag(message.Chat.Id, hashtag);
             if (query == null)
