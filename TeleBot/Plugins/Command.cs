@@ -63,7 +63,7 @@ namespace TeleBot.Plugins
                     break;
                 
                 case "hashtag":
-                    new Bookmark(message).GenerateList();
+                    new Bookmark(message).GenerateList(false);
                     break;
                 
                 case "bookmark":

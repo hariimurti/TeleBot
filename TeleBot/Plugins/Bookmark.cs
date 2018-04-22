@@ -202,11 +202,18 @@ namespace TeleBot.Plugins
             }
         }
 
-        public async void GenerateList(bool useButton = false)
+        public async void GenerateList(bool useButton, bool update = false)
         {
-            // harus grup chat
-            if (!await CheckingGroup()) return;
-            
+            if (!update)
+            {
+                // harus grup chat
+                if (!await CheckingGroup()) return;
+            }
+            else if (_callbackMode)
+            {
+                await Bot.AnswerCallbackQueryAsync(_callback.Id, "Tunggu sebentar...");
+            }
+
             var list = await _db.GetBookmarks(_message.Chat.Id);
             if (list.Count == 0)
             {
@@ -246,6 +253,14 @@ namespace TeleBot.Plugins
             {
                 var respon = $"<b>Daftar Bookmark</b>\nGenerated : {DateTime.Now}\nTotal : {list.Count}";
                 var buttonRows = new List<List<InlineKeyboardButton>>();
+                
+                // tombol update -- atas
+                var updateButton = new List<InlineKeyboardButton>()
+                {
+                    InlineKeyboardButton.WithCallbackData("🔄 Perbarui Bookmark 🔄", $"cmd=generate&data=null")
+                };
+                buttonRows.Add(updateButton);
+                
                 foreach (var hashtag in list.OrderBy(h => h.KeyName))
                 {
                     var buttonColumns = new List<InlineKeyboardButton>()
@@ -255,8 +270,15 @@ namespace TeleBot.Plugins
                     buttonRows.Add(buttonColumns);
                 }
                 
+                // tombol update -- bawah
+                buttonRows.Add(updateButton);
+                
                 var buttons = new InlineKeyboardMarkup(buttonRows.ToArray());
-                await Bot.SendTextAsync(_message, respon, parse: ParseMode.Html, button: buttons);
+                
+                if (!update)
+                    await Bot.SendTextAsync(_message, respon, parse: ParseMode.Html, button: buttons);
+                else
+                    await Bot.EditOrSendTextAsync(_message, _message.MessageId, respon, ParseMode.Html, buttons);
             }
         }
 
