@@ -177,7 +177,7 @@ namespace TeleBot.Plugins
                 data = string.Empty;
             }
             
-            var keywords = WebUtility.UrlEncode(data);
+            var keywords = data.UrlEncode();
             var forumId = isApp ? "399" : "408";
             
             // search mode : app - game

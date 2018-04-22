@@ -85,6 +85,19 @@ namespace TeleBot.Plugins
                     new Mobilism(message).ThreadList(data, false);
                     break;
                 
+                case "cari":
+                case "g":
+                case "google":
+                case "search":
+                    new Qwant(message).SearchWeb(data);
+                    break;
+                
+                case "img":
+                case "image":
+                case "photo":
+                    new Qwant(message).SearchImage(data);
+                    break;
+                
                 default:
                     _log.Ignore("Perintah: {0} -- tdk ada", cmd);
                     break;

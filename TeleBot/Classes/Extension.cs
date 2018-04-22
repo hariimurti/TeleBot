@@ -46,5 +46,10 @@ namespace TeleBot.Classes
         {
             return WebUtility.UrlEncode(text);
         }
+
+        public static string UrlDecode(this string text)
+        {
+            return WebUtility.UrlDecode(text);
+        }
     }
 }
