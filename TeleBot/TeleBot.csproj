@@ -2,8 +2,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <AssemblyVersion>2018.4.19</AssemblyVersion>
-    <FileVersion>2018.4.19</FileVersion>
+    <AssemblyVersion>2018.4.22</AssemblyVersion>
+    <FileVersion>2018.4.22</FileVersion>
     <Version>2.0</Version>
     <Authors>Harimurti</Authors>
     <Company>Harimurti.net</Company>
