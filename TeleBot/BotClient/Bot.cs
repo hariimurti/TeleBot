@@ -212,17 +212,17 @@ namespace TeleBot.BotClient
 
         #region EditOrSendTextAsync
 
-        public static async Task<Message> EditOrSendTextAsync(Message msg, int messageId, string text, ParseMode parse = ParseMode.Default, InlineKeyboardMarkup keyboard = null, bool preview = true)
+        public static async Task<Message> EditOrSendTextAsync(Message msg, int messageId, string text, ParseMode parse = ParseMode.Default, InlineKeyboardMarkup button = null, bool preview = true)
         {
-            return await EditOrSendTextAsync(msg.Chat.Id, messageId, text, parse, keyboard, preview);
+            return await EditOrSendTextAsync(msg.Chat.Id, messageId, text, parse, button, preview);
         }
 
-        public static async Task<Message> EditOrSendTextAsync(ChatId chatId, int messageId, string text, ParseMode parse = ParseMode.Default, InlineKeyboardMarkup keyboard = null, bool preview = true)
+        public static async Task<Message> EditOrSendTextAsync(ChatId chatId, int messageId, string text, ParseMode parse = ParseMode.Default, InlineKeyboardMarkup button = null, bool preview = true)
         {
             try
             {
                 _log.Debug("EditOrSendTextAsync: {0} » {1}", messageId, text.SingleLine());
-                var message = await _bot.EditMessageTextAsync(chatId, messageId, text, parse, !preview, keyboard);
+                var message = await _bot.EditMessageTextAsync(chatId, messageId, text, parse, !preview, button);
                 
                 await _db.InsertMessageOutgoing(message);
                 return message;
@@ -230,7 +230,7 @@ namespace TeleBot.BotClient
             catch (Exception ex)
             {
                 _log.Error(ex.Message);
-                return await SendTextAsync(chatId, text, 0, parse, keyboard, preview);
+                return await SendTextAsync(chatId, text, 0, parse, button, preview);
             }
         }
 

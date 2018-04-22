@@ -84,7 +84,7 @@ namespace TeleBot.BotClient
             var callback = e.CallbackQuery;
             var message = e.CallbackQuery.Message;
             
-            var query = Regex.Match(callback.Data, @"cmd=(\S+)&data=(\S+)");
+            var query = Regex.Match(callback.Data, @"^cmd=([\w\-]+)&data=(\S+)$");
             if (!query.Success)
             {
                 _log.Error("Unknown: {0}", callback.Data);
@@ -101,8 +101,16 @@ namespace TeleBot.BotClient
                     new Bookmark(message, callback).FindHashtag(data);
                     break;
                 
+                case "manage":
+                    new Bookmark(message, callback).ManageList();
+                    break;
+                
                 case "remove":
-                    new Bookmark(message, callback).Delete(data, true);
+                    new Bookmark(message, callback).DeleteWithButton(data);
+                    break;
+                
+                case "remove-final":
+                    new Bookmark(message, callback).DeleteWithButton(data, true);
                     break;
                 
                 case "mobilism":
@@ -111,6 +119,7 @@ namespace TeleBot.BotClient
                 
                 default:
                     _log.Ignore("Unknown: {0}", callback.Data);
+                    await Bot.AnswerCallbackQueryAsync(callback.Id, "Perintah tidak diketahui", true);
                     break;
             }
         }

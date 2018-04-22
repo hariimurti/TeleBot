@@ -59,7 +59,7 @@ namespace TeleBot.Plugins
                 
                 case "delete":
                 case "hapus":
-                    new Bookmark(message).Delete(data);
+                    new Bookmark(message).Delete(data).GetAwaiter();
                     break;
                 
                 case "hashtag":
@@ -68,6 +68,11 @@ namespace TeleBot.Plugins
                 
                 case "bookmark":
                     new Bookmark(message).GenerateList(true);
+                    break;
+                
+                case "manage":
+                case "kelola":
+                    new Bookmark(message).ManageList();
                     break;
                 
                 case "app":
