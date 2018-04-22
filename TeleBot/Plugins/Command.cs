@@ -150,8 +150,7 @@ namespace TeleBot.Plugins
                 _log.Error(ex.Message);
             }
             
-            // tambah supportedby
-            respon += $"—— —— —— ——\n{Bot.Keys.SupportedBy}";
+            // kirim status
             await Bot.SendTextAsync(message, respon, parse: ParseMode.Markdown);
         }
     }
