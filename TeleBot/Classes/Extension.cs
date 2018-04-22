@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Net;
+using System.Text.RegularExpressions;
 using TeleBot.BotClient;
 
 namespace TeleBot.Classes
@@ -39,6 +40,11 @@ namespace TeleBot.Classes
         public static string RemoveHtmlTag(this string text)
         {
             return Regex.Replace(text, "<.*?>", string.Empty).Trim();
+        }
+
+        public static string UrlEncode(this string text)
+        {
+            return WebUtility.UrlEncode(text);
         }
     }
 }
