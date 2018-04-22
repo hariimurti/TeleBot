@@ -112,7 +112,32 @@ namespace TeleBot.Plugins
 
         private static async void Help(Message message)
         {
-            await Bot.SendTextAsync(message, "Ini adalah pesan help");
+            var help = "*Panduan penggunaan* :\n" +
+                       "—— —— —— —— ——\n" +
+                       "Mobilism (Android)\n" +
+                       "• `/app` — 10 app terbaru.\n" +
+                       "• `/app query` — cari app.\n" +
+                       "• `/game` — 10 game terbaru.\n" +
+                       "• `/game query` — cari game.\n" +
+                       "• _alias: aplikasi, permainan_\n" +
+                       "\n" +
+                       "Bookmark/Hashtag (Grup)\n" +
+                       "• Rules: reply pesan & hanya admin.\n" +
+                       "• `/simpan nama` — simpan nama.\n" +
+                       "• `/hapus nama` — hapus nama.\n" +
+                       "• `/kelola` — info & hapus.\n" +
+                       "• _alias: save, delete, manage_\n" +
+                       "\n" +
+                       "Qwant (Pencarian)\n" +
+                       "• `/cari query` — cari website.\n" +
+                       "• `/image query` — cari image.\n" +
+                       "• _alias: g, search, img, photo_\n" +
+                       "\n" +
+                       "Teman obrolan\n" +
+                       "• PM: chat teks spt biasa.\n" +
+                       "• Grup: reply pesan atau mention {alias}.\n";
+            
+            await Bot.SendTextAsync(message, help.ReplaceWithBotValue(), parse: ParseMode.Markdown);
         }
         
         private static async void Token(Message message, string data)
