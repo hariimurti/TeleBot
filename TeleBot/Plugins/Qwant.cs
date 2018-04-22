@@ -85,7 +85,9 @@ namespace TeleBot.Plugins
 
         public async void SearchWeb(string query)
         {
+            if (string.IsNullOrWhiteSpace(query)) return;
             _log.Debug("Pencarian : {0}", query);
+            
             var address = apiUrl + "web?count=10&locale=id_ID&q=" + query.UrlEncode();
             Response result;
             
@@ -127,7 +129,9 @@ namespace TeleBot.Plugins
 
         public async void SearchImage(string query)
         {
+            if (string.IsNullOrWhiteSpace(query)) return;
             _log.Debug("Pencarian : {0}", query);
+            
             var address = apiUrl + "images?count=10&offset=1&q=" + query.UrlEncode();
             Response result;
             
