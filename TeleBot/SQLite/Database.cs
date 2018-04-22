@@ -123,7 +123,22 @@ namespace TeleBot.SQLite
                 .ToListAsync();
         }
 
-        public async Task<bool> InsertOrReplaceContact(Message data)
+        public async Task<bool> InsertOrReplaceContact(Contact data)
+        {
+            try
+            {
+                // update contacts
+                await _con.InsertOrReplaceAsync(data);
+                return true;
+            }
+            catch (Exception e)
+            {
+                _log.Error(e.Message);
+                return false;
+            }
+        }
+
+        public async Task<bool> InsertMessageIncoming(Message data)
         {
             try
             {
@@ -140,25 +155,11 @@ namespace TeleBot.SQLite
                 if (exist != null)
                 {
                     contact.Blocked = exist.Blocked;
+                    contact.Greeting = exist.Greeting;
                 }
                 
-                // update contacts
-                await _con.InsertOrReplaceAsync(contact);
-                return true;
-            }
-            catch (Exception e)
-            {
-                _log.Error(e.Message);
-                return false;
-            }
-        }
-
-        public async Task<bool> InsertMessageIncoming(Message data)
-        {
-            try
-            {
                 // tambah/perbarui contact
-                await InsertOrReplaceContact(data);
+                await InsertOrReplaceContact(contact);
                 
                 // MessageIncoming
                 var message = new MessageIncoming()

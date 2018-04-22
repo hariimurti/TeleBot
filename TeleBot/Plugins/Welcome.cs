@@ -1,21 +1,42 @@
 ﻿using System;
+using System.Collections.Generic;
 using TeleBot.BotClient;
+using TeleBot.Classes;
+using TeleBot.SQLite;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TeleBot.Plugins
 {
-    public static class Welcome
+    public class Welcome
     {
-        public static async void SendGreeting(Message message)
+        private static Log _log = new Log("Welcome");
+        private static Database _db = new Database();
+        private Message _message;
+        private CallbackQuery _callback;
+        private bool _callbackMode;
+        
+        public Welcome(Message message, CallbackQuery callback = null)
+        {
+            _message = message;
+            _callback = callback;
+            if (callback != null)
+            {
+                _message.From = callback.From;
+                _callbackMode = true;
+            }
+        }
+        
+        public async void SendGreeting()
         {
             var mention = string.Empty;
-            foreach (var member in message.NewChatMembers)
+            foreach (var member in _message.NewChatMembers)
             {
                 var usernameExist = !string.IsNullOrWhiteSpace(member.Username);
-                if (usernameExist && string.Equals(member.Username, Bot.Username, StringComparison.OrdinalIgnoreCase))
+                if (usernameExist && member.Username.Equals(Bot.Username, StringComparison.OrdinalIgnoreCase))
                 {
-                    Command.Start(message);
+                    Command.Start(_message);
                     return;
                 }
                 else
@@ -32,12 +53,80 @@ namespace TeleBot.Plugins
             
             if (string.IsNullOrWhiteSpace(mention)) return;
             
+            // cari kontak yg ada
+            var exist = await _db.FindContact(_message.Chat.Id);
+            if (!exist.Greeting) return;
+            
             var greeting = Bot.Keys.SayHelloNewMember
                 .ReplaceWithBotValue()
                 .Replace("{member}", mention.TrimEnd(','))
-                .Replace("{group}", message.ChatName());
+                .Replace("{group}", _message.ChatName());
             
-            await Bot.SendTextAsync(message, greeting, parse: ParseMode.Markdown);
+            await Bot.SendTextAsync(_message, greeting, parse: ParseMode.Markdown);
+        }
+
+        public async void Manage(string data = null)
+        {
+            if (!_callbackMode)
+            {
+                if (!_message.IsGroupChat()) return;
+
+                // cek admin atau bukan
+                if (!await _message.IsAdminThisGroup())
+                {
+                    _log.Warning("User {0} bukan admin grup!", _message.FromName());
+                    await Bot.SendTextAsync(_message, $"Maaf kaka... Kamu bukan admin grup ini!");
+                    return;
+                }
+            }
+            else
+            {
+                if (_message.ReplyToMessage.From.Id == _callback.From.Id)
+                {
+                    await Bot.AnswerCallbackQueryAsync(_callback.Id, "Tunggu sebentar...");
+                }
+                else
+                {
+                    //Kamu tidak mempunyai hak untuk memencet tombol ini!
+                    await Bot.AnswerCallbackQueryAsync(_callback.Id, "Apaan sih pencet-pencet... Geli tauu!!", true);
+                    return;
+                }
+            }
+
+            // cari kontak yg ada
+            var existContact = await _db.FindContact(_message.Chat.Id);
+
+            if (string.IsNullOrWhiteSpace(data))
+            {
+                var buttons = new InlineKeyboardMarkup(new List<InlineKeyboardButton>()
+                {
+                    InlineKeyboardButton.WithCallbackData("Aktifkan", $"cmd=greeting&data=enable"),
+                    InlineKeyboardButton.WithCallbackData("Nonaktifkan", $"cmd=greeting&data=disable")
+                });
+                await Bot.SendTextAsync(_message,
+                    $"Pengaturan ucapan selamat datang.\nStatus sekarang : " +
+                    (existContact.Greeting ? "aktif." : "nonaktif."),
+                    true, button: buttons);
+                
+                return;
+            }
+            
+            var contact = new SQLite.Contact()
+            {
+                Id = _message.Chat.Id,
+                Name = _message.ChatName(),
+                UserName = _message.Chat.Username,
+                Private = (_message.Chat.Type == ChatType.Private),
+                Blocked = existContact.Blocked,
+                Greeting = data.Equals("enable", StringComparison.OrdinalIgnoreCase)
+            };
+
+            var result = await _db.InsertOrReplaceContact(contact);
+            if (!result) return;
+            
+            _log.Debug("Greeting {0} telah diperbaharui ({1})", _message.ChatName(), contact.Greeting);
+            await Bot.EditOrSendTextAsync(_message, _message.MessageId,
+                $"Ucapan selamat datang telah " + (contact.Greeting ? "diaktifkan." : "dinonaktifkan."));
         }
     }
 }

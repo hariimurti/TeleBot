@@ -52,6 +52,11 @@ namespace TeleBot.Plugins
                     Token(message, data);
                     break;
                 
+                case "selamatdatang":
+                case "welcome":
+                    new Welcome(message).Manage();
+                    break;
+                
                 case "save":
                 case "simpan":
                     new Bookmark(message).Save(data);
@@ -121,7 +126,7 @@ namespace TeleBot.Plugins
                        "• `/game query` — cari game.\n" +
                        "• _alias: aplikasi, permainan_\n" +
                        "\n" +
-                       "Bookmark/Hashtag (Grup)\n" +
+                       "Bookmark / Hashtag (Grup)\n" +
                        "• Rules: reply pesan & hanya admin.\n" +
                        "• `/simpan nama` — simpan nama.\n" +
                        "• `/hapus nama` — hapus nama.\n" +
@@ -132,6 +137,10 @@ namespace TeleBot.Plugins
                        "• `/cari query` — cari website.\n" +
                        "• `/image query` — cari image.\n" +
                        "• _alias: g, search, img, photo_\n" +
+                       "\n" +
+                       "Welcome / Selamat Datang (Grup)\n" +
+                       "• `/welcome` — pengaturan.\n" +
+                       "• _alias: selamatdatang_\n" +
                        "\n" +
                        "Teman obrolan\n" +
                        "• PM: chat teks spt biasa.\n" +

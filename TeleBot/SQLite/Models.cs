@@ -26,6 +26,7 @@ namespace TeleBot.SQLite
         public string UserName { get; set; }
         public bool Private { get; set; }
         public bool Blocked { get; set; }
+        public bool Greeting { get; set; }
     }
 
     [Table("Incomings")]

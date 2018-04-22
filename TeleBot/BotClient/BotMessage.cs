@@ -35,7 +35,7 @@ namespace TeleBot.BotClient
                 _log.Info("{0} | Id: {1} | Dari: {2} | Pesan: Member baru!",
                     message.Date.ToLocalTime(), message.MessageId, message.ChatName());
                 
-                Welcome.SendGreeting(message);
+                new Welcome(message).SendGreeting();
                 return;
             }
             
@@ -97,12 +97,16 @@ namespace TeleBot.BotClient
 
             switch (cmd)
             {
+                case "greeting":
+                    new Welcome(message, callback).Manage(data);
+                    break;
+                
                 case "call":
                     new Bookmark(message, callback).FindHashtag(data);
                     break;
                 
                 case "generate":
-                    new Bookmark(message, callback).GenerateList(true, true);;
+                    new Bookmark(message, callback).GenerateList(true, true);
                     break;
                 
                 case "manage":
