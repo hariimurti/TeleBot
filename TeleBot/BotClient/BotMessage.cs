@@ -113,6 +113,10 @@ namespace TeleBot.BotClient
                     new Bookmark(message, callback).DeleteWithButton(data, true);
                     break;
                 
+                case "info":
+                    new Bookmark(message, callback).ShowInfo(data);
+                    break;
+                
                 case "mobilism":
                     new Mobilism(message, callback).OpenThread(data);
                     break;

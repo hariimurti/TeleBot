@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -85,7 +86,9 @@ namespace TeleBot.Plugins
                     {
                         ChatId = _message.Chat.Id,
                         MessageId = _message.ReplyToMessage.MessageId,
-                        KeyName = hashtag
+                        KeyName = hashtag,
+                        ByName = _message.FromName(true),
+                        DateTime = DateTime.Now.ToString(CultureInfo.CurrentCulture)
                     };
                     
                     _log.Debug("Simpan #{0} ({1}) ke {2}", hash.MessageId, hashtag, _message.ChatName());
@@ -398,6 +401,25 @@ namespace TeleBot.Plugins
             await Bot.SendTextAsync(_message,
                 $"Buat kaka {_message.FromNameWithMention(ParseMode.Html)}, " +
                 $"itu pesenan-nya sudah tak siapin...", parse: ParseMode.Html);
+        }
+
+        public async void ShowInfo(string hashtag)
+        {
+            if (!_callbackMode) return;
+            
+            var query = await _db.GetBookmarkByHashtag(_message.Chat.Id, hashtag);
+            if (query == null)
+            {
+                await Bot.AnswerCallbackQueryAsync(_callback.Id, $"Tidak ada #{hashtag} di grup ini!", true);
+                
+                return;
+            }
+            
+            await Bot.AnswerCallbackQueryAsync(_callback.Id,
+                $"Hashtag : {query.KeyName}\n" +
+                $"MessageId : {query.MessageId}\n" +
+                $"Set By : {query.ByName}\n" +
+                $"DateTime : {query.DateTime}", true);
         }
     }
 }

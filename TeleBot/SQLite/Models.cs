@@ -98,5 +98,7 @@ namespace TeleBot.SQLite
         public int MessageId { get; set; }
 
         public string KeyName { get; set; }
+        public string ByName { get; set; }
+        public string DateTime { get; set; }
     }
 }
