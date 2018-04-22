@@ -57,6 +57,7 @@ namespace TeleBot.Classes
 
                 case Level.Ignore:
                     Console.ForegroundColor = ConsoleColor.Green;
+                    if (!ShowDebug) return;
                     break;
 
                 case Level.Warning:
