@@ -318,10 +318,25 @@ namespace TeleBot.Plugins
             }
             
             var buttons = new InlineKeyboardMarkup(buttonRows.ToArray());
+            Message sentMessage;
             if (_callbackMode)
-                await Bot.EditOrSendTextAsync(_message, _message.MessageId, respon, ParseMode.Html, buttons);
+                sentMessage = await Bot.EditOrSendTextAsync(_message, _message.MessageId, respon, ParseMode.Html, buttons);
             else
-                await Bot.SendTextAsync(_message, respon, true, parse: ParseMode.Html, button: buttons);
+                sentMessage = await Bot.SendTextAsync(_message, respon, true, ParseMode.Html, buttons);
+            
+            if (sentMessage == null) return;
+            
+            // schedule edit pesan keluar
+            var schedule = new ScheduleData()
+            {
+                ChatId = sentMessage.Chat.Id,
+                MessageId = sentMessage.MessageId,
+                DateTime = DateTime.Now.AddMinutes(30),
+                Operation = ScheduleData.Type.Edit,
+                Text = "Perintah telah kadaluarsa.",
+                ParseMode = ParseMode.Html
+            };
+            Schedule.RegisterNew(schedule);
         }
 
         public async void FindHashtags()

@@ -401,6 +401,7 @@ namespace TeleBot.Plugins
             var sentMessage = await Bot.SendTextAsync(_message, responWithButtons, parse: ParseMode.Html, button: buttons, preview: false);
             if (sentMessage == null) return;
             
+            // schedule edit pesan keluar
             var schedule = new ScheduleData()
             {
                 ChatId = sentMessage.Chat.Id,
