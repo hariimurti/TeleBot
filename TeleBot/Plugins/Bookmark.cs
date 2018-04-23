@@ -419,16 +419,22 @@ namespace TeleBot.Plugins
                 return;
             }
             
-            if (_callbackMode)
-                await Bot.AnswerCallbackQueryAsync(_callback.Id, $"Tunggu sebentar...");
-            
             _log.Debug("Panggil hashtag #{0}", hashtag);
-            await Bot.ForwardMessageAsync(_message.Chat.Id, query.ChatId, query.MessageId);
+            var sentMessage = await Bot.ForwardMessageAsync(_message.Chat.Id, query.ChatId, query.MessageId);
 
             if (!_callbackMode) return;
-            await Bot.SendTextAsync(_message,
-                $"Buat kaka {_message.FromNameWithMention(ParseMode.Html)}, " +
-                $"itu pesenan-nya sudah tak siapin...", parse: ParseMode.Html);
+
+            if (sentMessage != null)
+            {
+                await Bot.AnswerCallbackQueryAsync(_callback.Id, $"Hashtag #{hashtag} pesenan kaka udah tak siapin..", true);
+                await Bot.SendTextAsync(_message,
+                    $"Buat kaka {_message.FromNameWithMention(ParseMode.Html)},\n" +
+                    $"itu {hashtag} udah tak siapin...", parse: ParseMode.Html);
+            }
+            else
+            {
+                await Bot.AnswerCallbackQueryAsync(_callback.Id, $"Hashtag #{hashtag} pesenan kaka gak bisa diforward 😔", true);
+            }
         }
 
         public async void ShowInfo(string hashtag)
