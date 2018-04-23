@@ -95,7 +95,10 @@ namespace TeleBot.Plugins
                 
                     await _db.InsertBookmark(hash);
                     await Bot.SendTextAsync(_message.Chat.Id,
-                        $"<b>Simpan Bookmark!</b>\nMessageId : {hash.MessageId}\nHashtag : #{hashtag}\n—— —— —— ——\nHasil : Telah tersimpan.",
+                        $"<b>Simpan Bookmark!</b>\n—— —— —— ——\n" +
+                        $"MessageId : {hash.MessageId}\n" +
+                        $"Hashtag : #{hashtag}\n—— —— —— ——\n" +
+                        $"Hasil : Tersimpan.",
                         _message.ReplyToMessage.MessageId,
                         ParseMode.Html);
                 }
@@ -108,7 +111,10 @@ namespace TeleBot.Plugins
                     
                     await _db.InsertBookmark(query, true);
                     await Bot.SendTextAsync(_message.Chat.Id,
-                        $"<b>Simpan Bookmark!</b>\nMessageId : {query.MessageId}\nHashtag : #{hashtag}\n—— —— —— ——\nHasil : Telah diganti.",
+                        $"<b>Simpan Bookmark!</b>\n—— —— —— ——\n" +
+                        $"MessageId : {query.MessageId}\n" +
+                        $"Hashtag : #{hashtag}\n—— —— —— ——\n" +
+                        $"Hasil : Telah diganti.",
                         _message.ReplyToMessage.MessageId,
                         ParseMode.Html);
                 }
@@ -116,7 +122,7 @@ namespace TeleBot.Plugins
             catch (Exception e)
             {
                 _log.Error(e.Message);
-                await Bot.SendTextAsync(_message, $"Gagal menyimpan #{hashtag}.\nError : {e.Message}");
+                await Bot.SendTextAsync(_message, $"Gagal menyimpan #{hashtag}.\n—— —— —— ——\nError : {e.Message}");
             }
         }
 
