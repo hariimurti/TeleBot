@@ -182,7 +182,7 @@ namespace TeleBot.Plugins
             
             var respons = Bot.Keys.SimsimiNoResponse;
             var rand = _random.Next(0, respons.Count - 1);
-            await Bot.SendTextAsync(_message, respons[rand]);
+            await Bot.SendTextAsync(_message, respons[rand].ReplaceWithBotValue());
         }
     }
 }

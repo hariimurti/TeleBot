@@ -36,6 +36,7 @@ namespace TeleBot.Plugins
 
             switch (cmd.ToLower())
             {
+                case "bantuan":
                 case "help":
                     Help(message);
                     break;
@@ -117,7 +118,7 @@ namespace TeleBot.Plugins
         {
             var help = "*Panduan penggunaan* :\n" +
                        "—— —— —— —— ——\n" +
-                       "Info ID\n" +
+                       "Info Grup/User\n" +
                        "• `/id` — menampilkan info.\n" +
                        "\n" +
                        "Mobilism (Android)\n" +
@@ -125,23 +126,23 @@ namespace TeleBot.Plugins
                        "• `/app query` — cari app.\n" +
                        "• `/game` — 10 game terbaru.\n" +
                        "• `/game query` — cari game.\n" +
-                       "• _alias: aplikasi, permainan_\n" +
+                       "• _alias: aplikasi, permainan._\n" +
                        "\n" +
-                       "Bookmark / Hashtag (Grup)\n" +
+                       "Bookmark/Hashtag (Grup)\n" +
                        "• Rules: reply pesan & hanya admin.\n" +
                        "• `/simpan nama` — simpan nama.\n" +
                        "• `/hapus nama` — hapus nama.\n" +
                        "• `/kelola` — info & hapus.\n" +
-                       "• _alias: save, delete, manage_\n" +
+                       "• _alias: save, delete, manage._\n" +
                        "\n" +
                        "Qwant (Pencarian)\n" +
                        "• `/cari query` — cari website.\n" +
                        "• `/image query` — cari image.\n" +
-                       "• _alias: g, search, img, photo_\n" +
+                       "• _alias: g, search, img, photo._\n" +
                        "\n" +
-                       "Welcome / Selamat Datang (Grup)\n" +
+                       "Welcome/Selamat Datang (Grup)\n" +
                        "• `/welcome` — pengaturan.\n" +
-                       "• _alias: selamatdatang_\n" +
+                       "• _alias: selamatdatang._\n" +
                        "\n" +
                        "Teman obrolan\n" +
                        "• PM: chat teks spt biasa.\n" +

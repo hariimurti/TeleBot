@@ -47,8 +47,8 @@
 		"Bentar, baru keluar...",
 		"Diem luu.. Udah jelek, keriput lagi"
 	],
-	"SayHello": "Hai.. Salam kenal ya 😘\nNama ku *{name}*, bisa dipanggil _{alias}_.\nUntuk bantuan klik /help\nMau godain aku juga boleh 😘",
-	"SayHelloNewMember": "Hai, {member}!\nSelamat bergabung di *{group}*...\nGodain aku juga boleh loh 😘",
+	"SayHello": "Hai.. Salam kenal ya 😘\nNama ku *{name}*, bisa dipanggil _{alias}_.\nUntuk bantuan klik /help.\nMau godain aku juga boleh 😘",
+	"SayHelloNewMember": "Hai, {member} 🖖\nSelamat bergabung di *{group}* 🤝\n\nGodain aku juga boleh loh 😘",
 	"SimsimiNoResponse": [
 		"{name} bingung",
 		"Pusing ah",
