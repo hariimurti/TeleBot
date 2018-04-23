@@ -212,12 +212,12 @@ namespace TeleBot.BotClient
 
         #region EditOrSendTextAsync
 
-        public static async Task<Message> EditOrSendTextAsync(Message msg, int messageId, string text, ParseMode parse = ParseMode.Default, InlineKeyboardMarkup button = null, bool preview = true)
+        public static async Task<Message> EditOrSendTextAsync(Message msg, int messageId, string text, ParseMode parse = ParseMode.Default, InlineKeyboardMarkup button = null, bool preview = true, bool sendOnError = true)
         {
-            return await EditOrSendTextAsync(msg.Chat.Id, messageId, text, parse, button, preview);
+            return await EditOrSendTextAsync(msg.Chat.Id, messageId, text, parse, button, preview, sendOnError);
         }
 
-        public static async Task<Message> EditOrSendTextAsync(ChatId chatId, int messageId, string text, ParseMode parse = ParseMode.Default, InlineKeyboardMarkup button = null, bool preview = true)
+        public static async Task<Message> EditOrSendTextAsync(ChatId chatId, int messageId, string text, ParseMode parse = ParseMode.Default, InlineKeyboardMarkup button = null, bool preview = true, bool sendOnError = true)
         {
             try
             {
@@ -230,7 +230,11 @@ namespace TeleBot.BotClient
             catch (Exception ex)
             {
                 _log.Error(ex.Message);
-                return await SendTextAsync(chatId, text, 0, parse, button, preview);
+                
+                if (sendOnError)
+                    return await SendTextAsync(chatId, text, 0, parse, button, preview);
+                else
+                    return null;
             }
         }
 
