@@ -44,6 +44,21 @@ namespace TeleBot.BotClient
             return name;
         }
 
+        public static string FromName(this User from, bool fullname = false)
+        {
+            var name = from.FirstName;
+            if (string.IsNullOrWhiteSpace(name))
+                name = from.LastName;
+            if (fullname)
+                name = (from.FirstName + " " + from.LastName).Trim();
+            if (string.IsNullOrWhiteSpace(name))
+                name = from.Username;
+            if (string.IsNullOrWhiteSpace(name))
+                name = from.Id.ToString();
+
+            return name;
+        }
+
         public static string FromNameWithMention(this Message message, ParseMode parse, bool fullname = false)
         {
             var id = message.From.Id;
