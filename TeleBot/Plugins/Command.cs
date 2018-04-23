@@ -36,12 +36,16 @@ namespace TeleBot.Plugins
 
             switch (cmd.ToLower())
             {
-                case "start":
-                    Start(message);
-                    break;
-                
                 case "help":
                     Help(message);
+                    break;
+                
+                case "id":
+                    ShowId(message);
+                    break;
+                
+                case "start":
+                    Start(message);
                     break;
                 
                 case "status":
@@ -109,16 +113,13 @@ namespace TeleBot.Plugins
             }
         }
 
-        public static async void Start(Message message)
-        {
-            var respon = Bot.Keys.SayHello.ReplaceWithBotValue();
-            await Bot.SendTextAsync(message, respon, parse: ParseMode.Markdown);
-        }
-
         private static async void Help(Message message)
         {
             var help = "*Panduan penggunaan* :\n" +
                        "—— —— —— —— ——\n" +
+                       "Info ID\n" +
+                       "• `/id` — menampilkan info.\n" +
+                       "\n" +
                        "Mobilism (Android)\n" +
                        "• `/app` — 10 app terbaru.\n" +
                        "• `/app query` — cari app.\n" +
@@ -148,17 +149,52 @@ namespace TeleBot.Plugins
             
             await Bot.SendTextAsync(message, help.ReplaceWithBotValue(), parse: ParseMode.Markdown);
         }
-        
-        private static async void Token(Message message, string data)
+
+        private static async void ShowId(Message message)
         {
-            if (!string.IsNullOrWhiteSpace(data))
+            var respon = "";
+            if (message.IsGroupChat())
             {
-                new Simsimi(message).SaveToken(data);
+                var chat = message.Chat;
+                respon += $"👥 <b>Group Info</b> 👥\n" +
+                          $"ID : <code>{chat.Id}</code>\n" +
+                          $"Name : {message.ChatName()}\n";
+                if (!string.IsNullOrWhiteSpace(chat.Username))
+                    respon += $"Username : {chat.Username}\n";
+                if (!string.IsNullOrWhiteSpace(chat.InviteLink))
+                    respon += $"Invite Link : {chat.InviteLink}\n";
+                if (!string.IsNullOrWhiteSpace(chat.Description))
+                    respon += $"Description : {chat.Description}\n";
+
+                respon += "\n";
+            }
+
+            if (message.IsReplyToMessage())
+            {
+                var from = message.ReplyToMessage.From;
+                respon += $"👤 <b>User Info</b> 👤\n" +
+                          $"ID : <code>{from.Id}</code>\n" +
+                          $"Name : {from.FromName(true)}";
+                if (!string.IsNullOrWhiteSpace(from.Username))
+                    respon += $"\nUsername : @{from.Username}";
             }
             else
             {
-                await Bot.SendTextAsync(message, Bot.Keys.HowToGetToken, parse: ParseMode.Markdown);
+                var from = message.From;
+                respon += $"👤 <b>User Info</b> 👤\n" +
+                          $"ID : <code>{from.Id}</code>\n" +
+                          $"Name : {from.FromName(true)}";
+                if (!string.IsNullOrWhiteSpace(from.Username))
+                    respon += $"\nUsername : @{from.Username}";
             }
+            
+            await Bot.SendTextAsync(message, respon, parse: ParseMode.Html);
+        }
+
+        public static async void Start(Message message)
+        {
+            var respon = Bot.Keys.SayHello.ReplaceWithBotValue();
+            await Bot.SendTextAsync(message, respon, parse: ParseMode.Markdown);
         }
         
         private static async void Status(Message message)
@@ -186,6 +222,18 @@ namespace TeleBot.Plugins
             
             // kirim status
             await Bot.SendTextAsync(message, respon, parse: ParseMode.Markdown);
+        }
+        
+        private static async void Token(Message message, string data)
+        {
+            if (!string.IsNullOrWhiteSpace(data))
+            {
+                new Simsimi(message).SaveToken(data);
+            }
+            else
+            {
+                await Bot.SendTextAsync(message, Bot.Keys.HowToGetToken, parse: ParseMode.Markdown);
+            }
         }
     }
 }
