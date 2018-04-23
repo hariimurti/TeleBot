@@ -11,6 +11,8 @@ namespace TeleBot.Classes
         {
             try
             {
+                if (!Log.ShowDebug) return;
+                
                 var filePath = Program.FilePathInData(fileName);
                 
                 _log.Debug("Simpan {0}", filePath);

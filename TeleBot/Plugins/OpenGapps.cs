@@ -306,8 +306,8 @@ namespace TeleBot.Plugins
                     Method = WebMethod.Get
                 };
                 var response = await WebClient.GetOrPostStringAsync(request);
-                
-                System.IO.File.WriteAllText(Program.FilePathInData("opengapps.json"), response);
+
+                Dump.ToFile("opengapps.json", response);
                 
                 gapps = JsonConvert.DeserializeObject<Gapps>(response);
             }
