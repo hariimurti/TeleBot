@@ -108,6 +108,11 @@ namespace TeleBot.Plugins
                     new Qwant(message).SearchImage(data);
                     break;
                 
+                case "gapps":
+                case "opengapps":
+                    new OpenGapps(message).SelectArch();
+                    break;
+                
                 default:
                     _log.Ignore("Perintah: {0} -- tdk ada", cmd);
                     break;
@@ -139,6 +144,10 @@ namespace TeleBot.Plugins
                        "• `/cari query` — cari website.\n" +
                        "• `/image query` — cari image.\n" +
                        "• _alias: g, search, img, photo._\n" +
+                       "\n" +
+                       "OpenGapps\n" +
+                       "• `/gapps` — link dl gapps.\n" +
+                       "• _alias: opengapps._\n" +
                        "\n" +
                        "Welcome/Selamat Datang (Grup)\n" +
                        "• `/welcome` — pengaturan.\n" +
