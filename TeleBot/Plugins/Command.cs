@@ -214,16 +214,18 @@ namespace TeleBot.Plugins
             var timespan = new TimeSpan(tfs.Days, tfs.Hours, tfs.Minutes, tfs.Seconds);
 
             var respon =
-                $"*{Program.AppName}*\n—— —— —— ——\n" +
-                $"*Version* : {Program.AppVersion}\n" +
-                $"*UpTime* : {timespan}\n";
+                $"*{Program.AppName} v2.0*\n" +
+                $"—— —— —— ——\n" +
+                $"SubVersion : {Program.AppVersion}\n" +
+                $"UpTime : {timespan}\n" +
+                $"Messages : {BotMessage.Count}\n";
             
             // cek token
             try
             {
                 var tokens = await _db.GetTokens();
                 var tokenActive = tokens.Where(t => t.LimitExceed <= DateTime.Now).ToList();
-                respon += $"*Token* : {tokenActive.Count}/{tokens.Count}\n";
+                respon += $"Token : {tokenActive.Count}/{tokens.Count}";
             }
             catch (Exception ex)
             {

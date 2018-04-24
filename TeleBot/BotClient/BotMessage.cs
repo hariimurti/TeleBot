@@ -19,7 +19,8 @@ namespace TeleBot.BotClient
         private static Database _db = new Database();
         private static List<CallbackData> _callbackBlocked = new List<CallbackData>();
         private static readonly int _callbackBlockedTimeout = 60;
-            
+        public static int Count = 0;
+        
         private class CallbackData
         {
             public int MessageId { get; set; }
@@ -73,6 +74,7 @@ namespace TeleBot.BotClient
             
             // tambah pesan masuk
             await _db.InsertMessageIncoming(message);
+            Count++;
             
             _log.Info("{0} | Id: {1} | Dari: {2} | Pesan: {3}",
                 message.Date.ToLocalTime(), message.MessageId, message.FromName(), message.Text);
