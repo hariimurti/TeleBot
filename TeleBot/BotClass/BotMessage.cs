@@ -11,7 +11,7 @@ using Telegram.Bot.Args;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
-namespace TeleBot.BotClient
+namespace TeleBot.BotClass
 {
     public static class BotMessage
     {
@@ -105,7 +105,7 @@ namespace TeleBot.BotClient
             if (!query.Success)
             {
                 _log.Error("Unknown: {0}", callback.Data);
-                await Bot.AnswerCallbackQueryAsync(callback.Id, "Perintah tidak diketahui", true);
+                await BotClient.AnswerCallbackQueryAsync(callback.Id, "Perintah tidak diketahui", true);
                 return;
             }
             
@@ -166,7 +166,7 @@ namespace TeleBot.BotClient
                 
                 default:
                     _log.Ignore("Unknown: {0}", callback.Data);
-                    await Bot.AnswerCallbackQueryAsync(callback.Id, "Perintah tidak diketahui", true);
+                    await BotClient.AnswerCallbackQueryAsync(callback.Id, "Perintah tidak diketahui", true);
                     break;
             }
         }
@@ -183,7 +183,7 @@ namespace TeleBot.BotClient
                 var countdown = (DateTime.Now - found.LastTime).Seconds;
                 if (countdown < _callbackBlockedTimeout)
                 {
-                    await Bot.AnswerCallbackQueryAsync(callback.Id,
+                    await BotClient.AnswerCallbackQueryAsync(callback.Id,
                         $"Sabar ya kaka...\nTunggu {_callbackBlockedTimeout - countdown} dtk baru bisa tekan tombol ini lagi.", true);
                     
                     return true;

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using TeleBot.BotClient;
+using TeleBot.BotClass;
 using TeleBot.Classes;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -88,7 +88,7 @@ namespace TeleBot.Plugins
             if (string.IsNullOrWhiteSpace(query)) return;
             _log.Debug("Pencarian : {0}", query);
             
-            var address = apiUrl + "web?count=10&locale=id_ID&q=" + query.UrlEncode();
+            var address = apiUrl + "web?count=10&locale=id_ID&q=" + query.EncodeUrl();
             Response result;
             
             try
@@ -99,7 +99,7 @@ namespace TeleBot.Plugins
             {
                 _log.Error(e.Message);
 
-                await Bot.SendTextAsync(_message, "Mohon maaf...\nPlugin qwant sedang mengalami gangguan.\nCobalah beberapa saat lagi.", true);
+                await BotClient.SendTextAsync(_message, "Mohon maaf...\nPlugin qwant sedang mengalami gangguan.\nCobalah beberapa saat lagi.", true);
                 return;
             }
             
@@ -108,7 +108,7 @@ namespace TeleBot.Plugins
             {
                 _log.Warning("Pencarian tidak membuahkan hasil...");
                 
-                await Bot.SendTextAsync(_message, $"Maaf kak... {Bot.Name} gak nemu yang dicari..", true);
+                await BotClient.SendTextAsync(_message, $"Maaf kak... {Bot.Name} gak nemu yang dicari..", true);
                 return;
             }
             
@@ -124,7 +124,7 @@ namespace TeleBot.Plugins
                 respon += $"\n{num}. <a href=\"{item.Url}\">{item.Title.RemoveHtmlTag().Trim()}</a>";
             }
             
-            await Bot.SendTextAsync(_message, respon, parse: ParseMode.Html, preview: false);
+            await BotClient.SendTextAsync(_message, respon, parse: ParseMode.Html, preview: false);
         }
 
         public async void SearchImage(string query)
@@ -132,7 +132,7 @@ namespace TeleBot.Plugins
             if (string.IsNullOrWhiteSpace(query)) return;
             _log.Debug("Pencarian : {0}", query);
             
-            var address = apiUrl + "images?count=10&offset=1&q=" + query.UrlEncode();
+            var address = apiUrl + "images?count=10&offset=1&q=" + query.EncodeUrl();
             Response result;
             
             try
@@ -143,7 +143,7 @@ namespace TeleBot.Plugins
             {
                 _log.Error(e.Message);
 
-                await Bot.SendTextAsync(_message, "Mohon maaf...\nPlugin qwant sedang mengalami gangguan.\nCobalah beberapa saat lagi.", true);
+                await BotClient.SendTextAsync(_message, "Mohon maaf...\nPlugin qwant sedang mengalami gangguan.\nCobalah beberapa saat lagi.", true);
                 return;
             }
             
@@ -152,7 +152,7 @@ namespace TeleBot.Plugins
             {
                 _log.Warning("Pencarian tidak membuahkan hasil...");
                 
-                await Bot.SendTextAsync(_message, $"Maaf kak... {Bot.Name} gak nemu yang dicari..", true);
+                await BotClient.SendTextAsync(_message, $"Maaf kak... {Bot.Name} gak nemu yang dicari..", true);
                 return;
             }
             
@@ -167,7 +167,7 @@ namespace TeleBot.Plugins
             while (queue.Count > 0)
             {
                 var item = items[_random.Next(0, items.Length)];
-                var title = item.Title.UrlDecode();
+                var title = item.Title.DecodeUrl();
                 var desc = item.Desc;
                 
                 _log.Debug("Kirim image : {0}", item.Url);
@@ -179,7 +179,7 @@ namespace TeleBot.Plugins
                 if (!string.IsNullOrWhiteSpace(desc))
                     caption += $"\nDeskripsi : {desc}";
                 
-                var sentPhoto = await Bot.SendPhotoAsync(_message, image, caption);
+                var sentPhoto = await BotClient.SendPhotoAsync(_message, image, caption);
                 
                 if (sentPhoto != null) break;
             }

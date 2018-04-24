@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
-using TeleBot.BotClient;
+using TeleBot.BotClass;
 using TeleBot.Classes;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -70,10 +70,10 @@ namespace TeleBot.Plugins
             });
             
             if (!edit)
-                await Bot.SendTextAsync(_message,
+                await BotClient.SendTextAsync(_message,
                     "<b>OpenGapps</b>\n—— —— ——\nArsitektur :", true, ParseMode.Html, buttons);
             else
-                await Bot.EditOrSendTextAsync(_message, _message.MessageId,
+                await BotClient.EditOrSendTextAsync(_message, _message.MessageId,
                     "<b>OpenGapps</b>\n—— —— ——\nArsitektur :", ParseMode.Html, buttons);
         }
 
@@ -81,12 +81,12 @@ namespace TeleBot.Plugins
         {
             if (_message.ReplyToMessage.From.Id != _callback.From.Id)
             {
-                await Bot.AnswerCallbackQueryAsync(_callback.Id, "Apaan sih pencet-pencet... Geli tauu!!", true);
+                await BotClient.AnswerCallbackQueryAsync(_callback.Id, BotResponse.NoAccessToButton(), true);
                 return;
             }
             
             _log.Debug("Arch: {0} | Pilih versi android...", arch);
-            await Bot.AnswerCallbackQueryAsync(_callback.Id, $"Silahkan pilih versi android!");
+            await BotClient.AnswerCallbackQueryAsync(_callback.Id, $"Silahkan pilih versi android!");
             
             const string cmd = "cmd=variant";
             
@@ -134,7 +134,7 @@ namespace TeleBot.Plugins
             android.Add(back);
             
             var buttons = new InlineKeyboardMarkup(android.ToArray());
-            await Bot.EditOrSendTextAsync(_message, _message.MessageId,
+            await BotClient.EditOrSendTextAsync(_message, _message.MessageId,
                 $"<b>OpenGapps</b>\n" +
                 $"—— —— ——\n" +
                 $"Arsitektur : <code>{arch}</code>\n" +
@@ -147,14 +147,14 @@ namespace TeleBot.Plugins
         {
             if (_message.ReplyToMessage.From.Id != _callback.From.Id)
             {
-                await Bot.AnswerCallbackQueryAsync(_callback.Id, "Apaan sih pencet-pencet... Geli tauu!!", true);
+                await BotClient.AnswerCallbackQueryAsync(_callback.Id, BotResponse.NoAccessToButton(), true);
                 return;
             }
 
             var regex = Regex.Match(data, @"(\w+)-([\w\.]+)", RegexOptions.IgnoreCase);
             if (!regex.Success)
             {
-                await Bot.AnswerCallbackQueryAsync(_callback.Id, $"Tidak bisa pilih paket!", true);
+                await BotClient.AnswerCallbackQueryAsync(_callback.Id, $"Tidak bisa pilih paket!", true);
                 return;
             }
 
@@ -162,7 +162,7 @@ namespace TeleBot.Plugins
             var android = regex.Groups[2].Value;
             
             _log.Debug("Arch: {0} | Android: {1} | Pilih variasi gapps...", arch, android);
-            await Bot.AnswerCallbackQueryAsync(_callback.Id, $"Silahkan pilih variasi!");
+            await BotClient.AnswerCallbackQueryAsync(_callback.Id, $"Silahkan pilih variasi!");
 
             const string cmd = "cmd=gapps";
             
@@ -265,7 +265,7 @@ namespace TeleBot.Plugins
             
             package.Add(new List<InlineKeyboardButton>() { back });
             var buttons = new InlineKeyboardMarkup(package.ToArray());
-            await Bot.EditOrSendTextAsync(_message, _message.MessageId,
+            await BotClient.EditOrSendTextAsync(_message, _message.MessageId,
                 $"<b>OpenGapps</b>\n" +
                 $"—— —— ——\n" +
                 $"Arsitektur : <code>{arch}</code>\n" +
@@ -279,14 +279,14 @@ namespace TeleBot.Plugins
         {
             if (_message.ReplyToMessage.From.Id != _callback.From.Id)
             {
-                await Bot.AnswerCallbackQueryAsync(_callback.Id, "Apaan sih pencet-pencet... Geli tauu!!", true);
+                await BotClient.AnswerCallbackQueryAsync(_callback.Id, BotResponse.NoAccessToButton(), true);
                 return;
             }
 
             var regex = Regex.Match(data, @"(\w+)-([\w\.]+)-(\w+)", RegexOptions.IgnoreCase);
             if (!regex.Success)
             {
-                await Bot.AnswerCallbackQueryAsync(_callback.Id, $"Ada sesuatu yang aneh! Coba lain waktu.", true);
+                await BotClient.AnswerCallbackQueryAsync(_callback.Id, $"Ada sesuatu yang aneh! Coba lain waktu.", true);
                 return;
             }
 
@@ -315,7 +315,7 @@ namespace TeleBot.Plugins
             {
                 _log.Error(e.Message);
                 
-                await Bot.AnswerCallbackQueryAsync(_callback.Id,
+                await BotClient.AnswerCallbackQueryAsync(_callback.Id,
                     "Mohon maaf...\nPlugin opengapps saat ini sedang mengalami gangguan!", true);
                 
                 return;
@@ -325,7 +325,7 @@ namespace TeleBot.Plugins
             {
                 _log.Warning("Gapps asset tidak ditemukan");
                 
-                await Bot.AnswerCallbackQueryAsync(_callback.Id,
+                await BotClient.AnswerCallbackQueryAsync(_callback.Id,
                     "Mohon maaf...\nPlugin opengapps tidak menemukan asset yg dicari 🙁", true);
                 
                 return;
@@ -337,14 +337,14 @@ namespace TeleBot.Plugins
             var release = releases.FirstOrDefault();
             if (release == null)
             {
-                await Bot.AnswerCallbackQueryAsync(_callback.Id,
+                await BotClient.AnswerCallbackQueryAsync(_callback.Id,
                     "Mohon maaf...\nKriteria yang dicari tidak ada 🙁", true);
                 return;
             }
             
-            await Bot.AnswerCallbackQueryAsync(_callback.Id, "Tunggu sebentar...");
+            await BotClient.AnswerCallbackQueryAsync(_callback.Id, "Tunggu sebentar...");
 
-            await Bot.EditOrSendTextAsync(_message, _message.MessageId,
+            await BotClient.EditOrSendTextAsync(_message, _message.MessageId,
                 $"<b>OpenGapps</b>\n" +
                 $"—— —— ——\n" +
                 $"Arsitektur : <code>{arch}</code>\n" +

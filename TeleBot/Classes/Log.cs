@@ -75,7 +75,7 @@ namespace TeleBot.Classes
             }
             
             // tampilkan log ke console
-            Console.WriteLine(text.SingleLine());
+            Console.WriteLine(text.ToSingleLine());
             Console.ResetColor();
 
             // masukkan ke database

@@ -1,18 +1,26 @@
 ﻿using System;
 using System.Net;
 using System.Text.RegularExpressions;
-using TeleBot.BotClient;
+using TeleBot.BotClass;
 
 namespace TeleBot.Classes
 {
     public static class Extension
     {
-        public static string SingleLine(this string text)
+        public static string ToSingleLine(this string text)
         {
             return text
                 .Replace("\r\n", "\\r\\n")
                 .Replace("\n", "\\n")
                 .Replace("\t", "\\t");
+        }
+
+        public static string ReplaceWithBotValue(this string text)
+        {
+            var alias = Bot.Keys.Alias.Replace("|", ", ").Trim();
+            return text.Replace("{name}", Bot.Name)
+                .Replace("{username}", Bot.Username)
+                .Replace("{alias}", alias);
         }
         
         public static string ReplaceBotNameWithSimsimi(this string text)
@@ -43,12 +51,12 @@ namespace TeleBot.Classes
             return Regex.Replace(text, "<.*?>", string.Empty).Trim();
         }
 
-        public static string UrlEncode(this string text)
+        public static string EncodeUrl(this string text)
         {
             return WebUtility.UrlEncode(text);
         }
 
-        public static string UrlDecode(this string text)
+        public static string DecodeUrl(this string text)
         {
             return WebUtility.UrlDecode(text);
         }

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Timers;
-using TeleBot.BotClient;
+using TeleBot.BotClass;
 using TeleBot.SQLite;
 
 namespace TeleBot.Classes
@@ -67,11 +67,11 @@ namespace TeleBot.Classes
             switch (data.Operation)
             {
                 case ScheduleData.Type.Delete:
-                    await Bot.DeleteMessageAsync(data.ChatId, data.MessageId);
+                    await BotClient.DeleteMessageAsync(data.ChatId, data.MessageId);
                     break;
 
                 case ScheduleData.Type.Edit:
-                    await Bot.EditOrSendTextAsync(data.ChatId, data.MessageId, data.Text, data.ParseMode, sendOnError: false);
+                    await BotClient.EditOrSendTextAsync(data.ChatId, data.MessageId, data.Text, data.ParseMode, sendOnError: false);
                     break;
                 
                 case ScheduleData.Type.Done:

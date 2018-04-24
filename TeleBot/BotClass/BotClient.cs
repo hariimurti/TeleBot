@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TeleBot.Classes;
 using TeleBot.SQLite;
@@ -9,16 +10,12 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace TeleBot.BotClient
+namespace TeleBot.BotClass
 {
-    public static class Bot
+    public static class BotClient
     {
         private static Log _log = new Log("Bot");
         private static Database _db = new Database();
-        
-        public static BotKeys Keys = Configs.LoadKeys();
-        public static string Name = string.Empty;
-        public static string Username = string.Empty;
         
         private static TelegramBotClient _bot = Client();
         private static TelegramBotClient _botFile = Client(30);
@@ -28,7 +25,7 @@ namespace TeleBot.BotClient
         {
             try
             {
-                var client = new TelegramBotClient(Keys.Token);
+                var client = new TelegramBotClient(Bot.Keys.Token);
                 if (timeout > 0)
                 {
                     client.Timeout = TimeSpan.FromMinutes(timeout);
@@ -39,7 +36,7 @@ namespace TeleBot.BotClient
             {
                 if (e.Message.ToLower().Contains("token"))
                 {
-                    _log.Error("Silahkan isi Token dgn benar! Konfigurasi ada di file Configs.json");
+                    _log.Error("Silahkan isi Token dgn benar! Konfigurasi ada di file Bot.json");
                     Program.Terminate(1);
                 }
                 else
@@ -50,26 +47,22 @@ namespace TeleBot.BotClient
             }
         }
 
-        public static string ReplaceWithBotValue(this string text)
-        {
-            var alias = Keys.Alias.Replace("|", ", ");
-            return text.Replace("{name}", Name)
-                .Replace("{username}", Username)
-                .Replace("{alias}", alias);
-        }
-
         #region StartReceivingMessage
         
         public static async Task StartReceivingMessage()
         {
             if (_isReceiving) return;
             
+            // mendapatkan info bot
             var me = await _bot.GetMeAsync();
-            Name = me.FirstName;
-            Username = me.Username;
+
+            // baca nama depan
+            var readFirstName = Regex.Match(me.FirstName, @"^(\w+)\b");
+            Bot.Name = readFirstName.Success ? readFirstName.Groups[1].Value : me.FirstName;
+            Bot.Username = me.Username;
             
-            Console.Title = string.Format("{0} » {1} — @{2}", Program.AppName, Name, Username);
-            _log.Info("Akun bot: {0} — @{1}", Name, Username);
+            Console.Title = string.Format("{0} » {1} — @{2}", Program.AppName, Bot.Name, Bot.Username);
+            _log.Info("Akun bot: {0} — @{1}", Bot.Name, Bot.Username);
 
             _bot.OnMessage += BotMessage.OnMessage;
             _bot.OnCallbackQuery += BotMessage.OnCallbackQuery;
@@ -195,7 +188,7 @@ namespace TeleBot.BotClient
                 await _bot.SendChatActionAsync(chatId, ChatAction.Typing);
                 await Task.Delay(500);
                 
-                _log.Debug("SendTextAsync: {0} » {1}", chatId, text.SingleLine());
+                _log.Debug("SendTextAsync: {0} » {1}", chatId, text.ToSingleLine());
                 var message = await _bot.SendTextMessageAsync(chatId, text, parse, !preview, replyToMessageId: replyId, replyMarkup: button);
                 
                 await _db.InsertMessageOutgoing(message);
@@ -221,7 +214,7 @@ namespace TeleBot.BotClient
         {
             try
             {
-                _log.Debug("EditOrSendTextAsync: {0} » {1}", messageId, text.SingleLine());
+                _log.Debug("EditOrSendTextAsync: {0} » {1}", messageId, text.ToSingleLine());
                 var message = await _bot.EditMessageTextAsync(chatId, messageId, text, parse, !preview, button);
                 
                 await _db.InsertMessageOutgoing(message);

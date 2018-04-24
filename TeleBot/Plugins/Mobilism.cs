@@ -6,7 +6,7 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using TeleBot.BotClient;
+using TeleBot.BotClass;
 using TeleBot.Classes;
 using TeleBot.SQLite;
 using Telegram.Bot.Types;
@@ -31,12 +31,7 @@ namespace TeleBot.Plugins
         private CallbackQuery _callback;
         private bool _callbackMode;
         
-        private static readonly string JsonPath = Program.FilePathInData("Mobilism.json");
-        private static readonly JsonSerializerSettings JsonSettings = new JsonSerializerSettings
-        {
-            Formatting = Formatting.Indented,
-            NullValueHandling = NullValueHandling.Include,
-        };
+        private static readonly string JsonFile = Program.FilePathInData("Mobilism.json");
         
         private class Account
         {
@@ -54,17 +49,17 @@ namespace TeleBot.Plugins
 
         private static Account ReadAccount()
         {
-            if (!File.Exists(JsonPath))
+            if (!File.Exists(JsonFile))
             {
-                var auth = new Account() {Username = "", Password = ""};
-                var json = JsonConvert.SerializeObject(auth, JsonSettings);
+                var auth = new Account();
+                var json = JsonConvert.SerializeObject(auth, Program.JsonSettings);
 
-                File.WriteAllText(JsonPath, json);
+                File.WriteAllText(JsonFile, json);
                 throw new Exception("Akun tidak boleh kosong!");
             }
             else
             {
-                var json = File.ReadAllText(JsonPath);
+                var json = File.ReadAllText(JsonFile);
                 var auth = JsonConvert.DeserializeObject<Account>(json);
                 
                 if (string.IsNullOrWhiteSpace(auth.Username) || string.IsNullOrWhiteSpace(auth.Password))
@@ -177,7 +172,7 @@ namespace TeleBot.Plugins
                 data = string.Empty;
             }
             
-            var keywords = data.UrlEncode();
+            var keywords = data.EncodeUrl();
             var forumId = isApp ? "399" : "408";
             
             // search mode : app - game
@@ -230,7 +225,7 @@ namespace TeleBot.Plugins
                     if (!_isLoggedIn)
                     {
                         _log.Warning("Gangguan login...");
-                        await Bot.SendTextAsync(_message,
+                        await BotClient.SendTextAsync(_message,
                             "Mohon maaf...\nPlugin mobilism saat ini sedang mengalami gangguan tidak bisa login!");
                         return;
                     }
@@ -260,7 +255,7 @@ namespace TeleBot.Plugins
             catch (Exception e)
             {
                 _log.Error(e.Message);
-                await Bot.SendTextAsync(_message, "Mohon maaf...\nPlugin mobilism sedang mengalami gangguan.\nCobalah beberapa saat lagi.");
+                await BotClient.SendTextAsync(_message, "Mohon maaf...\nPlugin mobilism sedang mengalami gangguan.\nCobalah beberapa saat lagi.");
                 return;
             }
             
@@ -271,7 +266,7 @@ namespace TeleBot.Plugins
             if (!findTable.Success)
             {
                 _log.Error("Tabel tidak ditemukan!");
-                await Bot.SendTextAsync(_message, "Mohon maaf...\nPlugin mobilism tidak bisa membaca threads.");
+                await BotClient.SendTextAsync(_message, "Mohon maaf...\nPlugin mobilism tidak bisa membaca threads.");
                 return;
             }
             
@@ -294,7 +289,7 @@ namespace TeleBot.Plugins
             if (rows.Count == 0)
             {
                 _log.Warning("Rows tidak ditemukan!");
-                await Bot.SendTextAsync(_message, $"Maaf kaka...\n{Bot.Name} gak nemu yg dicari." +
+                await BotClient.SendTextAsync(_message, $"Maaf kaka...\n{Bot.Name} gak nemu yg dicari." +
                                                   (threadMode ? "" : "\nCoba pakai keyword yg lain."));
                 return;
             }
@@ -398,7 +393,7 @@ namespace TeleBot.Plugins
             var responWithButtons = respon + "—— —— —— —— —— ——\nLink download, pilih nomor dibawah :";
             var buttons = new InlineKeyboardMarkup(buttonRows.ToArray());
 
-            var sentMessage = await Bot.SendTextAsync(_message, responWithButtons, parse: ParseMode.Html, button: buttons, preview: false);
+            var sentMessage = await BotClient.SendTextAsync(_message, responWithButtons, parse: ParseMode.Html, button: buttons, preview: false);
             if (sentMessage == null) return;
             
             // schedule edit pesan keluar
@@ -417,7 +412,7 @@ namespace TeleBot.Plugins
         private async void GetThreadPost(WebRequest threadRequest)
         {
             if (_callbackMode)
-                await Bot.AnswerCallbackQueryAsync(_callback.Id, "Tunggu sebentar...");
+                await BotClient.AnswerCallbackQueryAsync(_callback.Id, "Tunggu sebentar...");
 
             string content;
             
@@ -433,7 +428,7 @@ namespace TeleBot.Plugins
             catch (Exception e)
             {
                 _log.Error(e.Message);
-                await Bot.SendTextAsync(_message, "Mohon maaf...\nPlugin mobilism sedang mengalami gangguan.\nCobalah beberapa saat lagi.");
+                await BotClient.SendTextAsync(_message, "Mohon maaf...\nPlugin mobilism sedang mengalami gangguan.\nCobalah beberapa saat lagi.");
                 return;
             }
             
@@ -447,7 +442,7 @@ namespace TeleBot.Plugins
             if (!post.Success)
             {
                 _log.Error("Post download tidak ditemukan!");
-                await Bot.SendTextAsync(_message, "Mohon maaf...\nPlugin mobilism tidak bisa membaca thread.");
+                await BotClient.SendTextAsync(_message, "Mohon maaf...\nPlugin mobilism tidak bisa membaca thread.");
                 return;
             }
 
@@ -464,7 +459,7 @@ namespace TeleBot.Plugins
                          $"Download Instructions :\n{link}" +
                          $"\n—— —— —— —— —— ——\n" +
                          $"Requested By : {request}";
-            await Bot.SendTextAsync(_message, respon, parse: ParseMode.Html, preview: false);
+            await BotClient.SendTextAsync(_message, respon, parse: ParseMode.Html, preview: false);
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SQLite;
-using TeleBot.BotClient;
+using TeleBot.BotClass;
 using TeleBot.Classes;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;

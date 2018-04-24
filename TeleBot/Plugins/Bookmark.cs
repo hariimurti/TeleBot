@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using TeleBot.BotClient;
+using TeleBot.BotClass;
 using TeleBot.Classes;
 using TeleBot.SQLite;
 using Telegram.Bot.Types;
@@ -50,14 +50,14 @@ namespace TeleBot.Plugins
             if (string.IsNullOrWhiteSpace(hashtag))
             {
                 _log.Warning("Hashtag kosong!", hashtag);
-                await Bot.SendTextAsync(_message, $"Cara penggunaan :\n1. Reply pesan,\n2. `/simpan nama_hashtag`!");
+                await BotClient.SendTextAsync(_message, $"Cara penggunaan :\n1. Reply pesan,\n2. `/simpan nama_hashtag`!");
                 return true;
             }
             
             if (Regex.IsMatch(hashtag, @"^#?([\w]+)$")) return false;
             
             _log.Warning("Format \"{0}\" salah!", hashtag);
-            await Bot.SendTextAsync(_message, $"Format ilegal! Hashtag \"{hashtag}\" tidak bisa dipakai.");
+            await BotClient.SendTextAsync(_message, $"Format ilegal! Hashtag \"{hashtag}\" tidak bisa dipakai.");
             return true;
         }
         
@@ -66,7 +66,7 @@ namespace TeleBot.Plugins
             if (_message.IsGroupChat()) return false;
             
             _log.Warning("Bukan grup!");
-            await Bot.SendTextAsync(_message, $"Perintah bookmark hanya bisa dipakai didalam grup!");
+            await BotClient.SendTextAsync(_message, $"Perintah bookmark hanya bisa dipakai didalam grup!");
             return true;
         }
 
@@ -77,7 +77,7 @@ namespace TeleBot.Plugins
             if (await _message.IsAdminThisGroup()) return false;
             
             _log.Warning("User {0} bukan admin grup!", _message.FromName());
-            await Bot.SendTextAsync(_message, $"Maaf kaka... Kamu bukan admin grup ini!");
+            await BotClient.SendTextAsync(_message, $"Maaf kaka... Kamu bukan admin grup ini!");
             return true;
         }
 
@@ -96,7 +96,7 @@ namespace TeleBot.Plugins
                 if (!_message.IsReplyToMessage())
                 {
                     _log.Warning("Tidak ada pesan yang akan disimpan!");
-                    await Bot.SendTextAsync(_message, $"Tidak ada pesan yg akan disimpan!");
+                    await BotClient.SendTextAsync(_message, $"Tidak ada pesan yg akan disimpan!");
                     return;
                 }
                 
@@ -118,7 +118,7 @@ namespace TeleBot.Plugins
                     _log.Debug("Simpan #{0} ({1}) ke {2}", hashtag, hash.MessageId, _message.ChatName());
                 
                     await _db.InsertBookmark(hash);
-                    await Bot.SendTextAsync(_message.Chat.Id,
+                    await BotClient.SendTextAsync(_message.Chat.Id,
                         $"<b>Simpan Bookmark!</b>\n—— —— —— ——\n" +
                         $"MessageId : {hash.MessageId}\n" +
                         $"Hashtag : #{hashtag}\n—— —— —— ——\n" +
@@ -134,7 +134,7 @@ namespace TeleBot.Plugins
                     _log.Debug("Ganti #{0} ({1}) dari {2}", hashtag, query.MessageId, _message.ChatName());
                     
                     await _db.InsertBookmark(query, true);
-                    await Bot.SendTextAsync(_message.Chat.Id,
+                    await BotClient.SendTextAsync(_message.Chat.Id,
                         $"<b>Simpan Bookmark!</b>\n—— —— —— ——\n" +
                         $"MessageId : {query.MessageId}\n" +
                         $"Hashtag : #{hashtag}\n—— —— —— ——\n" +
@@ -146,7 +146,7 @@ namespace TeleBot.Plugins
             catch (Exception e)
             {
                 _log.Error(e.Message);
-                await Bot.SendTextAsync(_message, $"Gagal menyimpan #{hashtag}!\n—— —— —— ——\nError : {e.Message}");
+                await BotClient.SendTextAsync(_message, $"Gagal menyimpan #{hashtag}!\n—— —— —— ——\nError : {e.Message}");
             }
         }
 
@@ -170,7 +170,7 @@ namespace TeleBot.Plugins
             {
                 _log.Ignore("Tidak ada #{0} di {1}", hashtag, _message.ChatName());
                 
-                await Bot.SendTextAsync(_message, $"Tidak ada #{hashtag} di grup ini.");
+                await BotClient.SendTextAsync(_message, $"Tidak ada #{hashtag} di grup ini.");
                 return;
             }
 
@@ -180,14 +180,14 @@ namespace TeleBot.Plugins
                 
                 await _db.DeleteBookmark(query);
                 
-                await Bot.SendTextAsync(_message,
+                await BotClient.SendTextAsync(_message,
                     $"{_message.FromNameWithMention(ParseMode.Html)} telah menghapus #{hashtag}!",
                     parse: ParseMode.Html);
             }
             catch (Exception e)
             {
                 _log.Error(e.Message);
-                await Bot.SendTextAsync(_message, $"Gagal hapus #{hashtag}!\nError : {e.Message}");
+                await BotClient.SendTextAsync(_message, $"Gagal hapus #{hashtag}!\nError : {e.Message}");
             }
         }
 
@@ -196,11 +196,11 @@ namespace TeleBot.Plugins
             if (!_callbackMode) return;
             if (_message.ReplyToMessage.From.Id == _callback.From.Id)
             {
-                await Bot.AnswerCallbackQueryAsync(_callback.Id, "Tunggu sebentar...");
+                await BotClient.AnswerCallbackQueryAsync(_callback.Id, "Tunggu sebentar...");
             }
             else
             {
-                await Bot.AnswerCallbackQueryAsync(_callback.Id, "Apaan sih pencet-pencet... Geli tauu!!", true);
+                await BotClient.AnswerCallbackQueryAsync(_callback.Id, BotResponse.NoAccessToButton(), true);
                 return;
             }
 
@@ -212,7 +212,7 @@ namespace TeleBot.Plugins
                     InlineKeyboardButton.WithCallbackData("Tidak", $"cmd=manage&data=null")
                 });
                 
-                await Bot.EditOrSendTextAsync(_message, _message.MessageId,
+                await BotClient.EditOrSendTextAsync(_message, _message.MessageId,
                     $"Apakah kamu yakin mau menghapus #{hashtag}?",
                     button: buttons);
             }
@@ -232,7 +232,7 @@ namespace TeleBot.Plugins
             }
             else if (_callbackMode)
             {
-                await Bot.AnswerCallbackQueryAsync(_callback.Id, "Tunggu sebentar...");
+                await BotClient.AnswerCallbackQueryAsync(_callback.Id, "Tunggu sebentar...");
             }
 
             var list = await _db.GetBookmarks(_message.Chat.Id);
@@ -241,7 +241,7 @@ namespace TeleBot.Plugins
                 _log.Ignore("Tidak ada list di {0}", _message.ChatName());
 
                 var respon = "Bookmark/Hashtag *kosong*.\nTapi kamu bisa panggil semua admin di grup ini dengan #admin atau #mimin.";
-                await Bot.SendTextAsync(_message, respon, parse: ParseMode.Markdown);
+                await BotClient.SendTextAsync(_message, respon, parse: ParseMode.Markdown);
                 
                 return;
             }
@@ -258,7 +258,7 @@ namespace TeleBot.Plugins
                     count++;
                 }
             
-                var sentMessage = await Bot.SendTextAsync(_message, respon, parse: ParseMode.Html);
+                var sentMessage = await BotClient.SendTextAsync(_message, respon, parse: ParseMode.Html);
                 if (sentMessage == null) return;
                 var schedule = new ScheduleData()
                 {
@@ -297,9 +297,9 @@ namespace TeleBot.Plugins
                 var buttons = new InlineKeyboardMarkup(buttonRows.ToArray());
                 
                 if (!update)
-                    await Bot.SendTextAsync(_message, respon, parse: ParseMode.Html, button: buttons);
+                    await BotClient.SendTextAsync(_message, respon, parse: ParseMode.Html, button: buttons);
                 else
-                    await Bot.EditOrSendTextAsync(_message, _message.MessageId, respon, ParseMode.Html, buttons);
+                    await BotClient.EditOrSendTextAsync(_message, _message.MessageId, respon, ParseMode.Html, buttons);
             }
         }
 
@@ -317,11 +317,11 @@ namespace TeleBot.Plugins
             {
                 if (_message.ReplyToMessage.From.Id == _callback.From.Id)
                 {
-                    await Bot.AnswerCallbackQueryAsync(_callback.Id, "Tunggu sebentar...");
+                    await BotClient.AnswerCallbackQueryAsync(_callback.Id, "Tunggu sebentar...");
                 }
                 else
                 {
-                    await Bot.AnswerCallbackQueryAsync(_callback.Id, "Apaan sih pencet-pencet... Geli tauu!!", true);
+                    await BotClient.AnswerCallbackQueryAsync(_callback.Id, BotResponse.NoAccessToButton(), true);
                     return;
                 }
             }
@@ -333,9 +333,9 @@ namespace TeleBot.Plugins
 
                 var norespon = "Bookmark/Hashtag *kosong*.";
                 if (_callbackMode)
-                    await Bot.EditOrSendTextAsync(_message, _message.MessageId, norespon, ParseMode.Markdown);
+                    await BotClient.EditOrSendTextAsync(_message, _message.MessageId, norespon, ParseMode.Markdown);
                 else
-                    await Bot.SendTextAsync(_message, norespon, parse: ParseMode.Markdown);
+                    await BotClient.SendTextAsync(_message, norespon, parse: ParseMode.Markdown);
                 
                 return;
             }
@@ -356,9 +356,9 @@ namespace TeleBot.Plugins
             var buttons = new InlineKeyboardMarkup(buttonRows.ToArray());
             Message sentMessage;
             if (_callbackMode)
-                sentMessage = await Bot.EditOrSendTextAsync(_message, _message.MessageId, respon, ParseMode.Html, buttons);
+                sentMessage = await BotClient.EditOrSendTextAsync(_message, _message.MessageId, respon, ParseMode.Html, buttons);
             else
-                sentMessage = await Bot.SendTextAsync(_message, respon, true, ParseMode.Html, buttons);
+                sentMessage = await BotClient.SendTextAsync(_message, respon, true, ParseMode.Html, buttons);
             
             if (sentMessage == null) return;
             
@@ -393,7 +393,7 @@ namespace TeleBot.Plugins
                 {
                     _log.Debug("Panggil admins grup!", hashtag);
                     
-                    var admins = await Bot.GetChatAdministratorsAsync(_message);
+                    var admins = await BotClient.GetChatAdministratorsAsync(_message);
                     admins = admins.OrderBy(x => x.User.FirstName).ToArray();
                     var respon = "Panggilan kepada :";
                     foreach (var x in admins)
@@ -404,7 +404,7 @@ namespace TeleBot.Plugins
                         respon += $"\n• <a href=\"tg://user?id={x.User.Id}\">{user.Trim()}</a>";
                     }
                     
-                    await Bot.SendTextAsync(_message, respon, parse: ParseMode.Html);
+                    await BotClient.SendTextAsync(_message, respon, parse: ParseMode.Html);
                     continue;
                 }
 
@@ -419,26 +419,26 @@ namespace TeleBot.Plugins
             if (query == null)
             {
                 if (_callbackMode)
-                    await Bot.AnswerCallbackQueryAsync(_callback.Id, $"Tidak ada #{hashtag} di grup ini!", true);
+                    await BotClient.AnswerCallbackQueryAsync(_callback.Id, $"Tidak ada #{hashtag} di grup ini!", true);
                 
                 return;
             }
             
             _log.Debug("Panggil hashtag #{0}", hashtag);
-            var sentMessage = await Bot.ForwardMessageAsync(_message.Chat.Id, query.ChatId, query.MessageId);
+            var sentMessage = await BotClient.ForwardMessageAsync(_message.Chat.Id, query.ChatId, query.MessageId);
 
             if (!_callbackMode) return;
 
             if (sentMessage != null)
             {
-                await Bot.AnswerCallbackQueryAsync(_callback.Id, $"Hashtag #{hashtag} pesenan kaka udah tak siapin..", true);
-                await Bot.SendTextAsync(_message,
+                await BotClient.AnswerCallbackQueryAsync(_callback.Id, $"Hashtag #{hashtag} pesenan kaka udah tak siapin..", true);
+                await BotClient.SendTextAsync(_message,
                     $"Buat kaka {_message.FromNameWithMention(ParseMode.Html)},\n" +
                     $"itu {hashtag} udah tak siapin...", parse: ParseMode.Html);
             }
             else
             {
-                await Bot.AnswerCallbackQueryAsync(_callback.Id, $"Hashtag #{hashtag} pesenan kaka gak bisa diforward 😔", true);
+                await BotClient.AnswerCallbackQueryAsync(_callback.Id, $"Hashtag #{hashtag} pesenan kaka gak bisa diforward 😔", true);
             }
         }
 
@@ -449,12 +449,12 @@ namespace TeleBot.Plugins
             var query = await _db.GetBookmarkByHashtag(_message.Chat.Id, hashtag);
             if (query == null)
             {
-                await Bot.AnswerCallbackQueryAsync(_callback.Id, $"Tidak ada #{hashtag} di grup ini!", true);
+                await BotClient.AnswerCallbackQueryAsync(_callback.Id, $"Tidak ada #{hashtag} di grup ini!", true);
                 
                 return;
             }
             
-            await Bot.AnswerCallbackQueryAsync(_callback.Id,
+            await BotClient.AnswerCallbackQueryAsync(_callback.Id,
                 $"Hashtag : {query.KeyName}\n" +
                 $"MessageId : {query.MessageId}\n" +
                 $"Set By : {query.ByName}\n" +

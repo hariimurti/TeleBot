@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
-using TeleBot.BotClient;
+using TeleBot.BotClass;
 using TeleBot.Classes;
 using TeleBot.SQLite;
 using Telegram.Bot.Types;
@@ -70,7 +70,7 @@ namespace TeleBot.Plugins
             {
                 _log.Debug("Pesan {0} | Respon: kalimat template", message.MessageId);
                 var respon = message.GetReplyResponse().ReplaceWithBotValue();
-                await Bot.SendTextAsync(message, respon);
+                await BotClient.SendTextAsync(message, respon);
                 return;
             }
             
@@ -78,8 +78,8 @@ namespace TeleBot.Plugins
             if (message.IsTextMesum())
             {
                 _log.Debug("Pesan {0} | Alasan: terindikasi mesum!", message.MessageId);
-                var respon = message.GetBadWordResponse().ReplaceWithBotValue();
-                await Bot.SendTextAsync(message, respon);
+                var respon = BotResponse.BadWord();
+                await BotClient.SendTextAsync(message, respon);
                 return;
             }
             

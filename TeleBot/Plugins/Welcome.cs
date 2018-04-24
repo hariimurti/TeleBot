@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using TeleBot.BotClient;
+using TeleBot.BotClass;
 using TeleBot.Classes;
 using TeleBot.SQLite;
 using Telegram.Bot.Types;
@@ -57,12 +57,11 @@ namespace TeleBot.Plugins
             var exist = await _db.FindContact(_message.Chat.Id);
             if (!exist.Greeting) return;
             
-            var greeting = Bot.Keys.SayHelloNewMember
-                .ReplaceWithBotValue()
+            var welcome = BotResponse.WelcomeToGroup()
                 .Replace("{member}", mention.TrimEnd(','))
                 .Replace("{group}", _message.ChatName());
             
-            await Bot.SendTextAsync(_message, greeting, parse: ParseMode.Markdown);
+            await BotClient.SendTextAsync(_message, welcome, parse: ParseMode.Markdown);
         }
 
         public async void Manage(string data = null)
@@ -75,7 +74,7 @@ namespace TeleBot.Plugins
                 if (!await _message.IsAdminThisGroup())
                 {
                     _log.Warning("User {0} bukan admin grup!", _message.FromName());
-                    await Bot.SendTextAsync(_message, $"Maaf kaka... Kamu bukan admin grup ini!");
+                    await BotClient.SendTextAsync(_message, $"Maaf kaka... Kamu bukan admin grup ini!");
                     return;
                 }
             }
@@ -83,12 +82,12 @@ namespace TeleBot.Plugins
             {
                 if (_message.ReplyToMessage.From.Id == _callback.From.Id)
                 {
-                    await Bot.AnswerCallbackQueryAsync(_callback.Id, "Tunggu sebentar...");
+                    await BotClient.AnswerCallbackQueryAsync(_callback.Id, "Tunggu sebentar...");
                 }
                 else
                 {
                     //Kamu tidak mempunyai hak untuk memencet tombol ini!
-                    await Bot.AnswerCallbackQueryAsync(_callback.Id, "Apaan sih pencet-pencet... Geli tauu!!", true);
+                    await BotClient.AnswerCallbackQueryAsync(_callback.Id, BotResponse.NoAccessToButton(), true);
                     return;
                 }
             }
@@ -103,7 +102,7 @@ namespace TeleBot.Plugins
                     InlineKeyboardButton.WithCallbackData("Aktifkan", $"cmd=greeting&data=enable"),
                     InlineKeyboardButton.WithCallbackData("Nonaktifkan", $"cmd=greeting&data=disable")
                 });
-                await Bot.SendTextAsync(_message,
+                await BotClient.SendTextAsync(_message,
                     $"Pengaturan ucapan selamat datang.\nStatus sekarang : " +
                     (existContact.Greeting ? "aktif." : "nonaktif."),
                     true, button: buttons);
@@ -125,7 +124,7 @@ namespace TeleBot.Plugins
             if (!result) return;
             
             _log.Debug("Greeting {0} telah diperbaharui ({1})", _message.ChatName(), contact.Greeting);
-            await Bot.EditOrSendTextAsync(_message, _message.MessageId,
+            await BotClient.EditOrSendTextAsync(_message, _message.MessageId,
                 $"Ucapan selamat datang telah " + (contact.Greeting ? "diaktifkan." : "dinonaktifkan."));
         }
     }

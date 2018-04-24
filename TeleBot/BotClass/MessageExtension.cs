@@ -1,15 +1,12 @@
-﻿using System;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
-namespace TeleBot.BotClient
+namespace TeleBot.BotClass
 {
-    public static class Extension
+    public static class MessageExtension
     {
-        private static Random _random = new Random();
-        
         public static string ChatName(this Message message, bool full = false)
         {
             var chat = message.Chat;
@@ -79,35 +76,11 @@ namespace TeleBot.BotClient
             }
         }
 
-        public static string GetBadWordResponse(this Message message)
-        {
-            var respon = Bot.Keys.BadWordResponse;
-            var rand = _random.Next(0, respon.Count - 1);
-            return respon[rand];
-        }
-
-        public static string GetReplyResponse(this Message message)
-        {
-            var respon = Bot.Keys.ReplyOthers;
-            
-            if (message.IsFromOwner())
-            {
-                respon = Bot.Keys.ReplyOwner;
-            }
-            else if (message.IsFromAdmins())
-            {
-                respon = Bot.Keys.ReplyAdmins;
-            }
-
-            var rand = _random.Next(0, respon.Count - 1);
-            return respon[rand];
-        }
-
         public static async Task<bool> IsAdminThisGroup(this Message message)
         {
             if (!message.IsGroupChat()) return false;
             
-            var admins = await Bot.GetChatAdministratorsAsync(message.Chat.Id);
+            var admins = await BotClient.GetChatAdministratorsAsync(message.Chat.Id);
             foreach (var admin in admins)
             {
                 if (admin.User.Id == message.From.Id)
@@ -115,6 +88,21 @@ namespace TeleBot.BotClient
             }
 
             return false;
+        }
+
+        public static string GetReplyResponse(this Message message)
+        {
+            if (message.IsFromOwner())
+            {
+                return BotResponse.ReplyToOwner();
+            }
+            
+            if (message.IsFromAdmins())
+            {
+                return BotResponse.ReplyToAdmins();
+            }
+
+            return BotResponse.ReplyToOthers();
         }
 
         public static bool IsCallMe(this Message message)
@@ -143,11 +131,7 @@ namespace TeleBot.BotClient
 
         public static bool IsFromAdmins(this Message message)
         {
-            foreach (var admin in Bot.Keys.AdminIds)
-            {
-                if (message.From.Id == admin) return true;
-            }
-            return false;
+            return Bot.Keys.AdminIds.Contains(message.From.Id);
         }
 
         public static bool IsGodMode(this Message message)

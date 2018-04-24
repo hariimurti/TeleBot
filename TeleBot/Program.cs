@@ -5,7 +5,8 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using TeleBot.BotClient;
+using Newtonsoft.Json;
+using TeleBot.BotClass;
 using TeleBot.Classes;
 
 namespace TeleBot
@@ -16,8 +17,13 @@ namespace TeleBot
         public static readonly string AppVersion = GetVersion();
         public static readonly string AppNameWithVersion = string.Format("{0} v{1}", AppName, AppVersion);
         
-        public static readonly string WorkingDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-        public static readonly string DataDirectory = GetDataDirectory();
+        private static readonly string WorkingDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+        private static readonly string DataDirectory = GetDataDirectory();
+        public static readonly JsonSerializerSettings JsonSettings = new JsonSerializerSettings
+        {
+            Formatting = Formatting.Indented,
+            NullValueHandling = NullValueHandling.Include
+        };
 
         public static readonly DateTime StartTime = DateTime.Now;
 
@@ -37,12 +43,17 @@ namespace TeleBot
             log.Debug("Working Directory: {0}", WorkingDirectory);
             log.Debug("Data Directory: {0}", DataDirectory);
             
+            // buka konfigurasi
+            var isBotConfigLoaded = Bot.Loaded();
+            var isBotResponseLoaded = BotResponse.Loaded();
+            if (!isBotConfigLoaded || !isBotResponseLoaded) Terminate(1);
+            
             // bot menerima pesan
             while (true)
             {
                 try
                 {
-                    Bot.StartReceivingMessage().GetAwaiter();
+                    BotClient.StartReceivingMessage().GetAwaiter();
                     break;
                 }
                 catch (Exception ex)

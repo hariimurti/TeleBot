@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
-using TeleBot.BotClient;
+using TeleBot.BotClass;
 using TeleBot.Classes;
 using TeleBot.SQLite;
 using Telegram.Bot.Types;
@@ -157,7 +157,7 @@ namespace TeleBot.Plugins
                        "• PM: chat teks spt biasa.\n" +
                        "• Grup: reply pesan atau mention {alias}.\n";
             
-            await Bot.SendTextAsync(message, help.ReplaceWithBotValue(), parse: ParseMode.Markdown);
+            await BotClient.SendTextAsync(message, help.ReplaceWithBotValue(), parse: ParseMode.Markdown);
         }
 
         private static async void ShowId(Message message)
@@ -198,13 +198,13 @@ namespace TeleBot.Plugins
                     respon += $"\nUsername : @{from.Username}";
             }
             
-            await Bot.SendTextAsync(message, respon, parse: ParseMode.Html);
+            await BotClient.SendTextAsync(message, respon, parse: ParseMode.Html);
         }
 
         public static async void Start(Message message)
         {
-            var respon = Bot.Keys.SayHello.ReplaceWithBotValue();
-            await Bot.SendTextAsync(message, respon, parse: ParseMode.Markdown);
+            var respon = BotResponse.SayHello();
+            await BotClient.SendTextAsync(message, respon, parse: ParseMode.Markdown);
         }
         
         private static async void Status(Message message)
@@ -233,7 +233,7 @@ namespace TeleBot.Plugins
             }
             
             // kirim status
-            await Bot.SendTextAsync(message, respon, parse: ParseMode.Markdown);
+            await BotClient.SendTextAsync(message, respon, parse: ParseMode.Markdown);
         }
         
         private static async void Token(Message message, string data)
@@ -244,7 +244,9 @@ namespace TeleBot.Plugins
             }
             else
             {
-                await Bot.SendTextAsync(message, Bot.Keys.HowToGetToken, parse: ParseMode.Markdown);
+                await BotClient.SendTextAsync(message,
+                    BotResponse.SimsimiHowToGetToken(),
+                    parse: ParseMode.Markdown);
             }
         }
     }

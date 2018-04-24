@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using TeleBot.BotClient;
+using TeleBot.BotClass;
 using TeleBot.Classes;
 using TeleBot.SQLite;
 using Telegram.Bot.Types;
@@ -16,7 +16,6 @@ namespace TeleBot.Plugins
     {
         private static Log _log = new Log("Simsimi");
         private static Database _db = new Database();
-        private static Random _random = new Random();
         private Message _message;
         
         private class ResponseModel
@@ -62,7 +61,7 @@ namespace TeleBot.Plugins
             if (!verify)
             {
                 _log.Warning("Token: {0} | Result: Format Salah!", key);
-                await Bot.SendTextAsync(_message, $"*Token* : {key}\n*Hasil* : Token Salah!", parse: ParseMode.Markdown);
+                await BotClient.SendTextAsync(_message, $"*Token* : {key}\n*Hasil* : Token Salah!", parse: ParseMode.Markdown);
                 return;
             }
 
@@ -72,7 +71,7 @@ namespace TeleBot.Plugins
                 if (result.Result != 100)
                 {
                     _log.Warning("Token: {0} | Result: code {1} - {2}", key, result.Result, result.Msg);
-                    await Bot.SendTextAsync(_message, $"*Token* : {key}\n*Hasil* : {result.Result} - {result.Msg}", parse: ParseMode.Markdown);
+                    await BotClient.SendTextAsync(_message, $"*Token* : {key}\n*Hasil* : {result.Result} - {result.Msg}", parse: ParseMode.Markdown);
                     return;
                 }
             }
@@ -88,7 +87,7 @@ namespace TeleBot.Plugins
                 if (exist != null)
                 {
                     _log.Warning("Token: {0} | Result: Exist!", key);
-                    await Bot.SendTextAsync(_message, $"*Token* : {key}\n*Hasil* : Sudah ada!", parse: ParseMode.Markdown);
+                    await BotClient.SendTextAsync(_message, $"*Token* : {key}\n*Hasil* : Sudah ada!", parse: ParseMode.Markdown);
                     return;
                 }
                 
@@ -100,12 +99,12 @@ namespace TeleBot.Plugins
                 };
                 
                 await _db.InsertOrReplaceToken(token);
-                await Bot.SendTextAsync(_message, "Makasih kaka 😍😘\nSeneng deh dapet token baru..");
+                await BotClient.SendTextAsync(_message, "Makasih kaka 😍😘\nSeneng deh dapet token baru..");
             }
             catch (Exception ex)
             {
                 _log.Error(ex.Message);
-                await Bot.SendTextAsync(_message, $"Error: {ex.Message}");
+                await BotClient.SendTextAsync(_message, $"Error: {ex.Message}");
             }
         }
 
@@ -121,9 +120,7 @@ namespace TeleBot.Plugins
                 if (tokenActive.Count == 0)
                 {
                     _log.Warning("Token habis!");
-                    await Bot.SendTextAsync(_message, "Maaf ya kak...\n" +
-                                                      $"{Bot.Name} capek nih, gak ada tenaga buat balesin chat...\n\n" +
-                                                      "Bantu isi tenaga pakai /token.\nTengkyu 😘");
+                    await BotClient.SendTextAsync(_message, BotResponse.SimsimiOutOfToken());
                     return;
                 }
 
@@ -141,7 +138,7 @@ namespace TeleBot.Plugins
 
                             // rubah simsimi jadi nama bot
                             var respon = result.Response.ReplaceSimsimiWithBotName();
-                            await Bot.SendTextAsync(_message, respon);
+                            await BotClient.SendTextAsync(_message, respon);
                             replied = true;
                             
                             break;
@@ -180,9 +177,8 @@ namespace TeleBot.Plugins
 
             if (replied) return;
             
-            var respons = Bot.Keys.SimsimiNoResponse;
-            var rand = _random.Next(0, respons.Count - 1);
-            await Bot.SendTextAsync(_message, respons[rand].ReplaceWithBotValue());
+            var noResponse = BotResponse.SimsimiNullResult();
+            await BotClient.SendTextAsync(_message, noResponse);
         }
     }
 }
