@@ -32,33 +32,65 @@ namespace TeleBot.Plugins
             }
         }
 
-        private async Task<bool> CheckingHashtag(string hashtag)
+        private static string NormalizeHashtag(string hashtag)
         {
-            if (Regex.IsMatch(hashtag, @"^#?([\w]+)$")) return true;
+            var result = hashtag
+                .Replace("#", "")
+                .Replace("-", "_").Trim()
+                .Replace(" ", "_").TrimEnd('_');
             
-            _log.Warning("Format hashtag \"{0}\" salah!", hashtag);
-            await Bot.SendTextAsync(_message, $"Hashtag \"{hashtag}\" pakai format ilegal!");
-            return false;
+            if (!hashtag.Equals(result))
+                _log.Debug("Normalize: \"{0}\" » \"{1}\"", hashtag, result);
+
+            return result;
+        }
+
+        private async Task<bool> IsNotHashtag(string hashtag)
+        {
+            if (string.IsNullOrWhiteSpace(hashtag))
+            {
+                _log.Warning("Hashtag kosong!", hashtag);
+                await Bot.SendTextAsync(_message, $"Cara penggunaan :\n1. Reply pesan,\n2. `/simpan nama_hashtag`!");
+                return true;
+            }
+            
+            if (Regex.IsMatch(hashtag, @"^#?([\w]+)$")) return false;
+            
+            _log.Warning("Format \"{0}\" salah!", hashtag);
+            await Bot.SendTextAsync(_message, $"Format ilegal! Hashtag \"{hashtag}\" tidak bisa dipakai.");
+            return true;
         }
         
-        private async Task<bool> CheckingGroup()
+        private async Task<bool> IsNotInGroup()
         {
-            if (_message.IsGroupChat()) return true;
+            if (_message.IsGroupChat()) return false;
             
-            _log.Warning("Khusus digunakan didalam grup!");
+            _log.Warning("Bukan grup!");
             await Bot.SendTextAsync(_message, $"Perintah bookmark hanya bisa dipakai didalam grup!");
-            return false;
+            return true;
+        }
+
+        private async Task<bool> IsNotAdmin()
+        {
+            if (_message.IsGodMode()) return false;
+
+            if (await _message.IsAdminThisGroup()) return false;
+            
+            _log.Warning("User {0} bukan admin grup!", _message.FromName());
+            await Bot.SendTextAsync(_message, $"Maaf kaka... Kamu bukan admin grup ini!");
+            return true;
         }
 
         public async void Save(string hashtag)
         {
             try
             {
-                hashtag = hashtag.TrimStart('#');
-                if (string.IsNullOrWhiteSpace(hashtag)) return;
+                // normalize dan cek hashtag
+                hashtag = NormalizeHashtag(hashtag);
+                if (await IsNotHashtag(hashtag)) return;
                 
                 // harus grup chat
-                if (!await CheckingGroup()) return;
+                if (await IsNotInGroup()) return;
 
                 // harus mereply pesan
                 if (!_message.IsReplyToMessage())
@@ -68,16 +100,8 @@ namespace TeleBot.Plugins
                     return;
                 }
                 
-                // cek format hashtag
-                if (!await CheckingHashtag(hashtag)) return;
-                
                 // cek admin atau bukan
-                if (!await _message.IsAdminThisGroup())
-                {
-                    _log.Warning("User {0} bukan admin grup!", _message.FromName());
-                    await Bot.SendTextAsync(_message, $"Maaf kaka... Kamu bukan admin grup ini!");
-                    return;
-                }
+                if (await IsNotAdmin()) return;
                 
                 var query = await _db.GetBookmarkByHashtag(_message.Chat.Id, hashtag);
                 if (query == null)
@@ -91,7 +115,7 @@ namespace TeleBot.Plugins
                         DateTime = DateTime.Now.ToString(CultureInfo.CurrentCulture)
                     };
                     
-                    _log.Debug("Simpan #{0} ({1}) ke {2}", hash.MessageId, hashtag, _message.ChatName());
+                    _log.Debug("Simpan #{0} ({1}) ke {2}", hashtag, hash.MessageId, _message.ChatName());
                 
                     await _db.InsertBookmark(hash);
                     await Bot.SendTextAsync(_message.Chat.Id,
@@ -107,7 +131,7 @@ namespace TeleBot.Plugins
                     query.MessageId = _message.ReplyToMessage.MessageId;
                     query.KeyName = hashtag;
                 
-                    _log.Debug("Ganti #{0} ({1}) dari {2}", query.MessageId, hashtag, _message.ChatName());
+                    _log.Debug("Ganti #{0} ({1}) dari {2}", hashtag, query.MessageId, _message.ChatName());
                     
                     await _db.InsertBookmark(query, true);
                     await Bot.SendTextAsync(_message.Chat.Id,
@@ -122,7 +146,7 @@ namespace TeleBot.Plugins
             catch (Exception e)
             {
                 _log.Error(e.Message);
-                await Bot.SendTextAsync(_message, $"Gagal menyimpan #{hashtag}.\n—— —— —— ——\nError : {e.Message}");
+                await Bot.SendTextAsync(_message, $"Gagal menyimpan #{hashtag}!\n—— —— —— ——\nError : {e.Message}");
             }
         }
 
@@ -130,27 +154,16 @@ namespace TeleBot.Plugins
         {
             if (!_callbackMode)
             {
-                hashtag = hashtag.TrimStart('#');
-                if (string.IsNullOrWhiteSpace(hashtag)) return;
+                // normalize dan cek hashtag
+                hashtag = NormalizeHashtag(hashtag);
+                if (await IsNotHashtag(hashtag)) return;
 
                 // harus grup chat
-                if (!await CheckingGroup()) return;
-
-                // cek format hashtag
-                if (!await CheckingHashtag(hashtag)) return;
+                if (await IsNotInGroup()) return;
             }
             
             // cek admin atau bukan
-            if (!await _message.IsAdminThisGroup())
-            {
-                _log.Warning("User {0} bukan admin grup!", _message.FromName());
-                await Bot.SendTextAsync(_message,
-                    $"Maaf kakak,\n" +
-                    $"Kamu bukan admin grup ini, jadi tidak bisa menghapus #{hashtag}.",
-                    parse: ParseMode.Html);
-                
-                return;
-            }
+            if (await IsNotAdmin()) return;
 
             var query = await _db.GetBookmarkByHashtag(_message.Chat.Id, hashtag);
             if (query == null)
@@ -187,7 +200,6 @@ namespace TeleBot.Plugins
             }
             else
             {
-                //Kamu tidak mempunyai hak untuk memencet tombol ini!
                 await Bot.AnswerCallbackQueryAsync(_callback.Id, "Apaan sih pencet-pencet... Geli tauu!!", true);
                 return;
             }
@@ -199,7 +211,10 @@ namespace TeleBot.Plugins
                     InlineKeyboardButton.WithCallbackData("Yakin", $"cmd=remove-final&data={hashtag}"),
                     InlineKeyboardButton.WithCallbackData("Tidak", $"cmd=manage&data=null")
                 });
-                await Bot.EditOrSendTextAsync(_message, _message.MessageId, $"Apakah kamu yakin mau menghapus #{hashtag}?", button: buttons);
+                
+                await Bot.EditOrSendTextAsync(_message, _message.MessageId,
+                    $"Apakah kamu yakin mau menghapus #{hashtag}?",
+                    button: buttons);
             }
             else
             {
@@ -213,7 +228,7 @@ namespace TeleBot.Plugins
             if (!update)
             {
                 // harus grup chat
-                if (!await CheckingGroup()) return;
+                if (await IsNotInGroup()) return;
             }
             else if (_callbackMode)
             {
@@ -251,7 +266,7 @@ namespace TeleBot.Plugins
                     MessageId = sentMessage.MessageId,
                     DateTime = DateTime.Now.AddMinutes(10),
                     Operation = ScheduleData.Type.Edit,
-                    Text = "Bookmark kadaluarsa!\nGunakan /list untuk melihat daftar lagi."
+                    Text = "Daftar hashtag kadaluarsa!\nGunakan /hashtag untuk melihat daftar lagi."
                 };
                 Schedule.RegisterNew(schedule);
             }
@@ -293,19 +308,10 @@ namespace TeleBot.Plugins
             if (!_callbackMode)
             {
                 // harus grup chat
-                if (!await CheckingGroup()) return;
+                if (await IsNotInGroup()) return;
 
                 // cek admin atau bukan
-                if (!await _message.IsAdminThisGroup())
-                {
-                    _log.Warning("User {0} bukan admin grup!", _message.FromName());
-                    await Bot.SendTextAsync(_message,
-                        $"Maaf kakak,\n" +
-                        $"Kamu bukan admin grup ini, jadi tidak bisa menggunakan fitur ini.",
-                        parse: ParseMode.Html);
-
-                    return;
-                }
+                if (await IsNotAdmin()) return;
             }
             else
             {
@@ -315,7 +321,6 @@ namespace TeleBot.Plugins
                 }
                 else
                 {
-                    //Kamu tidak mempunyai hak untuk memencet tombol ini!
                     await Bot.AnswerCallbackQueryAsync(_callback.Id, "Apaan sih pencet-pencet... Geli tauu!!", true);
                     return;
                 }
