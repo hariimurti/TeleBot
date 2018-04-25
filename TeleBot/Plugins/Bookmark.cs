@@ -444,6 +444,8 @@ namespace TeleBot.Plugins
                 break;
             }
             
+            if (hashtags.Count == 0) return;
+            
             var isPrivateGroup = string.IsNullOrWhiteSpace(_message.Chat.Username);
             // forward pesan
             if (isPrivateGroup)
