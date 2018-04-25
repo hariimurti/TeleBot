@@ -255,7 +255,9 @@ namespace TeleBot.Plugins
             catch (Exception e)
             {
                 _log.Error(e.Message);
-                await BotClient.SendTextAsync(_message, "Mohon maaf...\nPlugin mobilism sedang mengalami gangguan.\nCobalah beberapa saat lagi.");
+                await BotClient.SendTextAsync(_message, "Mohon maaf...\n" +
+                                                        "Plugin mobilism sedang mengalami gangguan.\n" +
+                                                        "Cobalah beberapa saat lagi.");
                 return;
             }
             
@@ -383,7 +385,8 @@ namespace TeleBot.Plugins
                 foreach (var thread in threads)
                 {
                     var num = count.ToString().PadLeft(padding, '0');
-                    var buttonColumn = InlineKeyboardButton.WithCallbackData(num, "cmd=mobilism&data=" + thread.LinkPath);
+                    var buttonColumn =
+                        InlineKeyboardButton.WithCallbackData(num, "cmd=mobilism&data=" + thread.LinkPath);
                     buttonRow.Add(buttonColumn);
                     count++;
                 }
@@ -393,7 +396,8 @@ namespace TeleBot.Plugins
             var responWithButtons = respon + "—— —— —— —— —— ——\nLink download, pencet tombol nomor dibawah :";
             var buttons = new InlineKeyboardMarkup(buttonRows.ToArray());
 
-            var sentMessage = await BotClient.SendTextAsync(_message, responWithButtons, parse: ParseMode.Html, button: buttons, preview: false);
+            var sentMessage = await BotClient.SendTextAsync(_message, responWithButtons,
+                parse: ParseMode.Html, button: buttons, preview: false);
             if (sentMessage == null) return;
             
             // schedule edit pesan keluar
@@ -428,7 +432,9 @@ namespace TeleBot.Plugins
             catch (Exception e)
             {
                 _log.Error(e.Message);
-                await BotClient.SendTextAsync(_message, "Mohon maaf...\nPlugin mobilism sedang mengalami gangguan.\nCobalah beberapa saat lagi.");
+                await BotClient.SendTextAsync(_message, "Mohon maaf...\n" +
+                                                        "Plugin mobilism sedang mengalami gangguan.\n" +
+                                                        "Cobalah beberapa saat lagi.");
                 return;
             }
             

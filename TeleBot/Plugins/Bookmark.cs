@@ -471,7 +471,7 @@ namespace TeleBot.Plugins
                 }
 
                 respon = respon.TrimEnd('\n');
-                await BotClient.SendTextAsync(_message.Chat.Id, $"Link Bookmark:\n{respon}",
+                await BotClient.SendTextAsync(_message.Chat.Id, $"Link Bookmark :\n{respon}",
                     _message.MessageId, ParseMode.Html, preview: false);
             }
         }
