@@ -120,7 +120,7 @@ namespace TeleBot.BotClass
                 
                 case "call":
                     if (await IsCallbackBlocked(callback, "Hashtag")) return;
-                    new Bookmark(message, callback).FindHashtag(data);
+                    await new Bookmark(message, callback).ForwardHashtag(data);
                     break;
                 
                 case "generate":
