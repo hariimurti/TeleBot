@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using Newtonsoft.Json;
 using TeleBot.Classes;
 using File = System.IO.File;
@@ -58,7 +59,7 @@ namespace TeleBot.BotClass
                     };
                     jsonObject = JsonConvert.SerializeObject(newKeys, Program.JsonSettings);
 
-                    File.WriteAllText(JsonFile, jsonObject);
+                    File.WriteAllText(JsonFile, jsonObject, Encoding.UTF8);
                     
                     _log.Error("Silahkan isi pengaturan: {0}", Path.GetFileName(JsonFile));
                     

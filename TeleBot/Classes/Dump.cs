@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 
 namespace TeleBot.Classes
 {
@@ -17,7 +18,7 @@ namespace TeleBot.Classes
                 
                 _log.Debug("Simpan {0}", filePath);
                 
-                File.WriteAllText(filePath, text);
+                File.WriteAllText(filePath, text, Encoding.UTF8);
             }
             catch (Exception e)
             {
