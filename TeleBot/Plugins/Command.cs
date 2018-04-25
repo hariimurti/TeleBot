@@ -17,7 +17,7 @@ namespace TeleBot.Plugins
         public static void Execute(Message message)
         {
             // pemisahan command, mention & data
-            var regexCmd = Regex.Match(message.Text, @"^\/(\w+)(?:@(\w+))?\b ?(.+)?", RegexOptions.IgnoreCase);
+            var regexCmd = Regex.Match(message.Text, @"^\/(\w+)(?:@(\w+))?\b ?([\S\s]+)?", RegexOptions.IgnoreCase);
             if (!regexCmd.Success)
             {
                 _log.Warning("Regex tdk dapat memisahkan command!");
@@ -114,6 +114,10 @@ namespace TeleBot.Plugins
                     new OpenGapps(message).SelectArch();
                     break;
 
+                case "wa":
+                    Whatsapp(message, data);
+                    break;
+
                 default:
                     _log.Ignore("Perintah: {0} -- tdk ada", cmd);
                     break;
@@ -122,41 +126,45 @@ namespace TeleBot.Plugins
 
         private static async void Help(Message message)
         {
-            var help = "*Panduan penggunaan* :\n" +
-                       "—— —— —— —— ——\n" +
-                       "Info Grup/User\n" +
-                       "• `/id` — menampilkan info.\n" +
-                       "\n" +
-                       "Mobilism (Android)\n" +
-                       "• `/app` — 10 app terbaru.\n" +
-                       "• `/app query` — cari app.\n" +
-                       "• `/game` — 10 game terbaru.\n" +
-                       "• `/game query` — cari game.\n" +
-                       "• _alias: aplikasi, permainan._\n" +
-                       "\n" +
-                       "Bookmark/Hashtag (Grup)\n" +
-                       "• Rules: reply pesan & hanya admin.\n" +
-                       "• `/simpan nama` — simpan nama.\n" +
-                       "• `/hapus nama` — hapus nama.\n" +
-                       "• `/kelola` — info & hapus.\n" +
-                       "• _alias: save, delete, manage._\n" +
-                       "\n" +
-                       "Qwant (Pencarian)\n" +
-                       "• `/cari query` — cari website.\n" +
-                       "• `/image query` — cari image.\n" +
-                       "• _alias: g, search, img, photo._\n" +
-                       "\n" +
-                       "OpenGapps\n" +
-                       "• `/gapps` — link dl gapps.\n" +
-                       "• _alias: opengapps._\n" +
-                       "\n" +
-                       "Welcome/Selamat Datang (Grup)\n" +
-                       "• `/welcome` — pengaturan.\n" +
-                       "• _alias: selamatdatang._\n" +
-                       "\n" +
-                       "Teman obrolan\n" +
-                       "• PM: chat teks spt biasa.\n" +
-                       "• Grup: reply pesan atau mention {alias}.\n";
+            const string help = "*Panduan penggunaan* :\n" +
+                                "—— —— —— —— ——\n" +
+                                "Info Grup/User\n" +
+                                "• `/id` — menampilkan info.\n" +
+                                "\n" +
+                                "Mobilism (Android)\n" +
+                                "• `/app` — 10 app terbaru.\n" +
+                                "• `/app query` — cari app.\n" +
+                                "• `/game` — 10 game terbaru.\n" +
+                                "• `/game query` — cari game.\n" +
+                                "• _alias: aplikasi, permainan._\n" +
+                                "\n" +
+                                "Bookmark/Hashtag (Grup)\n" +
+                                "• Rules: reply pesan & hanya admin.\n" +
+                                "• `/simpan nama` — simpan nama.\n" +
+                                "• `/hapus nama` — hapus nama.\n" +
+                                "• `/kelola` — info & hapus.\n" +
+                                "• _alias: save, delete, manage._\n" +
+                                "\n" +
+                                "Qwant (Pencarian)\n" +
+                                "• `/cari query` — cari website.\n" +
+                                "• `/image query` — cari image.\n" +
+                                "• _alias: g, search, img, photo._\n" +
+                                "\n" +
+                                "OpenGapps\n" +
+                                "• `/gapps` — link dl gapps.\n" +
+                                "• _alias: opengapps._\n" +
+                                "\n" +
+                                "WhatsApp Api\n" +
+                                "• `/wa nomor` — link tnp teks.\n" +
+                                "• `/wa nomor teks pesan` — link dgn teks.\n" +
+                                "\n" +
+                                "Welcome/Selamat Datang (Grup)\n" +
+                                "• `/welcome` — pengaturan.\n" +
+                                "• _alias: selamatdatang._\n" +
+                                "\n" +
+                                "Teman obrolan\n" +
+                                "• PM: chat teks spt biasa.\n" +
+                                "• Grup: reply pesan atau mention {alias}.\n";
 
             await BotClient.SendTextAsync(message, help.ReplaceWithBotValue(), parse: ParseMode.Markdown);
         }
@@ -245,6 +253,36 @@ namespace TeleBot.Plugins
                 await BotClient.SendTextAsync(message,
                     BotResponse.SimsimiHowToGetToken(),
                     parse: ParseMode.Markdown);
+        }
+
+        private static async void Whatsapp(Message message, string data)
+        {
+            const string petunjuk = "Format pernggunaan :\n`/wa nomor_hp text yg dikirim`";
+            if (string.IsNullOrWhiteSpace(data))
+            {
+                await BotClient.SendTextAsync(message, petunjuk, parse: ParseMode.Markdown);
+                return;
+            }
+
+            var match = Regex.Match(data, @"^([\d+-]+) ?([\S\s]+)?");
+            if (!match.Success)
+            {
+                await BotClient.SendTextAsync(message, petunjuk, parse: ParseMode.Markdown);
+                return;
+            }
+
+            // rubah nomer jadi 628...
+            var nomor = match.Groups[1].Value.Replace("+", "").Replace("-", "");
+            nomor = Regex.Replace(nomor, @"^0(\d+)", nope => "62" + nope.Groups[1].Value);
+            
+            var text = match.Groups[2].Value;
+
+            var apiLink = $"https://api.whatsapp.com/send?phone={nomor}";
+            if (!string.IsNullOrWhiteSpace(text)) apiLink += $"&text={text.EncodeUrl()}";
+
+            await BotClient.SendTextAsync(message.Chat.Id,
+                $"*WhatsApp* : [API Link]({apiLink})",
+                message.MessageId, ParseMode.Markdown, preview: false);
         }
     }
 }
