@@ -307,7 +307,7 @@ namespace TeleBot.Plugins
                 };
                 var response = await WebClient.GetOrPostStringAsync(request);
 
-                Dump.ToFile("opengapps.json", response);
+                Dump.ToFile("OpenGapps.json", response);
                 
                 gapps = JsonConvert.DeserializeObject<Gapps>(response);
             }
