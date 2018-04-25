@@ -105,7 +105,9 @@ namespace TeleBot.BotClass
         {
             var respons = keys as List<string>;
             if (respons == null) return string.Empty;
-            var rand = _random.Next(0, respons.Count - 1);
+            
+            // Next(0, 5) = antara 0 sampai 4
+            var rand = _random.Next(0, respons.Count);
             
             return respons[rand]
                 .ReplaceWithBotValue();
