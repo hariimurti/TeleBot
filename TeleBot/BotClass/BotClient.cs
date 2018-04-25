@@ -16,20 +16,17 @@ namespace TeleBot.BotClass
     {
         private static Log _log = new Log("Bot");
         private static Database _db = new Database();
-        
+
         private static TelegramBotClient _bot = Client();
         private static TelegramBotClient _botFile = Client(30);
         private static bool _isReceiving;
-        
+
         private static TelegramBotClient Client(int timeout = 0)
         {
             try
             {
                 var client = new TelegramBotClient(Bot.Keys.Token);
-                if (timeout > 0)
-                {
-                    client.Timeout = TimeSpan.FromMinutes(timeout);
-                }
+                if (timeout > 0) client.Timeout = TimeSpan.FromMinutes(timeout);
                 return client;
             }
             catch (Exception e)
@@ -43,16 +40,17 @@ namespace TeleBot.BotClass
                 {
                     _log.Error(e.Message);
                 }
+
                 return null;
             }
         }
 
         #region StartReceivingMessage
-        
+
         public static async Task StartReceivingMessage()
         {
             if (_isReceiving) return;
-            
+
             // mendapatkan info bot
             var me = await _bot.GetMeAsync();
 
@@ -60,7 +58,7 @@ namespace TeleBot.BotClass
             var readFirstName = Regex.Match(me.FirstName, @"^(\w+)\b");
             Bot.Name = readFirstName.Success ? readFirstName.Groups[1].Value : me.FirstName;
             Bot.Username = me.Username;
-            
+
             Console.Title = string.Format("{0} » {1} — @{2}", Program.AppName, Bot.Name, Bot.Username);
             _log.Info("Akun bot: {0} — @{1}", Bot.Name, Bot.Username);
 
@@ -83,7 +81,7 @@ namespace TeleBot.BotClass
         {
             _log.Error("OnReceiveError: " + e.ApiRequestException.Message);
         }
-        
+
         #endregion
 
         #region AnswerCallbackQueryAsync
@@ -102,7 +100,7 @@ namespace TeleBot.BotClass
         }
 
         #endregion
-        
+
         #region DeleteMessageAsync
 
         public static async Task<bool> DeleteMessageAsync(Message msg)
@@ -175,22 +173,25 @@ namespace TeleBot.BotClass
 
         #region SendTextAsync
 
-        public static async Task<Message> SendTextAsync(Message msg, string text, bool reply = false, ParseMode parse = ParseMode.Default, IReplyMarkup button = null, bool preview = true)
+        public static async Task<Message> SendTextAsync(Message msg, string text, bool reply = false,
+            ParseMode parse = ParseMode.Default, IReplyMarkup button = null, bool preview = true)
         {
             var replyId = reply ? msg.MessageId : 0;
             return await SendTextAsync(msg.Chat.Id, text, replyId, parse, button, preview);
         }
 
-        public static async Task<Message> SendTextAsync(ChatId chatId, string text, int replyId = 0, ParseMode parse = ParseMode.Default, IReplyMarkup button = null, bool preview = true)
+        public static async Task<Message> SendTextAsync(ChatId chatId, string text, int replyId = 0,
+            ParseMode parse = ParseMode.Default, IReplyMarkup button = null, bool preview = true)
         {
             try
             {
                 await _bot.SendChatActionAsync(chatId, ChatAction.Typing);
                 await Task.Delay(500);
-                
+
                 _log.Debug("SendTextAsync: {0} » {1}", chatId, text.ToSingleLine());
-                var message = await _bot.SendTextMessageAsync(chatId, text, parse, !preview, replyToMessageId: replyId, replyMarkup: button);
-                
+                var message = await _bot.SendTextMessageAsync(chatId, text, parse, !preview, replyToMessageId: replyId,
+                    replyMarkup: button);
+
                 await _db.InsertMessageOutgoing(message);
                 return message;
             }
@@ -205,29 +206,32 @@ namespace TeleBot.BotClass
 
         #region EditOrSendTextAsync
 
-        public static async Task<Message> EditOrSendTextAsync(Message msg, int messageId, string text, ParseMode parse = ParseMode.Default, InlineKeyboardMarkup button = null, bool preview = true, bool sendOnError = true)
+        public static async Task<Message> EditOrSendTextAsync(Message msg, int messageId, string text,
+            ParseMode parse = ParseMode.Default, InlineKeyboardMarkup button = null, bool preview = true,
+            bool sendOnError = true)
         {
             return await EditOrSendTextAsync(msg.Chat.Id, messageId, text, parse, button, preview, sendOnError);
         }
 
-        public static async Task<Message> EditOrSendTextAsync(ChatId chatId, int messageId, string text, ParseMode parse = ParseMode.Default, InlineKeyboardMarkup button = null, bool preview = true, bool sendOnError = true)
+        public static async Task<Message> EditOrSendTextAsync(ChatId chatId, int messageId, string text,
+            ParseMode parse = ParseMode.Default, InlineKeyboardMarkup button = null, bool preview = true,
+            bool sendOnError = true)
         {
             try
             {
                 _log.Debug("EditOrSendTextAsync: {0} » {1}", messageId, text.ToSingleLine());
                 var message = await _bot.EditMessageTextAsync(chatId, messageId, text, parse, !preview, button);
-                
+
                 await _db.InsertMessageOutgoing(message);
                 return message;
             }
             catch (Exception ex)
             {
                 _log.Error(ex.Message);
-                
+
                 if (sendOnError)
                     return await SendTextAsync(chatId, text, 0, parse, button, preview);
-                else
-                    return null;
+                return null;
             }
         }
 
@@ -235,13 +239,15 @@ namespace TeleBot.BotClass
 
         #region SendPhotoAsync
 
-        public static async Task<Message> SendPhotoAsync(Message msg, InputOnlineFile file, string caption = null, ParseMode parse = ParseMode.Default, bool reply = false)
+        public static async Task<Message> SendPhotoAsync(Message msg, InputOnlineFile file, string caption = null,
+            ParseMode parse = ParseMode.Default, bool reply = false)
         {
             var replyId = reply ? msg.MessageId : 0;
             return await SendPhotoAsync(msg.Chat.Id, file, caption, parse, replyId);
         }
 
-        public static async Task<Message> SendPhotoAsync(ChatId chatId, InputOnlineFile file, string caption = null, ParseMode parse = ParseMode.Default, int replyId = 0)
+        public static async Task<Message> SendPhotoAsync(ChatId chatId, InputOnlineFile file, string caption = null,
+            ParseMode parse = ParseMode.Default, int replyId = 0)
         {
             try
             {
@@ -249,7 +255,7 @@ namespace TeleBot.BotClass
                 await _bot.SendChatActionAsync(chatId, ChatAction.UploadPhoto);
 
                 _log.Debug("SendPhotoAsync: {0}", chatId);
-                
+
                 if (caption?.Length > 200)
                 {
                     message = await _botFile.SendPhotoAsync(chatId, file, replyToMessageId: replyId);

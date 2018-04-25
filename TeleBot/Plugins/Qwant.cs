@@ -59,8 +59,7 @@ namespace TeleBot.Plugins
             public string Media { get; set; }
             public string Thumbnail { get; set; }
 
-            [JsonProperty("thumb_type")]
-            public string Extension { get; set; }
+            [JsonProperty("thumb_type")] public string Extension { get; set; }
 
             public int Count { get; set; }
         }
@@ -74,7 +73,7 @@ namespace TeleBot.Plugins
 
         private async Task<Response> GetResponse(string address)
         {
-            var request = new WebRequest()
+            var request = new WebRequest
             {
                 Url = address,
                 Method = WebMethod.Get
@@ -87,10 +86,10 @@ namespace TeleBot.Plugins
         {
             if (string.IsNullOrWhiteSpace(query)) return;
             _log.Debug("Pencarian : {0}", query);
-            
+
             var address = apiUrl + "web?count=10&locale=id_ID&q=" + query.EncodeUrl();
             Response result;
-            
+
             try
             {
                 result = await GetResponse(address);
@@ -99,19 +98,20 @@ namespace TeleBot.Plugins
             {
                 _log.Error(e.Message);
 
-                await BotClient.SendTextAsync(_message, "Mohon maaf...\nPlugin qwant sedang mengalami gangguan.\nCobalah beberapa saat lagi.", true);
+                await BotClient.SendTextAsync(_message,
+                    "Mohon maaf...\nPlugin qwant sedang mengalami gangguan.\nCobalah beberapa saat lagi.", true);
                 return;
             }
-            
+
             var items = result.Data.Result.Items;
             if (items.Length == 0)
             {
                 _log.Warning("Pencarian tidak membuahkan hasil...");
-                
+
                 await BotClient.SendTextAsync(_message, $"Maaf kak... {Bot.Name} gak nemu yang dicari..", true);
                 return;
             }
-            
+
             _log.Debug("Hasil : {0}", items.Length);
 
             var count = 0;
@@ -123,7 +123,7 @@ namespace TeleBot.Plugins
                 var num = count.ToString().PadLeft(padding, '0');
                 respon += $"\n{num}. <a href=\"{item.Url}\">{item.Title.RemoveHtmlTag().Trim()}</a>";
             }
-            
+
             await BotClient.SendTextAsync(_message, respon, parse: ParseMode.Html, preview: false);
         }
 
@@ -131,10 +131,10 @@ namespace TeleBot.Plugins
         {
             if (string.IsNullOrWhiteSpace(query)) return;
             _log.Debug("Pencarian : {0}", query);
-            
+
             var address = apiUrl + "images?count=10&offset=1&q=" + query.EncodeUrl();
             Response result;
-            
+
             try
             {
                 result = await GetResponse(address);
@@ -143,44 +143,42 @@ namespace TeleBot.Plugins
             {
                 _log.Error(e.Message);
 
-                await BotClient.SendTextAsync(_message, "Mohon maaf...\nPlugin qwant sedang mengalami gangguan.\nCobalah beberapa saat lagi.", true);
+                await BotClient.SendTextAsync(_message,
+                    "Mohon maaf...\nPlugin qwant sedang mengalami gangguan.\nCobalah beberapa saat lagi.", true);
                 return;
             }
-            
+
             var items = result.Data.Result.Items;
             if (items.Length == 0)
             {
                 _log.Warning("Pencarian tidak membuahkan hasil...");
-                
+
                 await BotClient.SendTextAsync(_message, $"Maaf kak... {Bot.Name} gak nemu yang dicari..", true);
                 return;
             }
-            
+
             _log.Debug("Hasil : {0}", items.Length);
 
             var queue = new Queue<Items>();
-            foreach (var item in items)
-            {
-                queue.Enqueue(item);
-            }
+            foreach (var item in items) queue.Enqueue(item);
 
             while (queue.Count > 0)
             {
                 var item = items[_random.Next(0, items.Length)];
                 var title = item.Title.DecodeUrl();
                 var desc = item.Desc;
-                
+
                 _log.Debug("Kirim image : {0}", item.Url);
-                
+
                 var image = new InputOnlineFile(item.Media);
                 var caption = $"Hasil pencarian : {query}";
                 if (!string.IsNullOrWhiteSpace(title))
                     caption += $"\nJudul : {title}";
                 if (!string.IsNullOrWhiteSpace(desc))
                     caption += $"\nDeskripsi : {desc}";
-                
+
                 var sentPhoto = await BotClient.SendPhotoAsync(_message, image, caption);
-                
+
                 if (sentPhoto != null) break;
             }
         }

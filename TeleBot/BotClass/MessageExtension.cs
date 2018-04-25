@@ -64,13 +64,13 @@ namespace TeleBot.BotClass
             {
                 case ParseMode.Html:
                     return $"<a href=\"tg://user?id={id}\">{name}</a>";
-                 
+
                 case ParseMode.Markdown:
                     return $"[{name}](tg://user?id={id})";
-                 
+
                 case ParseMode.Default:
                     return name;
-                 
+
                 default:
                     return name;
             }
@@ -79,28 +79,20 @@ namespace TeleBot.BotClass
         public static async Task<bool> IsAdminThisGroup(this Message message)
         {
             if (!message.IsGroupChat()) return false;
-            
+
             var admins = await BotClient.GetChatAdministratorsAsync(message.Chat.Id);
             foreach (var admin in admins)
-            {
                 if (admin.User.Id == message.From.Id)
                     return true;
-            }
 
             return false;
         }
 
         public static string GetReplyResponse(this Message message)
         {
-            if (message.IsFromOwner())
-            {
-                return BotResponse.ReplyToOwner();
-            }
-            
-            if (message.IsFromAdmins())
-            {
-                return BotResponse.ReplyToAdmins();
-            }
+            if (message.IsFromOwner()) return BotResponse.ReplyToOwner();
+
+            if (message.IsFromAdmins()) return BotResponse.ReplyToAdmins();
 
             return BotResponse.ReplyToOthers();
         }
@@ -121,7 +113,7 @@ namespace TeleBot.BotClass
 
         public static bool IsForwardMessage(this Message message)
         {
-            return (message.ForwardFrom != null);
+            return message.ForwardFrom != null;
         }
 
         public static bool IsFromOwner(this Message message)
@@ -149,7 +141,7 @@ namespace TeleBot.BotClass
         {
             return message.Chat.Id == Bot.Keys.GroupId;
         }
-        
+
         public static bool IsPrivateChat(this Message message)
         {
             return message.Chat.Type == ChatType.Private;
@@ -157,7 +149,7 @@ namespace TeleBot.BotClass
 
         public static bool IsTextMessage(this Message message)
         {
-            return (message.Type == MessageType.Text);
+            return message.Type == MessageType.Text;
         }
 
         public static bool IsTextTooShort(this Message message)
@@ -166,7 +158,7 @@ namespace TeleBot.BotClass
             var text = Regex.Replace(message.Text, @"\p{C}+", string.Empty);
             // hapus spasi
             text = Regex.Replace(text, @"\s{2,}", string.Empty);
-            return (string.IsNullOrWhiteSpace(text) || text.Length < 2);
+            return string.IsNullOrWhiteSpace(text) || text.Length < 2;
         }
 
         public static bool IsTextMesum(this Message message)
@@ -183,7 +175,7 @@ namespace TeleBot.BotClass
 
         public static bool IsReplyToMessage(this Message message)
         {
-            return (message.ReplyToMessage != null);
+            return message.ReplyToMessage != null;
         }
     }
 }

@@ -12,10 +12,10 @@ namespace TeleBot.BotClass
         private static Log _log = new Log("BotConfigs");
         private static readonly string JsonFile = Program.FilePathInData("Bot.json");
         public static BotKeys Keys;
-        
+
         public static string Name = string.Empty;
         public static string Username = string.Empty;
-        
+
         public class BotKeys
         {
             public string Token { get; set; }
@@ -37,9 +37,9 @@ namespace TeleBot.BotClass
                 if (!File.Exists(JsonFile))
                 {
                     _log.Debug("Menyiapkan contoh pengaturan...");
-                    
+
                     // buat key baru
-                    var newKeys = new BotKeys()
+                    var newKeys = new BotKeys
                     {
                         Token = string.Empty,
                         Alias = string.Empty,
@@ -51,17 +51,17 @@ namespace TeleBot.BotClass
                     jsonObject = JsonConvert.SerializeObject(newKeys, Program.JsonSettings);
 
                     File.WriteAllText(JsonFile, jsonObject, Encoding.UTF8);
-                    
+
                     _log.Error("Silahkan isi pengaturan: {0}", Path.GetFileName(JsonFile));
-                    
+
                     return false;
                 }
-                
+
                 _log.Debug("Membaca pengaturan: {0}", Path.GetFileName(JsonFile));
-                
+
                 // buka file json
                 jsonObject = File.ReadAllText(JsonFile);
-                
+
                 // parsing ke BotKeys
                 Keys = JsonConvert.DeserializeObject<BotKeys>(jsonObject);
 
@@ -72,18 +72,18 @@ namespace TeleBot.BotClass
                     var value = prop.GetValue(Keys, null);
                     if (prop.PropertyType == typeof(List<string>))
                     {
-                        var list = (List<string>)value;
+                        var list = (List<string>) value;
                         if (list.Count > 0) continue;
                     }
                     else if (!string.IsNullOrWhiteSpace(value.ToString()))
                     {
                         continue;
                     }
-                    
+
                     _log.Error("{0} : tidak boleh kosong!", prop.Name);
                     result = false;
                 }
-                
+
                 return result;
             }
             catch (Exception ex)

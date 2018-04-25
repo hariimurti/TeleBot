@@ -41,9 +41,9 @@ namespace TeleBot.BotClass
                 if (!File.Exists(JsonFile))
                 {
                     _log.Debug("Menyiapkan contoh pengaturan...");
-                    
+
                     // buat key baru
-                    var newKeys = new BotResponseKeys()
+                    var newKeys = new BotResponseKeys
                     {
                         BadWord = new List<string>(),
                         NoAccessToButton = new List<string>(),
@@ -60,17 +60,17 @@ namespace TeleBot.BotClass
                     jsonObject = JsonConvert.SerializeObject(newKeys, Program.JsonSettings);
 
                     File.WriteAllText(JsonFile, jsonObject, Encoding.UTF8);
-                    
+
                     _log.Error("Silahkan isi pengaturan: {0}", Path.GetFileName(JsonFile));
-                    
+
                     return false;
                 }
-                
+
                 _log.Debug("Membaca pengaturan: {0}", Path.GetFileName(JsonFile));
-                
+
                 // buka file json
                 jsonObject = File.ReadAllText(JsonFile);
-                
+
                 // parsing ke BotResponseKeys
                 Keys = JsonConvert.DeserializeObject<BotResponseKeys>(jsonObject);
 
@@ -81,14 +81,14 @@ namespace TeleBot.BotClass
                     var value = prop.GetValue(Keys, null);
                     if (prop.PropertyType == typeof(List<string>))
                     {
-                        var list = (List<string>)value;
+                        var list = (List<string>) value;
                         if (list.Count > 0) continue;
                     }
                     else if (!string.IsNullOrWhiteSpace(value.ToString()))
                     {
                         continue;
                     }
-                    
+
                     _log.Error("{0} : tidak boleh kosong!", prop.Name);
                     result = false;
                 }
@@ -106,10 +106,10 @@ namespace TeleBot.BotClass
         {
             var respons = keys as List<string>;
             if (respons == null) return string.Empty;
-            
+
             // Next(0, 5) = antara 0 sampai 4
             var rand = _random.Next(0, respons.Count);
-            
+
             return respons[rand]
                 .ReplaceWithBotValue();
         }

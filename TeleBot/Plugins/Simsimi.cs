@@ -17,7 +17,7 @@ namespace TeleBot.Plugins
         private static Log _log = new Log("Simsimi");
         private static Database _db = new Database();
         private Message _message;
-        
+
         private class ResponseModel
         {
             //Result Code
@@ -27,19 +27,19 @@ namespace TeleBot.Plugins
             //404 - Not found.
             //500 - Server Error.
             //509 - Daily Request Query Limit Exceeded.
-            
+
             public string Response { get; set; }
             public string Id { get; set; }
             public int Result { get; set; }
             public string Msg { get; set; }
         }
-        
+
         private static async Task<ResponseModel> GetApiResponse(string key, string text, bool filter = true)
         {
             var ft = filter ? 0 : 1;
             var data = Uri.EscapeDataString(text);
             var apiUrl = $"http://sandbox.api.simsimi.com/request.p?key={key}&lc=id&ft={ft}.0&text={data}";
-            
+
             _log.Debug("Cari jawaban: {0}", text);
             using (var client = new HttpClient())
             {
@@ -61,7 +61,8 @@ namespace TeleBot.Plugins
             if (!verify)
             {
                 _log.Warning("Token: {0} | Result: Format Salah!", key);
-                await BotClient.SendTextAsync(_message, $"*Token* : {key}\n*Hasil* : Token Salah!", parse: ParseMode.Markdown);
+                await BotClient.SendTextAsync(_message, $"*Token* : {key}\n*Hasil* : Token Salah!",
+                    parse: ParseMode.Markdown);
                 return;
             }
 
@@ -71,7 +72,8 @@ namespace TeleBot.Plugins
                 if (result.Result != 100)
                 {
                     _log.Warning("Token: {0} | Result: code {1} - {2}", key, result.Result, result.Msg);
-                    await BotClient.SendTextAsync(_message, $"*Token* : {key}\n*Hasil* : {result.Result} - {result.Msg}", parse: ParseMode.Markdown);
+                    await BotClient.SendTextAsync(_message,
+                        $"*Token* : {key}\n*Hasil* : {result.Result} - {result.Msg}", parse: ParseMode.Markdown);
                     return;
                 }
             }
@@ -87,17 +89,18 @@ namespace TeleBot.Plugins
                 if (exist != null)
                 {
                     _log.Warning("Token: {0} | Result: Exist!", key);
-                    await BotClient.SendTextAsync(_message, $"*Token* : {key}\n*Hasil* : Sudah ada!", parse: ParseMode.Markdown);
+                    await BotClient.SendTextAsync(_message, $"*Token* : {key}\n*Hasil* : Sudah ada!",
+                        parse: ParseMode.Markdown);
                     return;
                 }
-                
-                var token = new Token()
+
+                var token = new Token
                 {
                     Key = key,
                     Expired = DateTime.Now.AddDays(7),
                     LimitExceed = DateTime.Now
                 };
-                
+
                 await _db.InsertOrReplaceToken(token);
                 await BotClient.SendTextAsync(_message, "Makasih kaka 😍😘\nSeneng deh dapet token baru..");
             }
@@ -111,7 +114,7 @@ namespace TeleBot.Plugins
         public async void SendResponse(string text)
         {
             var replied = false;
-            
+
             try
             {
                 var tokens = await _db.GetTokens();
@@ -125,12 +128,11 @@ namespace TeleBot.Plugins
                 }
 
                 foreach (var token in tokenActive)
-                {
                     try
                     {
                         var isGodMode = _message.IsGodMode();
                         var result = await GetApiResponse(token.Key, text, isGodMode);
-                        
+
                         // token ok & respon bagus
                         if (result.Result == 100 && !string.IsNullOrWhiteSpace(result.Response))
                         {
@@ -140,10 +142,10 @@ namespace TeleBot.Plugins
                             var respon = result.Response.ReplaceSimsimiWithBotName();
                             await BotClient.SendTextAsync(_message, respon);
                             replied = true;
-                            
+
                             break;
                         }
-                        
+
                         // token mati
                         if (result.Result == 401)
                             token.Expired = DateTime.Now;
@@ -153,7 +155,7 @@ namespace TeleBot.Plugins
                         // kode lain lanjut
                         else
                             continue;
-                        
+
                         // perbaharui token
                         try
                         {
@@ -168,7 +170,6 @@ namespace TeleBot.Plugins
                     {
                         _log.Error(ex.Message);
                     }
-                }
             }
             catch (Exception ex)
             {
@@ -176,7 +177,7 @@ namespace TeleBot.Plugins
             }
 
             if (replied) return;
-            
+
             var noResponse = BotResponse.SimsimiNullResult();
             await BotClient.SendTextAsync(_message, noResponse);
         }

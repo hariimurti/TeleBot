@@ -16,9 +16,10 @@ namespace TeleBot
         public static readonly string AppName = "TeleBot";
         public static readonly string AppVersion = GetVersion();
         public static readonly string AppNameWithVersion = string.Format("{0} v{1}", AppName, AppVersion);
-        
+
         private static readonly string WorkingDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
         private static readonly string DataDirectory = GetDataDirectory();
+
         public static readonly JsonSerializerSettings JsonSettings = new JsonSerializerSettings
         {
             Formatting = Formatting.Indented,
@@ -30,11 +31,9 @@ namespace TeleBot
         private static void Main(string[] args)
         {
             // set debug level
-            foreach(var arg in args)
-            {
+            foreach (var arg in args)
                 if (arg == "--debug")
                     Log.ShowDebug = true;
-            }
 
             // selamat datang
             Console.Title = AppNameWithVersion;
@@ -42,15 +41,14 @@ namespace TeleBot
             log.Info(AppNameWithVersion);
             log.Debug("Working Directory: {0}", WorkingDirectory);
             log.Debug("Data Directory: {0}", DataDirectory);
-            
+
             // buka konfigurasi
             var isBotConfigLoaded = Bot.Loaded();
             var isBotResponseLoaded = BotResponse.Loaded();
             if (!isBotConfigLoaded || !isBotResponseLoaded) Terminate(1);
-            
+
             // bot menerima pesan
             while (true)
-            {
                 try
                 {
                     BotClient.StartReceivingMessage().GetAwaiter();
@@ -61,11 +59,10 @@ namespace TeleBot
                     log.Error(ex.Message);
                     Task.Delay(10000).Wait();
                 }
-            }
-            
+
             // reSchedule
             Schedule.ReSchedule();
-            
+
             // tunggu key ctrl+c untuk keluar dari aplikasi
             var exitEvent = new ManualResetEvent(false);
             Console.CancelKeyPress += (sender, eventArgs) =>
@@ -74,7 +71,7 @@ namespace TeleBot
                 exitEvent.Set();
             };
             exitEvent.WaitOne();
-            
+
             // keluar dari aplikasi
             Terminate();
         }
@@ -100,12 +97,9 @@ namespace TeleBot
                 var windows = Path.Combine(WorkingDirectory, "Data");
                 var isRunOnLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
                 var dataDir = isRunOnLinux ? linux : windows;
-                
+
                 // bikin directory kalo blm ada
-                if (!Directory.Exists(dataDir))
-                {
-                    Directory.CreateDirectory(dataDir);
-                }
+                if (!Directory.Exists(dataDir)) Directory.CreateDirectory(dataDir);
 
                 return dataDir;
             }

@@ -16,7 +16,7 @@ namespace TeleBot.Plugins
         private Message _message;
         private CallbackQuery _callback;
         private bool _callbackMode;
-        
+
         public Welcome(Message message, CallbackQuery callback = null)
         {
             _message = message;
@@ -27,7 +27,7 @@ namespace TeleBot.Plugins
                 _callbackMode = true;
             }
         }
-        
+
         public async void SendGreeting()
         {
             var mention = string.Empty;
@@ -39,28 +39,26 @@ namespace TeleBot.Plugins
                     Command.Start(_message);
                     return;
                 }
-                else
-                {
-                    if (!string.IsNullOrWhiteSpace(mention)) mention += " ";
 
-                    var name = (member.FirstName + " " + member.LastName).Trim();
-                    if (string.IsNullOrWhiteSpace(name)) name = member.Username;
-                    if (string.IsNullOrWhiteSpace(name)) name = member.Id.ToString();
+                if (!string.IsNullOrWhiteSpace(mention)) mention += " ";
 
-                    mention += $"[{name}](tg://user?id={member.Id}),";
-                }
+                var name = (member.FirstName + " " + member.LastName).Trim();
+                if (string.IsNullOrWhiteSpace(name)) name = member.Username;
+                if (string.IsNullOrWhiteSpace(name)) name = member.Id.ToString();
+
+                mention += $"[{name}](tg://user?id={member.Id}),";
             }
-            
+
             if (string.IsNullOrWhiteSpace(mention)) return;
-            
+
             // cari kontak yg ada
             var exist = await _db.FindContact(_message.Chat.Id);
             if (!exist.Greeting) return;
-            
+
             var welcome = BotResponse.WelcomeToGroup()
                 .Replace("{member}", mention.TrimEnd(','))
                 .Replace("{group}", _message.ChatName());
-            
+
             await BotClient.SendTextAsync(_message, welcome, parse: ParseMode.Markdown);
         }
 
@@ -97,7 +95,7 @@ namespace TeleBot.Plugins
 
             if (string.IsNullOrWhiteSpace(data))
             {
-                var buttons = new InlineKeyboardMarkup(new List<InlineKeyboardButton>()
+                var buttons = new InlineKeyboardMarkup(new List<InlineKeyboardButton>
                 {
                     InlineKeyboardButton.WithCallbackData("Aktifkan", $"cmd=greeting&data=enable"),
                     InlineKeyboardButton.WithCallbackData("Nonaktifkan", $"cmd=greeting&data=disable")
@@ -106,23 +104,23 @@ namespace TeleBot.Plugins
                     $"Pengaturan ucapan selamat datang.\nStatus sekarang : " +
                     (existContact.Greeting ? "aktif." : "nonaktif."),
                     true, button: buttons);
-                
+
                 return;
             }
-            
-            var contact = new SQLite.Contact()
+
+            var contact = new SQLite.Contact
             {
                 Id = _message.Chat.Id,
                 Name = _message.ChatName(),
                 UserName = _message.Chat.Username,
-                Private = (_message.Chat.Type == ChatType.Private),
+                Private = _message.Chat.Type == ChatType.Private,
                 Blocked = existContact.Blocked,
                 Greeting = data.Equals("enable", StringComparison.OrdinalIgnoreCase)
             };
 
             var result = await _db.InsertOrReplaceContact(contact);
             if (!result) return;
-            
+
             _log.Debug("Greeting {0} telah diperbaharui ({1})", _message.ChatName(), contact.Greeting);
             await BotClient.EditOrSendTextAsync(_message, _message.MessageId,
                 $"Ucapan selamat datang telah " + (contact.Greeting ? "diaktifkan." : "dinonaktifkan."));

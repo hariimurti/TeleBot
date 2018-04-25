@@ -15,12 +15,12 @@ namespace TeleBot.SQLite
             try
             {
                 if (_con != null) return;
-                
+
                 _con = new SQLiteAsyncConnection(Program.FilePathInData("Logs.db"));
                 _con.SetBusyTimeoutAsync(TimeSpan.FromSeconds(20));
                 _con.CreateTableAsync<LogData>();
             }
-            catch(SQLiteException ex)
+            catch (SQLiteException ex)
             {
                 LogError(ex.Message);
             }
@@ -39,7 +39,7 @@ namespace TeleBot.SQLite
                 if (_queueStart) return;
 
                 _queueStart = true;
-                
+
                 while (_queueLog.Count > 0)
                 {
                     var data = _queueLog.Dequeue();
@@ -53,12 +53,12 @@ namespace TeleBot.SQLite
                 LogError("WriteLog: {0}", ex.Message);
             }
         }
-        
+
         private void LogError(string message, params Object[] args)
         {
             message = string.Format(message, args);
             var timenow = DateTime.Now.ToLongTimeString();
-            
+
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine($"{timenow} » Error » Database » {message}");
             Console.ResetColor();

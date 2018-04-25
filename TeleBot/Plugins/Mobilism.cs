@@ -23,22 +23,22 @@ namespace TeleBot.Plugins
         private const string BaseAddress = "https://forum.mobilism.org";
         private const string LoginPath = "/ucp.php?mode=login";
         private const string LoginAddress = BaseAddress + LoginPath;
-        
+
         private static Log _log = new Log("Mobilism");
         private static string _sid;
         private static bool _isLoggedIn;
         private Message _message;
         private CallbackQuery _callback;
         private bool _callbackMode;
-        
+
         private static readonly string JsonFile = Program.FilePathInData("Mobilism.json");
-        
+
         private class Account
         {
             public string Username { get; set; }
             public string Password { get; set; }
         }
-        
+
         private class Thread
         {
             public string LinkPath { get; set; }
@@ -61,10 +61,10 @@ namespace TeleBot.Plugins
             {
                 var json = File.ReadAllText(JsonFile);
                 var auth = JsonConvert.DeserializeObject<Account>(json);
-                
+
                 if (string.IsNullOrWhiteSpace(auth.Username) || string.IsNullOrWhiteSpace(auth.Password))
                     throw new Exception("Akun tidak boleh kosong!");
-                
+
                 return auth;
             }
         }
@@ -73,7 +73,7 @@ namespace TeleBot.Plugins
         {
             var newSid = WebClient.ReadCookieValue(BaseAddress, "sid");
             if (string.Equals(_sid, newSid)) return;
-            
+
             _sid = newSid;
             _log.Info("New SID: {0}", newSid);
         }
@@ -86,9 +86,9 @@ namespace TeleBot.Plugins
                 if (string.IsNullOrWhiteSpace(_sid))
                 {
                     // buka homepage
-                    var homepage = await WebClient.GetOrPostStringAsync(new WebRequest() {Url = BaseAddress});
+                    var homepage = await WebClient.GetOrPostStringAsync(new WebRequest {Url = BaseAddress});
                     Dump.ToFile("Mobilism.html", homepage);
-                    
+
                     GetSidFromCookies();
 
                     // verifikasi login
@@ -115,26 +115,26 @@ namespace TeleBot.Plugins
                 });
                 var headers = new List<WebHeader>
                 {
-                    new WebHeader() {Key = "Referer", Value = $"{LoginAddress}&sid={_sid}"}
+                    new WebHeader {Key = "Referer", Value = $"{LoginAddress}&sid={_sid}"}
                 };
 
-                var loginRequest = new WebRequest()
+                var loginRequest = new WebRequest
                 {
                     Url = LoginAddress,
                     Headers = headers,
                     Method = WebMethod.Post,
                     Content = content
                 };
-                
+
                 var loginpage = await WebClient.GetOrPostStringAsync(loginRequest);
                 Dump.ToFile("Mobilism-Login.html", loginpage);
-                
+
                 GetSidFromCookies();
-                
+
                 // cek html atau kode alien?
                 if (!loginpage.Contains("html"))
                     throw new Exception("Result bukan html!");
-                
+
                 // verifikasi login
                 if (!loginpage.Contains(LoginPath))
                 {
@@ -163,7 +163,7 @@ namespace TeleBot.Plugins
         {
             // default search mode
             var threadMode = false;
-            
+
             // antisipasi error jika data null
             // data diganti dgn string empty & pindah ke thread mode
             if (string.IsNullOrWhiteSpace(data))
@@ -171,25 +171,25 @@ namespace TeleBot.Plugins
                 threadMode = true;
                 data = string.Empty;
             }
-            
+
             var keywords = data.EncodeUrl();
             var forumId = isApp ? "399" : "408";
-            
+
             // search mode : app - game
-            var threadUrl = isApp ?
-                $"{BaseAddress}/search.php?keywords={keywords}&fid%5B%5D=399&sr=topics&sf=titleonly" :
-                $"{BaseAddress}/search.php?keywords={keywords}&sr=topics&sf=titleonly";
-            
+            var threadUrl = isApp
+                ? $"{BaseAddress}/search.php?keywords={keywords}&fid%5B%5D=399&sr=topics&sf=titleonly"
+                : $"{BaseAddress}/search.php?keywords={keywords}&sr=topics&sf=titleonly";
+
             // thread mode : app - game
             if (threadMode)
                 threadUrl = $"{BaseAddress}/viewforum.php?f={forumId}";
-            
+
             var headers = new List<WebHeader>
             {
-                new WebHeader() {Key = "Referer", Value = $"{BaseAddress}/viewforum.php?f={forumId}"}
+                new WebHeader {Key = "Referer", Value = $"{BaseAddress}/viewforum.php?f={forumId}"}
             };
-            
-            var threadRequest = new WebRequest()
+
+            var threadRequest = new WebRequest
             {
                 Url = threadUrl,
                 Headers = headers,
@@ -202,12 +202,12 @@ namespace TeleBot.Plugins
 
         public void OpenThread(string data)
         {
-            var threadRequest = new WebRequest()
+            var threadRequest = new WebRequest
             {
                 Url = BaseAddress + data,
                 Method = WebMethod.Get
             };
-            
+
             _log.Debug("Buka thread: {0}", data);
             GetThreadPost(threadRequest);
         }
@@ -237,17 +237,17 @@ namespace TeleBot.Plugins
             {
                 // akses thread/search
                 content = await WebClient.GetOrPostStringAsync(threadRequest);
-                
+
                 // cek html atau kode alien?
                 if (!content.Contains("html"))
                     throw new Exception("Result bukan html!");
-                
+
                 // verifikasi login
                 if (content.Contains(LoginPath))
                 {
                     _log.Warning("Status: logout...");
                     _isLoggedIn = false;
-                    
+
                     if (!threadMode)
                         throw new Exception("Search mode harus login!");
                 }
@@ -260,20 +260,21 @@ namespace TeleBot.Plugins
                                                         "Cobalah beberapa saat lagi.");
                 return;
             }
-            
+
             _log.Debug("Regex tabel...");
-            
+
             // regex tabel thread
-            var findTable = Regex.Match(content, @"<table.+>([\s\S]+)<\/table>", RegexOptions.Multiline | RegexOptions.IgnoreCase);
+            var findTable = Regex.Match(content, @"<table.+>([\s\S]+)<\/table>",
+                RegexOptions.Multiline | RegexOptions.IgnoreCase);
             if (!findTable.Success)
             {
                 _log.Error("Tabel tidak ditemukan!");
                 await BotClient.SendTextAsync(_message, "Mohon maaf...\nPlugin mobilism tidak bisa membaca threads.");
                 return;
             }
-            
+
             _log.Debug("Regex list...");
-            
+
             const string patternSearch = "<td>\n.+\n.+\n" +
                                          "<a.+href=\"(.+)\".+topictitle.+>(.+)<\\/a>.+\n.+" +
                                          "<a.+username.+>(.+)<\\/a>.+" +
@@ -284,7 +285,7 @@ namespace TeleBot.Plugins
                                          "<a.+username.+>(.+)<\\/a>.+" +
                                          "<small>(.+)<\\/small>\n.+\n.+\n.+\n.+\n.+\n.+\n.+\n" +
                                          "<\\/tr>";
-            
+
             // regex cari per-baris dalam tabel
             var table = findTable.Groups[1].Value;
             var rows = Regex.Matches(table, threadMode ? patternThread : patternSearch, RegexOptions.Multiline);
@@ -292,7 +293,7 @@ namespace TeleBot.Plugins
             {
                 _log.Warning("Rows tidak ditemukan!");
                 await BotClient.SendTextAsync(_message, $"Maaf kaka...\n{Bot.Name} gak nemu yg dicari." +
-                                                  (threadMode ? "" : "\nCoba pakai keyword yg lain."));
+                                                        (threadMode ? "" : "\nCoba pakai keyword yg lain."));
                 return;
             }
 
@@ -303,7 +304,7 @@ namespace TeleBot.Plugins
             {
                 var f = string.Empty;
                 var t = string.Empty;
-                
+
                 // regex f=number & t=number
                 var matches = Regex.Matches(row.Groups[1].Value, @"([f|t]=[\d]+)");
                 foreach (Match match in matches)
@@ -321,18 +322,18 @@ namespace TeleBot.Plugins
                     PostDate = row.Groups[4].Value
                 };
                 threads.Add(thread);
-                
+
                 if (count < maximum) count++;
                 else break;
             }
-            
+
             _log.Debug("Menyiapkan list...");
-            
+
             var total = threads.Count;
             var padding = total.ToString().Length;
             var respon = "<b>Mobilism</b> : " + (isApp ? "Aplikasi\n" : "Permainan\n") +
                          (threadMode ? "" : $"<b>Pencarian</b> : {keywords}\n") +
-                         "<b>Hasil</b> : " + (total < 10 ? total.ToString() : "10") + "/" + total.ToString() + " threads\n" +
+                         "<b>Hasil</b> : " + (total < 10 ? total.ToString() : "10") + "/" + total + " threads\n" +
                          "—— —— —— —— —— ——\n";
 
             count = 1;
@@ -344,13 +345,13 @@ namespace TeleBot.Plugins
                           $"by <b>{thread.Username}</b> — {thread.PostDate}.\n";
                 count++;
             }
-            
+
             var buttonRows = new List<List<InlineKeyboardButton>>();
-            if (threads.Count > (maximum / 2))
+            if (threads.Count > maximum / 2)
             {
                 // reset counter
                 count = 1;
-                
+
                 // button baris 1
                 var partOne = threads.Take(total / 2).ToList();
                 var buttonRowOne = new List<InlineKeyboardButton>();
@@ -361,8 +362,9 @@ namespace TeleBot.Plugins
                     buttonRowOne.Add(button);
                     count++;
                 }
+
                 buttonRows.Add(buttonRowOne);
-                
+
                 // button baris 2
                 var partTwo = threads.Skip(total / 2).ToList();
                 var buttonRowTwo = new List<InlineKeyboardButton>();
@@ -373,13 +375,14 @@ namespace TeleBot.Plugins
                     buttonRowTwo.Add(button);
                     count++;
                 }
+
                 buttonRows.Add(buttonRowTwo);
             }
             else
             {
                 // reset counter
                 count = 1;
-                
+
                 // button jadi 1 baris
                 var buttonRow = new List<InlineKeyboardButton>();
                 foreach (var thread in threads)
@@ -390,18 +393,19 @@ namespace TeleBot.Plugins
                     buttonRow.Add(buttonColumn);
                     count++;
                 }
+
                 buttonRows.Add(buttonRow);
             }
-            
+
             var responWithButtons = respon + "—— —— —— —— —— ——\nLink download, pencet tombol nomor dibawah :";
             var buttons = new InlineKeyboardMarkup(buttonRows.ToArray());
 
             var sentMessage = await BotClient.SendTextAsync(_message, responWithButtons,
                 parse: ParseMode.Html, button: buttons, preview: false);
             if (sentMessage == null) return;
-            
+
             // schedule edit pesan keluar
-            var schedule = new ScheduleData()
+            var schedule = new ScheduleData
             {
                 ChatId = sentMessage.Chat.Id,
                 MessageId = sentMessage.MessageId,
@@ -419,12 +423,12 @@ namespace TeleBot.Plugins
                 await BotClient.AnswerCallbackQueryAsync(_callback.Id, "Tunggu sebentar...");
 
             string content;
-            
+
             try
             {
                 // akses thread/search
                 content = await WebClient.GetOrPostStringAsync(threadRequest);
-                
+
                 // cek html atau kode alien?
                 if (!content.Contains("html"))
                     throw new Exception("Result bukan html!");
@@ -437,13 +441,13 @@ namespace TeleBot.Plugins
                                                         "Cobalah beberapa saat lagi.");
                 return;
             }
-            
+
             _log.Debug("Regex link download...");
 
             var pattern = "<div.*class=\"content\".*<span.*>(.+)<\\/span><br \\/>.*" +
                           "Requirements.*<\\/span>(.+)<br \\/>.*Overview:.*" +
                           "Instructions:(.+).*<\\/div>";
-            
+
             var post = Regex.Match(content, pattern);
             if (!post.Success)
             {
@@ -453,7 +457,7 @@ namespace TeleBot.Plugins
             }
 
             _log.Debug("Menyiapkan link download...");
-            
+
             var title = post.Groups[1].Value.RemoveHtmlTag();
             var require = post.Groups[2].Value.RemoveHtmlTag();
             var link = post.Groups[3].Value.Replace("<br />", "\n").RemoveHtmlTag();

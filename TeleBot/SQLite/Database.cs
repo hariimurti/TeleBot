@@ -20,7 +20,7 @@ namespace TeleBot.SQLite
             try
             {
                 if (_con != null) return;
-                
+
                 _con = new SQLiteAsyncConnection(Program.FilePathInData("Database.db"));
                 _con.SetBusyTimeoutAsync(TimeSpan.FromSeconds(20));
                 _con.CreateTableAsync<Contact>();
@@ -30,7 +30,7 @@ namespace TeleBot.SQLite
                 _con.CreateTableAsync<ScheduleData>();
                 _con.CreateTableAsync<Hashtag>();
             }
-            catch(SQLiteException ex)
+            catch (SQLiteException ex)
             {
                 _log.Error(ex.Message);
             }
@@ -75,10 +75,7 @@ namespace TeleBot.SQLite
                     .OrderByDescending(m => m.DateTime)
                     .ToListAsync();
 
-                if (list.Count > 1 && secondLast)
-                {
-                    return list[1];
-                }
+                if (list.Count > 1 && secondLast) return list[1];
 
                 return list.FirstOrDefault();
             }
@@ -112,7 +109,7 @@ namespace TeleBot.SQLite
             var list = await _con.Table<Token>()
                 .Where(t => t.Key == key)
                 .ToListAsync();
-            
+
             return list.FirstOrDefault();
         }
 
@@ -142,14 +139,14 @@ namespace TeleBot.SQLite
         {
             try
             {
-                var contact = new Contact()
+                var contact = new Contact
                 {
                     Id = data.Chat.Id,
                     Name = data.ChatName(),
                     UserName = data.Chat.Username,
-                    Private = (data.Chat.Type == ChatType.Private)
+                    Private = data.Chat.Type == ChatType.Private
                 };
-                
+
                 // cari kontak yg sudah ada
                 var exist = await FindContact(data.Chat.Id);
                 if (exist != null)
@@ -157,12 +154,12 @@ namespace TeleBot.SQLite
                     contact.Blocked = exist.Blocked;
                     contact.Greeting = exist.Greeting;
                 }
-                
+
                 // tambah/perbarui contact
                 await InsertOrReplaceContact(contact);
-                
+
                 // MessageIncoming
-                var message = new MessageIncoming()
+                var message = new MessageIncoming
                 {
                     MessageId = data.MessageId,
                     ChatId = data.Chat.Id,
@@ -172,7 +169,7 @@ namespace TeleBot.SQLite
                     Text = data.Text,
                     DateTime = data.Date
                 };
-                
+
                 // insert message
                 await _con.InsertAsync(message);
                 return true;
@@ -188,7 +185,7 @@ namespace TeleBot.SQLite
         {
             try
             {
-                var message = new MessageOutgoing()
+                var message = new MessageOutgoing
                 {
                     MessageId = data.MessageId,
                     ChatId = data.Chat.Id,
@@ -196,7 +193,7 @@ namespace TeleBot.SQLite
                     Text = data.Type == MessageType.Text ? data.Text : data.Type.ToString(),
                     DateTime = data.Date
                 };
-                
+
                 // insert message
                 await _con.InsertAsync(message);
             }
@@ -243,6 +240,7 @@ namespace TeleBot.SQLite
                 {
                     await _con.InsertAsync(data);
                 }
+
                 return true;
             }
             catch (Exception e)
@@ -260,7 +258,7 @@ namespace TeleBot.SQLite
 
         public async Task DeleteBookmark(Hashtag data)
         {
-           await _con.DeleteAsync(data);
+            await _con.DeleteAsync(data);
         }
 
         public async Task<List<Hashtag>> GetBookmarks(long chatId = 0)

@@ -13,7 +13,7 @@ namespace TeleBot.Plugins
     {
         private static Log _log = new Log("Command");
         private static Database _db = new Database();
-        
+
         public static void Execute(Message message)
         {
             // pemisahan command, mention & data
@@ -28,7 +28,8 @@ namespace TeleBot.Plugins
             var mention = regexCmd.Groups[2].Value;
             var data = regexCmd.Groups[3].Value;
 
-            if (!string.IsNullOrWhiteSpace(mention) && (!string.Equals(mention, Bot.Username, StringComparison.OrdinalIgnoreCase)))
+            if (!string.IsNullOrWhiteSpace(mention) &&
+                !string.Equals(mention, Bot.Username, StringComparison.OrdinalIgnoreCase))
             {
                 _log.Ignore("Username \"{0}\" (mention) tdk sama dgn \"{1}\" (bot)", mention, Bot.Username);
                 return;
@@ -40,79 +41,79 @@ namespace TeleBot.Plugins
                 case "help":
                     Help(message);
                     break;
-                
+
                 case "id":
                     ShowId(message);
                     break;
-                
+
                 case "start":
                     Start(message);
                     break;
-                
+
                 case "status":
                     Status(message);
                     break;
-                
+
                 case "token":
                     Token(message, data);
                     break;
-                
+
                 case "selamatdatang":
                 case "welcome":
                     new Welcome(message).Manage();
                     break;
-                
+
                 case "save":
                 case "simpan":
                     new Bookmark(message).Save(data);
                     break;
-                
+
                 case "delete":
                 case "hapus":
                     new Bookmark(message).Delete(data).GetAwaiter();
                     break;
-                
+
                 case "hashtag":
                     new Bookmark(message).GenerateList(false);
                     break;
-                
+
                 case "bookmark":
                     new Bookmark(message).GenerateList(true);
                     break;
-                
+
                 case "manage":
                 case "kelola":
                     new Bookmark(message).ManageList();
                     break;
-                
+
                 case "app":
                 case "aplikasi":
                     new Mobilism(message).ThreadList(data);
                     break;
-                
+
                 case "game":
                 case "permainan":
                     new Mobilism(message).ThreadList(data, false);
                     break;
-                
+
                 case "cari":
                 case "g":
                 case "google":
                 case "search":
                     new Qwant(message).SearchWeb(data);
                     break;
-                
+
                 case "img":
                 case "image":
                 case "photo":
                     new Qwant(message).SearchImage(data);
                     break;
-                
+
                 case "gapps":
                 case "opengapps":
                     new OpenGapps(message).SelectArch();
                     break;
-                
+
                 default:
                     _log.Ignore("Perintah: {0} -- tdk ada", cmd);
                     break;
@@ -156,7 +157,7 @@ namespace TeleBot.Plugins
                        "Teman obrolan\n" +
                        "• PM: chat teks spt biasa.\n" +
                        "• Grup: reply pesan atau mention {alias}.\n";
-            
+
             await BotClient.SendTextAsync(message, help.ReplaceWithBotValue(), parse: ParseMode.Markdown);
         }
 
@@ -197,7 +198,7 @@ namespace TeleBot.Plugins
                 if (!string.IsNullOrWhiteSpace(from.Username))
                     respon += $"\nUsername : @{from.Username}";
             }
-            
+
             await BotClient.SendTextAsync(message, respon, parse: ParseMode.Html);
         }
 
@@ -206,7 +207,7 @@ namespace TeleBot.Plugins
             var respon = BotResponse.SayHello();
             await BotClient.SendTextAsync(message, respon, parse: ParseMode.Markdown);
         }
-        
+
         private static async void Status(Message message)
         {
             var runtime = DateTime.Now - Program.StartTime;
@@ -219,7 +220,7 @@ namespace TeleBot.Plugins
                 $"SubVersion : {Program.AppVersion}\n" +
                 $"UpTime : {timespan}\n" +
                 $"Messages : {BotMessage.Count}\n";
-            
+
             // cek token
             try
             {
@@ -231,23 +232,19 @@ namespace TeleBot.Plugins
             {
                 _log.Error(ex.Message);
             }
-            
+
             // kirim status
             await BotClient.SendTextAsync(message, respon, parse: ParseMode.Markdown);
         }
-        
+
         private static async void Token(Message message, string data)
         {
             if (!string.IsNullOrWhiteSpace(data))
-            {
                 new Simsimi(message).SaveToken(data);
-            }
             else
-            {
                 await BotClient.SendTextAsync(message,
                     BotResponse.SimsimiHowToGetToken(),
                     parse: ParseMode.Markdown);
-            }
         }
     }
 }

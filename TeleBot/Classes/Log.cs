@@ -8,9 +8,15 @@ namespace TeleBot.Classes
         public static bool ShowDebug = false;
         private readonly DatabaseLog _db = new DatabaseLog();
         private readonly string _header;
-        
+
         private enum Level
-        { Debug, Info, Ignore, Warning, Error }
+        {
+            Debug,
+            Info,
+            Ignore,
+            Warning,
+            Error
+        }
 
         public Log(string header)
         {
@@ -73,13 +79,13 @@ namespace TeleBot.Classes
                     if (!ShowDebug) return;
                     break;
             }
-            
+
             // tampilkan log ke console
             Console.WriteLine(text.ToSingleLine());
             Console.ResetColor();
 
             // masukkan ke database
-            var data = new LogData()
+            var data = new LogData
             {
                 DateTime = $"{dtnow.ToShortDateString()} {dtnow.ToLongTimeString()}",
                 Level = level.ToString(),
