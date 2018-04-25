@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -86,7 +85,7 @@ namespace TeleBot.Plugins
         {
             if (_callback == null) return;
             
-            await BotClient.AnswerCallbackQueryAsync(_callback.Id, text, true);
+            await BotClient.AnswerCallbackQueryAsync(_callback.Id, text, showAlert);
         }
 
         public async void Save(string hashtag)
