@@ -390,7 +390,7 @@ namespace TeleBot.Plugins
                 buttonRows.Add(buttonRow);
             }
             
-            var responWithButtons = respon + "—— —— —— —— —— ——\nLink download, pilih nomor dibawah :";
+            var responWithButtons = respon + "—— —— —— —— —— ——\nLink download, pencet tombol nomor dibawah :";
             var buttons = new InlineKeyboardMarkup(buttonRows.ToArray());
 
             var sentMessage = await BotClient.SendTextAsync(_message, responWithButtons, parse: ParseMode.Html, button: buttons, preview: false);
@@ -403,7 +403,7 @@ namespace TeleBot.Plugins
                 MessageId = sentMessage.MessageId,
                 DateTime = DateTime.Now.AddMinutes(10),
                 Operation = ScheduleData.Type.Edit,
-                Text = respon,
+                Text = respon + "—— —— —— —— —— ——\nTombol download telah kadaluarsa.",
                 ParseMode = ParseMode.Html
             };
             Schedule.RegisterNew(schedule);
