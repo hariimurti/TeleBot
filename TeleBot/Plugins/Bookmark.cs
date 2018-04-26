@@ -460,6 +460,7 @@ namespace TeleBot.Plugins
             // bikin pesan link
             else
             {
+                var isFound = false;
                 var respon = string.Empty;
                 foreach (var hashtag in hashtags)
                 {
@@ -470,9 +471,12 @@ namespace TeleBot.Plugins
                         continue;
                     }
 
+                    isFound = true;
                     respon +=
                         $"» <a href=\"https://t.me/{_message.Chat.Username}/{found.MessageId}\">{found.KeyName}</a>\n";
                 }
+                
+                if (!isFound) return;
 
                 respon = respon.TrimEnd('\n');
                 await BotClient.SendTextAsync(_message.Chat.Id, $"Link Bookmark :\n{respon}",
