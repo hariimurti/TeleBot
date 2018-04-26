@@ -393,7 +393,7 @@ namespace TeleBot.Plugins
                 MessageId = sentMessage.MessageId,
                 DateTime = DateTime.Now.AddMinutes(30),
                 Operation = ScheduleData.Type.Edit,
-                Text = "Perintah /kelola telah kadaluarsa.",
+                Text = "Perintah ini telah kadaluarsa.",
                 ParseMode = ParseMode.Html
             };
             Schedule.RegisterNew(schedule);
