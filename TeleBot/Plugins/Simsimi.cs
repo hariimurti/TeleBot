@@ -151,7 +151,7 @@ namespace TeleBot.Plugins
                             token.Expired = DateTime.Now;
                         // token melebihi limit
                         else if (result.Result == 509)
-                            token.LimitExceed = DateTime.Now.AddHours(24);
+                            token.LimitExceed = DateTime.Now.AddHours(25);
                         // kode lain lanjut
                         else
                             continue;
