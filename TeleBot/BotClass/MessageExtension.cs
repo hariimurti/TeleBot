@@ -88,6 +88,19 @@ namespace TeleBot.BotClass
             return false;
         }
 
+        public static async Task<bool> IsAdminThisGroup(this CallbackQuery callback)
+        {
+            var message = callback.Message;
+            if (!message.IsGroupChat()) return false;
+
+            var admins = await BotClient.GetChatAdministratorsAsync(message.Chat.Id);
+            foreach (var admin in admins)
+                if (admin.User.Id == callback.From.Id)
+                    return true;
+
+            return false;
+        }
+
         public static string GetReplyResponse(this Message message)
         {
             if (message.IsFromOwner()) return BotResponse.ReplyToOwner();
