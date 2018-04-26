@@ -227,7 +227,7 @@ namespace TeleBot.Plugins
                 $"—— —— —— ——\n" +
                 $"SubVersion : {Program.AppVersion}\n" +
                 $"UpTime : {timespan}\n" +
-                $"Messages : {BotMessage.Count}\n";
+                $"Messages : {BotOnMessage.Count}\n";
 
             // cek token
             try
