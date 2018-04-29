@@ -16,8 +16,8 @@ namespace TeleBot.Classes
             if (_oneTime) return;
 
             var list = await _db.GetAllSchedule();
-            if (list.Count > 0)
-                _log.Debug("ReSchedule: {0} items", list.Count);
+
+            _log.Debug("ReSchedule: {0} items", list.Count);
 
             foreach (var data in list) Register(data);
 

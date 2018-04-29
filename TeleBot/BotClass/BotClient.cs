@@ -47,9 +47,9 @@ namespace TeleBot.BotClass
 
         #region StartReceivingMessage
 
-        public static async Task StartReceivingMessage()
+        public static async Task<bool> StartReceivingMessage()
         {
-            if (_isReceiving) return;
+            if (_isReceiving) return true;
 
             // mendapatkan info bot
             var me = await _bot.GetMeAsync();
@@ -70,6 +70,7 @@ namespace TeleBot.BotClass
             _log.Debug("Mulai menerima pesan...");
             _bot.StartReceiving();
             _isReceiving = true;
+            return true;
         }
 
         private static void OnReceiveGeneralError(object sender, ReceiveGeneralErrorEventArgs e)

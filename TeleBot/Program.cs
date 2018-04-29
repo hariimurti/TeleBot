@@ -51,8 +51,14 @@ namespace TeleBot
             while (true)
                 try
                 {
-                    BotClient.StartReceivingMessage().GetAwaiter();
-                    break;
+                    log.Debug("Mengakses akun bot...");
+
+                    var receive = BotClient
+                        .StartReceivingMessage()
+                        .GetAwaiter()
+                        .GetResult();
+
+                    if (receive) break;
                 }
                 catch (Exception ex)
                 {
