@@ -223,9 +223,9 @@ namespace TeleBot.Plugins
             var timespan = new TimeSpan(tfs.Days, tfs.Hours, tfs.Minutes, tfs.Seconds);
 
             var respon =
-                $"*{Program.AppName} v2.0*\n" +
+                $"*{Program.AppName} {Program.AppVersion}*\n" +
                 $"—— —— —— ——\n" +
-                $"SubVersion : {Program.AppVersion}\n" +
+                $"BuildVer : {Program.AppBuildVersion}\n" +
                 $"UpTime : {timespan}\n" +
                 $"Messages : {BotOnMessage.Count}\n";
 

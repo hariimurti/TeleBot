@@ -14,8 +14,10 @@ namespace TeleBot
     internal class Program
     {
         public static readonly string AppName = "TeleBot";
-        public static readonly string AppVersion = GetVersion();
-        public static readonly string AppNameWithVersion = string.Format("{0} v{1}", AppName, AppVersion);
+        public static readonly string AppVersion = "v2.0";
+        public static readonly string AppBuildVersion = GetBuildVersion();
+        public static readonly string AppNameWithVersion =
+            string.Format("{0} {1} build {2}", AppName, AppVersion, AppBuildVersion);
 
         private static readonly string WorkingDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
         private static readonly string DataDirectory = GetDataDirectory();
@@ -82,7 +84,7 @@ namespace TeleBot
             Terminate();
         }
 
-        private static string GetVersion()
+        private static string GetBuildVersion()
         {
             var attrb = typeof(Program)
                 .GetTypeInfo()
