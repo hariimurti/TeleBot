@@ -260,6 +260,16 @@ namespace TeleBot.Plugins
                                                         "Cobalah beberapa saat lagi.");
                 return;
             }
+            
+            // search tidak ketemu
+            if (!threadMode && content.Contains("No suitable matches were found."))
+            {
+                _log.Warning("Pencarian tidak ditemukan!");
+                await BotClient.SendTextAsync(_message, $"Maaf kaka...\n" +
+                                                        $"{Bot.Name} gak nemu yg dicari.\n" +
+                                                        $"Coba pakai keyword selain \"{keywords}\".");
+                return;
+            }
 
             _log.Debug("Regex tabel...");
 
@@ -269,7 +279,7 @@ namespace TeleBot.Plugins
             if (!findTable.Success)
             {
                 _log.Error("Tabel tidak ditemukan!");
-                await BotClient.SendTextAsync(_message, "Mohon maaf...\nPlugin mobilism tidak bisa membaca threads.");
+                await BotClient.SendTextAsync(_message, "Mohon maaf...\nPlugin mobilism tidak bisa membaca daftar thread.");
                 return;
             }
 
@@ -292,8 +302,13 @@ namespace TeleBot.Plugins
             if (rows.Count == 0)
             {
                 _log.Warning("Rows tidak ditemukan!");
-                await BotClient.SendTextAsync(_message, $"Maaf kaka...\n{Bot.Name} gak nemu yg dicari." +
-                                                        (threadMode ? "" : "\nCoba pakai keyword yg lain."));
+                if (threadMode)
+                    await BotClient.SendTextAsync(_message, $"Maaf kaka...\n{Bot.Name} gak nemu daftar thread.");
+                else
+                    await BotClient.SendTextAsync(_message, $"Maaf kaka...\n" +
+                                                            $"{Bot.Name} gak nemu yg dicari.\n" +
+                                                            $"Coba pakai keyword selain \"{keywords}\".");
+                
                 return;
             }
 
