@@ -118,7 +118,11 @@ namespace TeleBot.Plugins
             try
             {
                 var tokens = await _db.GetTokens();
-                var tokenActive = tokens.Where(t => t.LimitExceed <= DateTime.Now).ToList();
+                var tokenActive = tokens
+                    .Where(t => t.LimitExceed <= DateTime.Now)
+                    .ToList()
+                    .OrderBy(t => t.LimitExceed)
+                    .ToList();
 
                 if (tokenActive.Count == 0)
                 {
