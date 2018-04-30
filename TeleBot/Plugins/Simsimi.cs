@@ -38,9 +38,18 @@ namespace TeleBot.Plugins
         {
             var ft = filter ? 0 : 1;
             var data = Uri.EscapeDataString(text);
-            var apiUrl = $"http://sandbox.api.simsimi.com/request.p?key={key}&lc=id&ft={ft}.0&text={data}";
+            var apiUrl = $"http://sandbox.api.simsimi.com/request.p?" +
+                         $"key={key}&" +
+                         $"lc=id&" +
+                         $"ft={ft}.0&" +
+                         $"text={data}";
 
-            _log.Debug("Cari jawaban: {0}", text);
+            var token = string.Empty;
+            var match = Regex.Match(key, @"\b(\w+)-");
+            if (match.Success)
+                token = match.Groups[1].Value;
+
+            _log.Debug("Token: {0} | Filter: {1} | Kirim: {2}", token, filter, text);
             using (var client = new HttpClient())
             {
                 var response = await client.GetAsync(new Uri(apiUrl));
