@@ -34,24 +34,26 @@ namespace TeleBot.SQLite
 
         private async void StartQueue()
         {
-            try
+            if (_queueStart) return;
+
+            _queueStart = true;
+
+            while (_queueLog.Count > 0)
             {
-                if (_queueStart) return;
-
-                _queueStart = true;
-
-                while (_queueLog.Count > 0)
+                var data = _queueLog.Dequeue();
+                
+                try
                 {
-                    var data = _queueLog.Dequeue();
                     await _con.InsertAsync(data);
                 }
+                catch (Exception ex)
+                {
+                    _queueLog.Enqueue(data);
+                    LogError("WriteLog: {0}", ex.Message);
+                }
+            }
 
-                _queueStart = false;
-            }
-            catch (Exception ex)
-            {
-                LogError("WriteLog: {0}", ex.Message);
-            }
+            _queueStart = false;
         }
 
         private void LogError(string message, params Object[] args)
