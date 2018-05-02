@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using SQLite;
 
 namespace TeleBot.SQLite
@@ -9,6 +10,7 @@ namespace TeleBot.SQLite
         private static SQLiteAsyncConnection _con;
         private static Queue<LogData> _queueLog = new Queue<LogData>();
         private static bool _queueStart;
+        private static DateTime _lastClean;
 
         public DatabaseLog()
         {
@@ -36,6 +38,8 @@ namespace TeleBot.SQLite
         {
             if (_queueStart) return;
 
+            await CleanOldLogs();
+
             _queueStart = true;
 
             while (_queueLog.Count > 0)
@@ -54,6 +58,34 @@ namespace TeleBot.SQLite
             }
 
             _queueStart = false;
+        }
+
+        private async Task CleanOldLogs()
+        {
+            var today = DateTime.Today;
+            if (_lastClean == today) return;
+            
+            _lastClean = today;
+            
+            try
+            {
+                var twodaysago = DateTime.Today.AddDays(-2);
+                
+                var list = await _con.Table<LogData>().ToListAsync();
+            
+                await _con.RunInTransactionAsync(tran => {
+                    foreach (var log in list)
+                    {
+                        if (DateTime.Parse(log.DateTime) > twodaysago) continue;
+                        
+                        tran.Delete(log);
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                LogError("DeleteLog: {0}", ex.Message);
+            }
         }
 
         private void LogError(string message, params Object[] args)

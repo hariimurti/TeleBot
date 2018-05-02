@@ -14,6 +14,7 @@ namespace TeleBot.SQLite
     {
         private static Log _log = new Log("Database");
         private static SQLiteAsyncConnection _con;
+        private static DateTime _lastClean;
 
         public Database()
         {
@@ -33,6 +34,47 @@ namespace TeleBot.SQLite
             catch (SQLiteException ex)
             {
                 _log.Error(ex.Message);
+            }
+        }
+
+        private async void CleanOldMessages()
+        {
+            var today = DateTime.Today;
+            if (_lastClean == today) return;
+            
+            _lastClean = today;
+            
+            _log.Debug("Hapus pesan lama...");
+            
+            try
+            {
+                var twodaysago = today.AddDays(-2);
+                
+                var incomingList = await _con.Table<MessageIncoming>()
+                    .Where(i => i.DateTime < twodaysago)
+                    .ToListAsync();
+            
+                var outgoingList = await _con.Table<MessageOutgoing>()
+                    .Where(i => i.DateTime < twodaysago)
+                    .ToListAsync();
+            
+                await _con.RunInTransactionAsync(tran => {
+                    // hapus pesan masuk
+                    foreach (var message in incomingList)
+                    {
+                        tran.Delete(message);
+                    }
+                
+                    // hapus pesan keluar
+                    foreach (var message in outgoingList)
+                    {
+                        tran.Delete(message);
+                    }
+                });
+            }
+            catch (Exception e)
+            {
+                _log.Error(e.Message);
             }
         }
 
@@ -139,6 +181,9 @@ namespace TeleBot.SQLite
         {
             try
             {
+                // hapus pesan lama
+                CleanOldMessages();
+                
                 var contact = new Contact
                 {
                     Id = data.Chat.Id,
