@@ -81,6 +81,9 @@ namespace TeleBot.SQLite
                         tran.Delete(log);
                     }
                 });
+                
+                // vacuum - optimize the database file
+                await _con.ExecuteAsync("vacuum");
             }
             catch (Exception ex)
             {
