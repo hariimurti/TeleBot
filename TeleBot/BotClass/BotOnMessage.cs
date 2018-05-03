@@ -21,8 +21,8 @@ namespace TeleBot.BotClass
             if (message.Date.AddMinutes(1) <= DateTime.Now.ToUniversalTime())
             {
                 if (message.IsTextMessage())
-                    _log.Ignore("{0} | Id: {1} | Dari: {2} | Pesan: {3} | Alasan: Pesan lama!",
-                        message.Date.ToLocalTime(), message.MessageId, message.FromName(), message.Text);
+                    _log.Ignore("Id: {0} | {1} | Dari: {2} | Pesan: {3} | Alasan: Pesan lama!",
+                        message.MessageId, message.Date.ToLocalTime(), message.FromName(), message.Text);
 
                 return;
             }
@@ -30,8 +30,8 @@ namespace TeleBot.BotClass
             // member baru di grup: bot maupun user lain
             if (message.Type == MessageType.ChatMembersAdded)
             {
-                _log.Info("{0} | Id: {1} | Dari: {2} | Pesan: Member baru!",
-                    message.Date.ToLocalTime(), message.MessageId, message.ChatName());
+                _log.Info("Id: {0} | {1} | Dari: {2} | Pesan: Member baru!",
+                    message.MessageId, message.Date.ToLocalTime(), message.ChatName());
 
                 new Welcome(message).SendGreeting();
                 return;
@@ -40,8 +40,8 @@ namespace TeleBot.BotClass
             // abaikan pesan selain teks
             if (!message.IsTextMessage())
             {
-                _log.Ignore("{0} | Id: {1} | Dari: {2} | Pesan: {3} | Alasan: Pesan bukan text!",
-                    message.Date.ToLocalTime(), message.MessageId, message.FromName(), message.Type);
+                _log.Ignore("Id: {0} | {1} | Dari: {2} | Pesan: {3} | Alasan: Pesan bukan text!",
+                    message.MessageId, message.Date.ToLocalTime(), message.FromName(), message.Type);
                 return;
             }
 
@@ -49,8 +49,8 @@ namespace TeleBot.BotClass
             var result = await _db.FindMessageIncoming(message.MessageId, message.Chat.Id);
             if (result != null)
             {
-                _log.Ignore("{0} | Id: {1} | Dari: {2} | Pesan: {3} | Alasan: Pesan sudah dibaca!",
-                    message.Date.ToLocalTime(), message.MessageId, message.FromName(), message.Text);
+                _log.Ignore("Id: {0} | {1} | Dari: {2} | Pesan: {3} | Alasan: Pesan sudah dibaca!",
+                    message.MessageId, message.Date.ToLocalTime(), message.FromName(), message.Text);
                 return;
             }
 
@@ -58,8 +58,8 @@ namespace TeleBot.BotClass
             await _db.InsertMessageIncoming(message);
             Count++;
 
-            _log.Info("{0} | Id: {1} | Dari: {2} | Pesan: {3}",
-                message.Date.ToLocalTime(), message.MessageId, message.FromName(), message.Text);
+            _log.Info("Id: {0} | {1} | Dari: {2} | Pesan: {3}",
+                message.MessageId, message.Date.ToLocalTime(), message.FromName(), message.Text);
 
             // pesan perintah
             if (message.Text.StartsWith("/"))
