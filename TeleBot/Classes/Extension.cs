@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Web;
 using TeleBot.BotClass;
 
 namespace TeleBot.Classes
 {
     public static class Extension
     {
+        private static Log _log = new Log("StringExtension");
+        
         public static string ToSingleLine(this string text)
         {
             return text
@@ -50,14 +53,56 @@ namespace TeleBot.Classes
             return Regex.Replace(text, "<.*?>", string.Empty).Trim();
         }
 
-        public static string EncodeUrl(this string text)
+        public static string EncodeToUrl(this string text)
         {
-            return WebUtility.UrlEncode(text);
+            try
+            {
+                return WebUtility.UrlEncode(text);
+            }
+            catch (Exception e)
+            {
+                _log.Error(e.Message);
+                return text;
+            }
         }
 
-        public static string DecodeUrl(this string text)
+        public static string DecodeFromUrl(this string text)
         {
-            return WebUtility.UrlDecode(text);
+            try
+            {
+                return WebUtility.UrlDecode(text);
+            }
+            catch (Exception e)
+            {
+                _log.Error(e.Message);
+                return text;
+            }
+        }
+
+        public static string EncodeToHtml(this string text)
+        {
+            try
+            {
+                return HttpUtility.HtmlDecode(text);
+            }
+            catch (Exception e)
+            {
+                _log.Error(e.Message);
+                return text;
+            }
+        }
+
+        public static string DecodeFromHtml(this string text)
+        {
+            try
+            {
+                return HttpUtility.HtmlDecode(text);
+            }
+            catch (Exception e)
+            {
+                _log.Error(e.Message);
+                return text;
+            }
         }
 
         public static string ToHumanSizeFormat(this double value)

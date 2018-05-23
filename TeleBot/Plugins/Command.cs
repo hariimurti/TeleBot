@@ -278,7 +278,7 @@ namespace TeleBot.Plugins
             var text = match.Groups[2].Value;
 
             var apiLink = $"https://api.whatsapp.com/send?phone={nomor}";
-            if (!string.IsNullOrWhiteSpace(text)) apiLink += $"&text={text.EncodeUrl()}";
+            if (!string.IsNullOrWhiteSpace(text)) apiLink += $"&text={text.EncodeToUrl()}";
 
             await BotClient.SendTextAsync(message.Chat.Id,
                 $"*WhatsApp* : [API Link]({apiLink})",

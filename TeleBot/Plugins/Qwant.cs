@@ -87,7 +87,7 @@ namespace TeleBot.Plugins
             if (string.IsNullOrWhiteSpace(query)) return;
             _log.Debug("Pencarian : {0}", query);
 
-            var address = apiUrl + "web?count=10&locale=id_ID&q=" + query.EncodeUrl();
+            var address = apiUrl + "web?count=10&locale=id_ID&q=" + query.EncodeToUrl();
             Response result;
 
             try
@@ -121,7 +121,8 @@ namespace TeleBot.Plugins
             {
                 count++;
                 var num = count.ToString().PadLeft(padding, '0');
-                respon += $"\n{num}. <a href=\"{item.Url}\">{item.Title.RemoveHtmlTag().Trim()}</a>";
+                var title = item.Title.RemoveHtmlTag().Trim().DecodeFromHtml();
+                respon += $"\n{num}. <a href=\"{item.Url}\">{title}</a>";
             }
 
             await BotClient.SendTextAsync(_message, respon, parse: ParseMode.Html, preview: false);
@@ -132,7 +133,7 @@ namespace TeleBot.Plugins
             if (string.IsNullOrWhiteSpace(query)) return;
             _log.Debug("Pencarian : {0}", query);
 
-            var address = apiUrl + "images?count=10&offset=1&q=" + query.EncodeUrl();
+            var address = apiUrl + "images?count=10&offset=1&q=" + query.EncodeToUrl();
             Response result;
 
             try
@@ -165,7 +166,7 @@ namespace TeleBot.Plugins
             while (queue.Count > 0)
             {
                 var item = items[_random.Next(0, items.Length)];
-                var title = item.Title.DecodeUrl();
+                var title = item.Title.DecodeFromHtml();
                 var desc = item.Desc;
 
                 _log.Debug("Kirim image : {0}", item.Url);
