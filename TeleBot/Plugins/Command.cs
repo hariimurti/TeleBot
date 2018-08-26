@@ -96,7 +96,7 @@ namespace TeleBot.Plugins
                     new Mobilism(message).ThreadList(data, false);
                     break;
 
-                case "cari":
+                /*case "cari":
                 case "g":
                 case "google":
                 case "search":
@@ -107,7 +107,7 @@ namespace TeleBot.Plugins
                 case "image":
                 case "photo":
                     new Qwant(message).SearchImage(data);
-                    break;
+                    break;*/
 
                 case "gapps":
                 case "opengapps":
