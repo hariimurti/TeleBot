@@ -1,9 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <AssemblyVersion>2018.5.24</AssemblyVersion>
-    <FileVersion>2018.5.24</FileVersion>
+    <AssemblyVersion>2018.10.07</AssemblyVersion>
+    <FileVersion>2018.10.07</FileVersion>
     <Version>2.0</Version>
     <Authors>Harimurti</Authors>
     <Company>Harimurti.net</Company>
@@ -11,8 +11,8 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="sqlite-net-pcl" Version="1.5.166-beta" />
-    <PackageReference Include="Telegram.Bot" Version="14.5.0" />
+    <PackageReference Include="sqlite-net-pcl" Version="1.5.231" />
+    <PackageReference Include="Telegram.Bot" Version="14.10.0" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Service-Installer.sh">

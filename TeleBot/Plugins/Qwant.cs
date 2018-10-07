@@ -87,7 +87,7 @@ namespace TeleBot.Plugins
             if (string.IsNullOrWhiteSpace(query)) return;
             _log.Debug("Pencarian : {0}", query);
 
-            var address = apiUrl + "web?count=10&locale=id_ID&q=" + query.EncodeToUrl();
+            var address = apiUrl + "web?count=10&locale=id_ID&q=" + query.EncodeToUrl() + "&t=web&uiv=1";
             Response result;
 
             try
@@ -133,7 +133,7 @@ namespace TeleBot.Plugins
             if (string.IsNullOrWhiteSpace(query)) return;
             _log.Debug("Pencarian : {0}", query);
 
-            var address = apiUrl + "images?count=10&offset=1&q=" + query.EncodeToUrl();
+            var address = apiUrl + "images?count=10&offset=1&q=" + query.EncodeToUrl() + "&t=images&uiv=1";
             Response result;
 
             try
