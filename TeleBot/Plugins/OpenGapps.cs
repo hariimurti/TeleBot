@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -123,6 +123,12 @@ namespace TeleBot.Plugins
             };
             android.Add(oreo);
 
+            var pie = new List<InlineKeyboardButton>
+            {
+                InlineKeyboardButton.WithCallbackData("9.0", $"{cmd}&data={arch}-9.0")
+            };
+            android.Add(pie);
+
             var back = new List<InlineKeyboardButton>
             {
                 InlineKeyboardButton.WithCallbackData("Kembali", $"cmd=arch&data=null")
@@ -184,7 +190,7 @@ namespace TeleBot.Plugins
                     package.Add(new List<InlineKeyboardButton> {stock, aroma});
                 }
 
-                if (android.Equals("7.1") || android.Equals("8.0") || android.Equals("8.1"))
+                if (android.Equals("7.1") || android.Equals("8.0") || android.Equals("8.1") || android.Equals("9.0"))
                 {
                     package.Add(new List<InlineKeyboardButton> {pico, nano});
                     package.Add(new List<InlineKeyboardButton> {micro, mini});
@@ -203,7 +209,7 @@ namespace TeleBot.Plugins
                     package.Add(new List<InlineKeyboardButton> {stock, aroma});
                 }
 
-                if (android.Equals("7.1") || android.Equals("8.0") || android.Equals("8.1"))
+                if (android.Equals("7.1") || android.Equals("8.0") || android.Equals("8.1") || android.Equals("9.0"))
                 {
                     package.Add(new List<InlineKeyboardButton> {pico, nano});
                     package.Add(new List<InlineKeyboardButton> {micro, mini});
@@ -220,7 +226,7 @@ namespace TeleBot.Plugins
                 if (android.Equals("5.1") || android.Equals("6.0") || android.Equals("7.0"))
                     package.Add(new List<InlineKeyboardButton> {pico, nano, stock});
 
-                if (android.Equals("7.1") || android.Equals("8.0") || android.Equals("8.1"))
+                if (android.Equals("7.1") || android.Equals("8.0") || android.Equals("8.1") || android.Equals("9.0"))
                 {
                     package.Add(new List<InlineKeyboardButton> {pico});
                     package.Add(new List<InlineKeyboardButton> {nano, micro});
@@ -236,7 +242,7 @@ namespace TeleBot.Plugins
                 if (android.Equals("5.1") || android.Equals("6.0") || android.Equals("7.0"))
                     package.Add(new List<InlineKeyboardButton> {pico, nano, stock});
 
-                if (android.Equals("7.1") || android.Equals("8.0") || android.Equals("8.1"))
+                if (android.Equals("7.1") || android.Equals("8.0") || android.Equals("8.1") || android.Equals("9.0"))
                 {
                     package.Add(new List<InlineKeyboardButton> {pico});
                     package.Add(new List<InlineKeyboardButton> {nano, micro});
