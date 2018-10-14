@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -109,12 +109,12 @@ namespace TeleBot.Plugins
             };
             android.Add(marshmallow);
 
-            var naugat = new List<InlineKeyboardButton>
+            var nougat = new List<InlineKeyboardButton>
             {
                 InlineKeyboardButton.WithCallbackData("7.0", $"{cmd}&data={arch}-7.0"),
                 InlineKeyboardButton.WithCallbackData("7.1", $"{cmd}&data={arch}-7.1")
             };
-            android.Add(naugat);
+            android.Add(nougat);
 
             var oreo = new List<InlineKeyboardButton>
             {
