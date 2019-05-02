@@ -10,7 +10,8 @@ SET ProjectDir=TeleBot
 SET BuildDir=bin\Raspbian
 SET UploadTo=/opt/TeleBot
 
-REM Build project...
+TITLE Build project...
+ECHO Build project...
 CD %ProjectDir%
 dotnet publish -c Release -r linux-arm -o %BuildDir%
 
@@ -18,6 +19,7 @@ ECHO.
 ECHO Upload into Raspbian?
 PAUSE
 
+TITLE Stop bot service...
 CD ..
 ECHO Prepare SSH...
 SET SSHCommands="ssh_commands.txt"
@@ -27,6 +29,7 @@ ECHO SSH: Stoping TeleBot Service...
 ECHO sudo systemctl stop telebot> %SSHCommands%
 putty.exe -ssh %Username%@%Server% -pw %Password% -m %SSHCommands%
 
+TITLE Uploading...
 ECHO.
 ECHO Prepare FTP...
 SET FTPCommands="ftp_commands.txt"
@@ -44,6 +47,7 @@ ECHO.
 ECHO Upload via FTP...
 ftp -s:%FTPCommands%
 
+TITLE Start bot service...
 ECHO.
 ECHO SSH: Starting TeleBot Service...
 ECHO chmod +x %UploadTo%/TeleBot> %SSHCommands%
@@ -55,5 +59,6 @@ ECHO Clean up...
 IF EXIST %SSHCommands% DEL %SSHCommands%
 IF EXIST %FTPCommands% DEL %FTPCommands%
 
+TITLE Finish!
 ECHO.
 PAUSE
