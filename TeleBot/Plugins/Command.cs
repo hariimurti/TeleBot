@@ -89,11 +89,13 @@ namespace TeleBot.Plugins
                     break;
 
                 case "app":
+                case "apk":
                 case "aplikasi":
                     new Mobilism(message).ThreadList(data);
                     break;
 
                 case "game":
+                case "games":
                 case "permainan":
                     new Mobilism(message).ThreadList(data, false);
                     break;
