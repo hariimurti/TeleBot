@@ -1,5 +1,7 @@
-﻿using System;
+using System;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 using TeleBot.BotClass;
 using TeleBot.Classes;
@@ -87,11 +89,13 @@ namespace TeleBot.Plugins
                     break;
 
                 case "app":
+                case "apk":
                 case "aplikasi":
                     new Mobilism(message).ThreadList(data);
                     break;
 
                 case "game":
+                case "games":
                 case "permainan":
                     new Mobilism(message).ThreadList(data, false);
                     break;
@@ -116,6 +120,10 @@ namespace TeleBot.Plugins
 
                 case "wa":
                     Whatsapp(message, data);
+                    break;
+                
+                case "reg":
+                    RegCmd(message, data);
                     break;
 
                 default:
@@ -283,6 +291,19 @@ namespace TeleBot.Plugins
             await BotClient.SendTextAsync(message.Chat.Id,
                 $"*WhatsApp* : [API Link]({apiLink})",
                 message.MessageId, ParseMode.Markdown, preview: false);
+        }
+
+        private static async void RegCmd(Message message, string data)
+        {
+            if (message.From.Id != 7703322 && message.From.Id != 895117031)
+            {
+                await BotClient.SendTextAsync(message, "Kamu siapa? Kok berani-beraninya nyuruh aku 😡😡");
+                return;
+            }
+            
+            if (string.IsNullOrWhiteSpace(data)) return;
+
+            new KeyGenerator(message).Generate(data);
         }
     }
 }

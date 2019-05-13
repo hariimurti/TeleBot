@@ -37,11 +37,11 @@ namespace TeleBot.Classes
         public static string ReplaceSimsimiWithBotName(this string text)
         {
             var pattern =
-                @"\b((?:[s]+[i]+[m]+ ?)?[s]+[i]+[m]+[i]+(?:[w]+[a]+[t]+[i]+|[n]+[y]+[a]+|[k]+[u]+|[m]+[u]+)?)\b";
+                @"\b((?:[s]+[i]+[m]+ ?)?[s]+[i]+[m]+[iy]+(?:[w]+[a]+[t]+[i]+|[n]+[y]+[a]+|[k]+[u]+|[m]+[u]+)?)\b";
             var result = Regex.Replace(text, pattern, Bot.Name, RegexOptions.IgnoreCase);
 
             // ganti "sim" jika tdk ada kata berikut
-            pattern = @"\b(gak|gk|tidak|tdk|punya|pnya)\b";
+            pattern = @"\b(gak|gk|tidak|tdk|ndak|ndk|punya|pnya|pny|gpny)\b";
             if (!Regex.IsMatch(result, pattern, RegexOptions.IgnoreCase))
                 result = Regex.Replace(result, @"\b(sim ?)\b", string.Empty, RegexOptions.IgnoreCase);
 
