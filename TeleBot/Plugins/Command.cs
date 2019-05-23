@@ -118,6 +118,10 @@ namespace TeleBot.Plugins
                     new OpenGapps(message).SelectArch();
                     break;
 
+                case "eset":
+                    new Eset(message).GetKeys();
+                    break;
+
                 case "wa":
                     Whatsapp(message, data);
                     break;
