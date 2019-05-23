@@ -67,9 +67,9 @@ namespace TeleBot.BotClass
             // pesan berisi hashtag
             else if (message.Text.Contains("#"))
                 new Bookmark(message).FindHashtags();
-            // pesan teks lain
+            /* pesan teks lain
             else
-                Talk.Response(message);
+                Talk.Response(message);*/
         }
     }
 }

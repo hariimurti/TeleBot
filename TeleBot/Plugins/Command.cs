@@ -56,9 +56,9 @@ namespace TeleBot.Plugins
                     Status(message);
                     break;
 
-                case "token":
+                /*case "token":
                     Token(message, data);
-                    break;
+                    break;*/
 
                 case "selamatdatang":
                 case "welcome":
@@ -237,7 +237,7 @@ namespace TeleBot.Plugins
                 $"UpTime : {timespan}\n" +
                 $"Messages : {BotOnMessage.Count}\n";
 
-            // cek token
+            /* cek token
             try
             {
                 var tokens = await _db.GetTokens();
@@ -247,13 +247,13 @@ namespace TeleBot.Plugins
             catch (Exception ex)
             {
                 _log.Error(ex.Message);
-            }
+            }*/
 
             // kirim status
             await BotClient.SendTextAsync(message, respon, parse: ParseMode.Markdown);
         }
 
-        private static async void Token(Message message, string data)
+        /*private static async void Token(Message message, string data)
         {
             if (!string.IsNullOrWhiteSpace(data))
                 new Simsimi(message).SaveToken(data);
@@ -261,7 +261,7 @@ namespace TeleBot.Plugins
                 await BotClient.SendTextAsync(message,
                     BotResponse.SimsimiHowToGetToken(),
                     parse: ParseMode.Markdown);
-        }
+        }*/
 
         private static async void Whatsapp(Message message, string data)
         {
