@@ -62,7 +62,7 @@ namespace TeleBot.Plugins
                 if (message.IsCallMeNotProper()) return;
             }
 
-            // rubah nama bot jadi simsimi
+            /* rubah nama bot jadi simsimi
             var text = message.Text.ReplaceBotNameWithSimsimi();
 
             // respon panggilan
@@ -72,7 +72,7 @@ namespace TeleBot.Plugins
                 var respon = message.GetReplyResponse().ReplaceWithBotValue();
                 await BotClient.SendTextAsync(message, respon);
                 return;
-            }
+            }*/
 
             // respon pesan mesum
             if (message.IsTextMesum())
@@ -90,9 +90,9 @@ namespace TeleBot.Plugins
                 return;
             }
 
-            // respon dgn simsimi
-            _log.Debug("Pesan {0} | Respon: tanya simsimi", message.MessageId);
-            new Simsimi(message).SendResponse(text);
+            // respon dgn chatbot
+            _log.Debug("Pesan {0} | Respon: tanya chatbot", message.MessageId);
+            new ChatBot(message).SendResponse();
         }
     }
 }

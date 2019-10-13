@@ -172,11 +172,11 @@ namespace TeleBot.Plugins
                                 "\n" +
                                 "Welcome/Selamat Datang (Grup)\n" +
                                 "• `/welcome` — pengaturan.\n" +
-                                "• _alias: selamatdatang._\n";
-                                /*"\n" +
+                                "• _alias: selamatdatang._\n" +
+                                "\n" +
                                 "Teman obrolan\n" +
                                 "• PM: chat teks spt biasa.\n" +
-                                "• Grup: reply pesan atau mention {alias}.\n";*/
+                                "• Grup: reply pesan atau mention {alias}.";
 
             await BotClient.SendTextAsync(message, help.ReplaceWithBotValue(), parse: ParseMode.Markdown);
         }
