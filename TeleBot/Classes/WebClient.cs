@@ -33,9 +33,6 @@ namespace TeleBot.Classes
         private static Log _log = new Log("WebClient");
         private static readonly string CookiesFile = Program.FilePathInData("WebClient.cookies");
 
-        private const string UserAgent =
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36";
-
         #region Cookies
 
         private static void SaveCookies(CookieContainer cookies)
@@ -94,7 +91,7 @@ namespace TeleBot.Classes
             using (var client = new HttpClient(handler))
             {
                 var header = client.DefaultRequestHeaders;
-                header.Add("User-Agent", UserAgent);
+                header.Add("User-Agent", App.UserAgent);
                 header.Add("Host", linkUri.Host);
                 if (request.Headers != null)
                     foreach (var h in request.Headers)
@@ -132,7 +129,7 @@ namespace TeleBot.Classes
             using (var client = new HttpClient())
             {
                 var header = client.DefaultRequestHeaders;
-                header.Add("User-Agent", UserAgent);
+                header.Add("User-Agent", App.UserAgent);
                 header.Add("Host", linkUri.Host);
                 if (request.Headers != null)
                     foreach (var h in request.Headers)
