@@ -122,6 +122,11 @@ namespace TeleBot.Plugins
                     new Eset(message).GetKeys();
                     break;
 
+                case "translate":
+                case "terjemah":
+                    new Translator(message).Translate(data);
+                    break;
+
                 case "wa":
                     Whatsapp(message, data);
                     break;
@@ -166,6 +171,11 @@ namespace TeleBot.Plugins
                                 "• `/gapps platform android` — kriteria minimal.\n" +
                                 "• `/gapps platform android variant` — kriteria spesifik.\n" +
                                 "• _alias: opengapps._\n" +
+                                "\n" +
+                                "Translator\n" +
+                                "• `/translate [code]` — terjemahkan pesan yg dibalas.\n" +
+                                "• `/translate [code] teks asli` — terjemahkan teks.\n" +
+                                "• _alias: terjemah._\n" +
                                 "\n" +
                                 "WhatsApp Api\n" +
                                 "• `/wa nomor` — link tnp teks.\n" +
