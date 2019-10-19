@@ -113,10 +113,10 @@ namespace TeleBot.Plugins
                     new Qwant(message).SearchImage(data);
                     break;
 
-                /*case "gapps":
+                case "gapps":
                 case "opengapps":
-                    new OpenGapps(message).SelectArch();
-                    break;*/
+                    new OpenGapps(message).GetLatestRelease(data);
+                    break;
 
                 case "eset":
                     new Eset(message).GetKeys();
@@ -161,10 +161,11 @@ namespace TeleBot.Plugins
                                 "• `/cari query` — cari website.\n" +
                                 "• `/image query` — cari image.\n" +
                                 "• _alias: g, search, img, photo._\n" +
-                                /*"\n" +
+                                "\n" +
                                 "OpenGapps\n" +
-                                "• `/gapps` — link dl gapps.\n" +
-                                "• _alias: opengapps._\n" +*/
+                                "• `/gapps platform android` — kriteria minimal.\n" +
+                                "• `/gapps platform android variant` — kriteria spesifik.\n" +
+                                "• _alias: opengapps._\n" +
                                 "\n" +
                                 "WhatsApp Api\n" +
                                 "• `/wa nomor` — link tnp teks.\n" +

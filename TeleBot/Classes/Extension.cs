@@ -123,5 +123,10 @@ namespace TeleBot.Classes
                 return value.ToString("0.0");
             return value.ToString("0.00");
         }
+
+        public static string JoinWithComma(this string text, string newone)
+        {
+            return string.IsNullOrEmpty(text) ? newone : $"{text}, {newone}";
+        }
     }
 }

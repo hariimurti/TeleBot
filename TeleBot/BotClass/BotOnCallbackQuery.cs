@@ -78,22 +78,6 @@ namespace TeleBot.BotClass
                     new Mobilism(message, callback).OpenThread(data);
                     break;
 
-                case "arch":
-                    new OpenGapps(message).SelectArch(true);
-                    break;
-
-                case "android":
-                    new OpenGapps(message, callback).SelectAndroid(data);
-                    break;
-
-                case "variant":
-                    new OpenGapps(message, callback).SelectVariant(data);
-                    break;
-
-                case "gapps":
-                    new OpenGapps(message, callback).GetLatestRelease(data);
-                    break;
-
                 default:
                     _log.Ignore("Unknown: {0}", callback.Data);
                     await BotClient.AnswerCallbackQueryAsync(callback.Id, "Perintah tidak diketahui", true);

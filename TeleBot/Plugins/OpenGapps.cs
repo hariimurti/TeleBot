@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
+using RestSharp;
 using TeleBot.BotClass;
 using TeleBot.Classes;
 using Telegram.Bot.Types;
@@ -14,268 +17,112 @@ namespace TeleBot.Plugins
     public class OpenGapps
     {
         private static Log _log = new Log("OpenGapps");
-        private const string apiUrl = "https://api.github.com/repos/opengapps/arch/releases/latest?per_page=1";
         private Message _message;
-        private CallbackQuery _callback;
 
-        #region Gapps Class
+        #region OpenGapps Json
 
-        private class Gapps
+        public class Variant
         {
-            public List<Assets> Assets { get; set; }
+            public string name { get; set; }
+            public string zip { get; set; }
+            public int zip_size { get; set; }
+            public string md5 { get; set; }
+            public string version_info { get; set; }
+            public string source_report { get; set; }
         }
 
-        private class Assets
+        public class Variants
         {
-            public int Id { get; set; }
-            public string Name { get; set; }
-            public double Size { get; set; }
+            public IList<Variant> variants { get; set; }
+        }
 
-            [JsonProperty("download_count")] public int DownloadCount { get; set; }
+        public class Apis
+        {
+            [JsonProperty(PropertyName = "4.4")]
+            public Variants android_44 { get; set; }
+            [JsonProperty(PropertyName = "5.0")]
+            public Variants android_50 { get; set; }
+            [JsonProperty(PropertyName = "5.1")]
+            public Variants android_51 { get; set; }
+            [JsonProperty(PropertyName = "6.0")]
+            public Variants android_60 { get; set; }
+            [JsonProperty(PropertyName = "7.0")]
+            public Variants android_70 { get; set; }
+            [JsonProperty(PropertyName = "7.1")]
+            public Variants android_71 { get; set; }
+            [JsonProperty(PropertyName = "8.0")]
+            public Variants android_80 { get; set; }
+            [JsonProperty(PropertyName = "8.1")]
+            public Variants android_81 { get; set; }
+            [JsonProperty(PropertyName = "9.0")]
+            public Variants android_90 { get; set; }
+            [JsonProperty(PropertyName = "10.0")]
+            public Variants android_100 { get; set; }
+        }
 
-            [JsonProperty("created_at")] public DateTime CreateAt { get; set; }
+        public class Arch
+        {
+            public Apis apis { get; set; }
+            public string date { get; set; }
+            public string human_date { get; set; }
+        }
 
-            [JsonProperty("updated_at")] public DateTime UpdateAt { get; set; }
+        public class Archs
+        {
+            public Arch arm { get; set; }
+            public Arch arm64 { get; set; }
+            public Arch x86 { get; set; }
+            public Arch x86_64 { get; set; }
+        }
 
-            [JsonProperty("browser_download_url")] public string DownloadUrl { get; set; }
+        public class Gapps
+        {
+            public Archs archs { get; set; }
         }
 
         #endregion
 
-        public OpenGapps(Message message, CallbackQuery callback = null)
+        public OpenGapps(Message message)
         {
             _message = message;
-            _callback = callback;
         }
 
-        public async void SelectArch(bool edit = false)
+        private async void SendUsage()
         {
-            _log.Debug("Pilih arsitektur...");
+            var arch = string.Empty;
+            foreach (var prop in typeof(Archs).GetProperties())
+                arch = arch.JoinWithComma($"`{prop.Name}`");
 
-            const string cmd = "cmd=android";
-
-            var buttons = new InlineKeyboardMarkup(new[]
+            var android = string.Empty;
+            foreach (var prop in typeof(Apis).GetProperties())
             {
-                new[]
-                {
-                    InlineKeyboardButton.WithCallbackData("arm", $"{cmd}&data=arm"),
-                    InlineKeyboardButton.WithCallbackData("arm64", $"{cmd}&data=arm64"),
-                    InlineKeyboardButton.WithCallbackData("x86", $"{cmd}&data=x86"),
-                    InlineKeyboardButton.WithCallbackData("x86_x64", $"{cmd}&data=x86_x64")
-                }
-            });
-
-            if (!edit)
-                await BotClient.SendTextAsync(_message,
-                    "<b>OpenGapps</b>\n—— —— ——\nArsitektur :", true, ParseMode.Html, buttons);
-            else
-                await BotClient.EditOrSendTextAsync(_message, _message.MessageId,
-                    "<b>OpenGapps</b>\n—— —— ——\nArsitektur :", ParseMode.Html, buttons);
-        }
-
-        public async void SelectAndroid(string arch)
-        {
-            if (_message.ReplyToMessage.From.Id != _callback.From.Id)
-            {
-                await BotClient.AnswerCallbackQueryAsync(_callback.Id, BotResponse.NoAccessToButton(), true);
-                return;
+                var name = prop.GetCustomAttribute<JsonPropertyAttribute>().PropertyName;
+                android = android.JoinWithComma($"`{name}`");
             }
 
-            _log.Debug("Arch: {0} | Pilih versi android...", arch);
-            await BotClient.AnswerCallbackQueryAsync(_callback.Id, $"Silahkan pilih versi android!");
+            var variant = "`pico`, `nano`, `micro`, `mini`, `full`, `stock`, `super`, `aroma`, `tvstock`";
 
-            const string cmd = "cmd=variant";
-
-            var android = new List<List<InlineKeyboardButton>>();
-            if (!arch.Contains("64"))
-            {
-                var kitkat = new List<InlineKeyboardButton>
-                {
-                    InlineKeyboardButton.WithCallbackData("4.4", $"{cmd}&data={arch}-4.4")
-                };
-                android.Add(kitkat);
-            }
-
-            var lolipop = new List<InlineKeyboardButton>
-            {
-                InlineKeyboardButton.WithCallbackData("5.0", $"{cmd}&data={arch}-5.0"),
-                InlineKeyboardButton.WithCallbackData("5.1", $"{cmd}&data={arch}-5.1")
-            };
-            android.Add(lolipop);
-
-            var marshmallow = new List<InlineKeyboardButton>
-            {
-                InlineKeyboardButton.WithCallbackData("6.0", $"{cmd}&data={arch}-6.0")
-            };
-            android.Add(marshmallow);
-
-            var nougat = new List<InlineKeyboardButton>
-            {
-                InlineKeyboardButton.WithCallbackData("7.0", $"{cmd}&data={arch}-7.0"),
-                InlineKeyboardButton.WithCallbackData("7.1", $"{cmd}&data={arch}-7.1")
-            };
-            android.Add(nougat);
-
-            var oreo = new List<InlineKeyboardButton>
-            {
-                InlineKeyboardButton.WithCallbackData("8.0", $"{cmd}&data={arch}-8.0"),
-                InlineKeyboardButton.WithCallbackData("8.1", $"{cmd}&data={arch}-8.1")
-            };
-            android.Add(oreo);
-
-            var pie = new List<InlineKeyboardButton>
-            {
-                InlineKeyboardButton.WithCallbackData("9.0", $"{cmd}&data={arch}-9.0")
-            };
-            android.Add(pie);
-
-            var back = new List<InlineKeyboardButton>
-            {
-                InlineKeyboardButton.WithCallbackData("Kembali", $"cmd=arch&data=null")
-            };
-            android.Add(back);
-
-            var buttons = new InlineKeyboardMarkup(android.ToArray());
             await BotClient.EditOrSendTextAsync(_message, _message.MessageId,
-                $"<b>OpenGapps</b>\n" +
-                $"—— —— ——\n" +
-                $"Arsitektur : <code>{arch}</code>\n" +
-                $"—— —— ——\n" +
-                $"Android :",
-                ParseMode.Html, buttons);
-        }
-
-        public async void SelectVariant(string data)
-        {
-            if (_message.ReplyToMessage.From.Id != _callback.From.Id)
-            {
-                await BotClient.AnswerCallbackQueryAsync(_callback.Id, BotResponse.NoAccessToButton(), true);
-                return;
-            }
-
-            var regex = Regex.Match(data, @"(\w+)-([\w\.]+)", RegexOptions.IgnoreCase);
-            if (!regex.Success)
-            {
-                await BotClient.AnswerCallbackQueryAsync(_callback.Id, $"Tidak bisa pilih paket!", true);
-                return;
-            }
-
-            var arch = regex.Groups[1].Value;
-            var android = regex.Groups[2].Value;
-
-            _log.Debug("Arch: {0} | Android: {1} | Pilih variasi gapps...", arch, android);
-            await BotClient.AnswerCallbackQueryAsync(_callback.Id, $"Silahkan pilih variasi!");
-
-            const string cmd = "cmd=gapps";
-
-            var package = new List<List<InlineKeyboardButton>>();
-            var pico = InlineKeyboardButton.WithCallbackData("Pico", $"{cmd}&data={arch}-{android}-pico");
-            var nano = InlineKeyboardButton.WithCallbackData("Nano", $"{cmd}&data={arch}-{android}-nano");
-            var micro = InlineKeyboardButton.WithCallbackData("Micro", $"{cmd}&data={arch}-{android}-micro");
-            var mini = InlineKeyboardButton.WithCallbackData("Mini", $"{cmd}&data={arch}-{android}-mini");
-            var full = InlineKeyboardButton.WithCallbackData("Full", $"{cmd}&data={arch}-{android}-full");
-            var stock = InlineKeyboardButton.WithCallbackData("Stock", $"{cmd}&data={arch}-{android}-stock");
-            var super = InlineKeyboardButton.WithCallbackData("Super", $"{cmd}&data={arch}-{android}-super");
-            var aroma = InlineKeyboardButton.WithCallbackData("Aroma", $"{cmd}&data={arch}-{android}-aroma");
-            var back = InlineKeyboardButton.WithCallbackData("Kembali", $"cmd=android&data={arch}");
-
-            if (arch.Equals("arm"))
-            {
-                if (android.Equals("4.4") || android.Equals("5.0"))
-                    package.Add(new List<InlineKeyboardButton> {pico, nano});
-
-                if (android.Equals("5.1") || android.Equals("6.0") || android.Equals("7.0"))
-                {
-                    package.Add(new List<InlineKeyboardButton> {pico, nano});
-                    package.Add(new List<InlineKeyboardButton> {stock, aroma});
-                }
-
-                if (android.Equals("7.1") || android.Equals("8.0") || android.Equals("8.1") || android.Equals("9.0"))
-                {
-                    package.Add(new List<InlineKeyboardButton> {pico, nano});
-                    package.Add(new List<InlineKeyboardButton> {micro, mini});
-                    package.Add(new List<InlineKeyboardButton> {full, stock});
-                    package.Add(new List<InlineKeyboardButton> {super, aroma});
-                }
-            }
-
-            if (arch.Equals("arm64"))
-            {
-                if (android.Equals("5.0")) package.Add(new List<InlineKeyboardButton> {pico, nano});
-
-                if (android.Equals("5.1") || android.Equals("6.0") || android.Equals("7.0"))
-                {
-                    package.Add(new List<InlineKeyboardButton> {pico, nano});
-                    package.Add(new List<InlineKeyboardButton> {stock, aroma});
-                }
-
-                if (android.Equals("7.1") || android.Equals("8.0") || android.Equals("8.1") || android.Equals("9.0"))
-                {
-                    package.Add(new List<InlineKeyboardButton> {pico, nano});
-                    package.Add(new List<InlineKeyboardButton> {micro, mini});
-                    package.Add(new List<InlineKeyboardButton> {full, stock});
-                    package.Add(new List<InlineKeyboardButton> {super, aroma});
-                }
-            }
-
-            if (arch.Equals("x86"))
-            {
-                if (android.Equals("4.4") || android.Equals("5.0"))
-                    package.Add(new List<InlineKeyboardButton> {pico, nano});
-
-                if (android.Equals("5.1") || android.Equals("6.0") || android.Equals("7.0"))
-                    package.Add(new List<InlineKeyboardButton> {pico, nano, stock});
-
-                if (android.Equals("7.1") || android.Equals("8.0") || android.Equals("8.1") || android.Equals("9.0"))
-                {
-                    package.Add(new List<InlineKeyboardButton> {pico});
-                    package.Add(new List<InlineKeyboardButton> {nano, micro});
-                    package.Add(new List<InlineKeyboardButton> {mini, full});
-                    package.Add(new List<InlineKeyboardButton> {stock, super});
-                }
-            }
-
-            if (arch.Equals("x86_x64"))
-            {
-                if (android.Equals("5.0")) package.Add(new List<InlineKeyboardButton> {pico, nano});
-
-                if (android.Equals("5.1") || android.Equals("6.0") || android.Equals("7.0"))
-                    package.Add(new List<InlineKeyboardButton> {pico, nano, stock});
-
-                if (android.Equals("7.1") || android.Equals("8.0") || android.Equals("8.1") || android.Equals("9.0"))
-                {
-                    package.Add(new List<InlineKeyboardButton> {pico});
-                    package.Add(new List<InlineKeyboardButton> {nano, micro});
-                    package.Add(new List<InlineKeyboardButton> {mini, full});
-                    package.Add(new List<InlineKeyboardButton> {stock, super});
-                }
-            }
-
-            package.Add(new List<InlineKeyboardButton> {back});
-            var buttons = new InlineKeyboardMarkup(package.ToArray());
-            await BotClient.EditOrSendTextAsync(_message, _message.MessageId,
-                $"<b>OpenGapps</b>\n" +
-                $"—— —— ——\n" +
-                $"Arsitektur : <code>{arch}</code>\n" +
-                $"Android : <code>{android}</code>\n" +
-                $"—— —— ——\n" +
-                $"Variasi :",
-                ParseMode.Html, buttons);
+                    $"*OpenGapps*\n" +
+                    $"\n—— Opsi ——\n" +
+                    $"Platform : {arch}.\n" +
+                    $"Android : {android}.\n" +
+                    $"Variant : {variant}.\n" +
+                    $"\n—— Penggunaan ——\n" +
+                    $"`/gapps platform android`\n" +
+                    $"`/gapps platform android variant`\n" +
+                    $"\n—— Contoh ——\n" +
+                    $"`/gapps arm 7.1`\n" +
+                    $"`/gapps arm64 9.0 pico`",
+                    ParseMode.Markdown, preview: false);
         }
 
         public async void GetLatestRelease(string data)
         {
-            if (_message.ReplyToMessage.From.Id != _callback.From.Id)
-            {
-                await BotClient.AnswerCallbackQueryAsync(_callback.Id, BotResponse.NoAccessToButton(), true);
-                return;
-            }
-
-            var regex = Regex.Match(data, @"(\w+)-([\w\.]+)-(\w+)", RegexOptions.IgnoreCase);
+            var regex = Regex.Match(data.ToLower(), @"([armx864_]+) ?([0-9.]+)? ?([a-zA-Z]+)?", RegexOptions.IgnoreCase);
             if (!regex.Success)
             {
-                await BotClient.AnswerCallbackQueryAsync(_callback.Id, $"Ada sesuatu yang aneh! Coba lain waktu.",
-                    true);
+                SendUsage();
                 return;
             }
 
@@ -283,67 +130,91 @@ namespace TeleBot.Plugins
             var android = regex.Groups[2].Value;
             var variant = regex.Groups[3].Value;
 
-            _log.Debug("Arch: {0} | Android: {1} | Package {2} | Cari gapps...", arch, android, variant);
+            if (string.IsNullOrWhiteSpace(arch) || string.IsNullOrWhiteSpace(android))
+            {
+                await BotClient.SendTextAsync(_message, "Kriteria minimal belum terpenuhi!\nGunakan /gapps untuk lebih jelasnya.");
+                return;
+            }
+
+            _log.Debug("Platform: {0} | Android: {1} | Variant: {2} | Cari gapps...", arch, android, variant);
 
             Gapps gapps;
 
             try
             {
-                var request = new WebRequest
-                {
-                    Url = apiUrl.Replace("arch", arch),
-                    Method = WebMethod.Get
-                };
-                var response = await WebClient.GetOrPostStringAsync(request);
+                var client = new RestClient("https://api.opengapps.org/list");
+                var req = new RestRequest();
+                req.AddHeader("Sec-Fetch-Mode", "cors");
+                req.AddHeader("Referer", "https://opengapps.org/");
+                req.AddHeader("Origin", "https://opengapps.org");
+                req.AddHeader("User-Agent", App.UserAgent);
+                req.AddHeader("DNT", "1");
 
-                Dump.ToFile("OpenGapps.json", response);
+                _message = await BotClient.SendTextAsync(_message, "Tunggu sebentar, aku carikan di websitenya dulu...");
 
-                gapps = JsonConvert.DeserializeObject<Gapps>(response);
+                _log.Debug("Getting json from api...");
+                var res = await client.ExecuteTaskAsync(req);
+                gapps = JsonConvert.DeserializeObject<Gapps>(res.Content);
             }
             catch (Exception e)
             {
                 _log.Error(e.Message);
 
-                await BotClient.AnswerCallbackQueryAsync(_callback.Id,
-                    "Mohon maaf...\nPlugin opengapps saat ini sedang mengalami gangguan!", true);
+                await BotClient.EditOrSendTextAsync(_message, _message.MessageId,
+                    "Mohon maaf...\nPlugin opengapps saat ini sedang mengalami gangguan!");
 
                 return;
             }
 
-            if (gapps.Assets.Count == 0)
+            var found = false;
+            var result = $"<b>OpenGapps</b>\n\n—— —— ——\n";
+            foreach (var pArch in typeof(Archs).GetProperties())
             {
-                _log.Warning("Gapps asset tidak ditemukan");
+                var gArch = (Arch)pArch.GetValue(gapps.archs);
+                if (gArch == null) continue;
+                if (pArch.Name.ToLower() != arch) continue;
 
-                await BotClient.AnswerCallbackQueryAsync(_callback.Id,
-                    "Mohon maaf...\nPlugin opengapps tidak menemukan asset yg dicari 🙁", true);
+                result += $"Release Date : <code>{gArch.human_date}</code>\n" +
+                    $"Platform : <code>{pArch.Name}</code>\n";
+                foreach (var pAndroid in typeof(Apis).GetProperties())
+                {
+                    var androidName = pAndroid.GetCustomAttribute<JsonPropertyAttribute>().PropertyName;
+                    if (androidName != android) continue;
 
-                return;
+                    var gAndroid = (Variants)pAndroid.GetValue(gArch.apis);
+                    if (gAndroid == null) continue;
+
+                    result += $"Android : <code>{androidName}</code>\nVariant : ";
+                    foreach (var gVariant in gAndroid.variants)
+                    {
+                        var zip = Path.GetFileName(gVariant.zip);
+                        if (string.IsNullOrWhiteSpace(variant))
+                        {
+                            if (!found)
+                                result += "<code>all</code>\n\n—— Downloads ——";
+
+                            found = true;
+                            result += $"\n• <a href=\"{gVariant.zip}\">{zip}</a>";
+                        }
+                        else if (gVariant.name == variant)
+                        {
+                            found = true;
+                            result += $"<code>{gVariant.name}</code>\n\n" +
+                                $"—— Downloads ——\n" +
+                                $"Link : <a href=\"{gVariant.zip}\">{zip}</a>";
+                        }
+                    }
+                }
             }
 
-            var releases = gapps.Assets.ToList()
-                .Where(g => g.Name.Contains(android) && g.Name.Contains(variant) && g.Name.EndsWith(".zip"));
-
-            var release = releases.FirstOrDefault();
-            if (release == null)
+            if (!found)
             {
-                await BotClient.AnswerCallbackQueryAsync(_callback.Id,
-                    "Mohon maaf...\nKriteria yang dicari tidak ada 🙁", true);
+                await BotClient.EditOrSendTextAsync(_message, _message.MessageId,
+                    "Mohon maaf... Kriteria yang dicari tidak ada atau tidak ketemu 🙁");
                 return;
             }
 
-            await BotClient.AnswerCallbackQueryAsync(_callback.Id, "Tunggu sebentar...");
-
-            await BotClient.EditOrSendTextAsync(_message, _message.MessageId,
-                $"<b>OpenGapps</b>\n" +
-                $"—— —— ——\n" +
-                $"Arsitektur : <code>{arch}</code>\n" +
-                $"Android : <code>{android}</code>\n" +
-                $"Variasi : <code>{variant}</code>\n" +
-                $"—— —— ——\n" +
-                $"File Size : <code>{release.Size.ToHumanSizeFormat()}</code>\n" +
-                $"File Link :\n" +
-                $"» <a href=\"{release.DownloadUrl}\">{release.Name}</a>",
-                ParseMode.Html, preview: false);
+            await BotClient.EditOrSendTextAsync(_message, _message.MessageId, result, ParseMode.Html, preview: false);
         }
     }
 }
