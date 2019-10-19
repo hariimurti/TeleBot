@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -8,6 +9,7 @@ using TeleBot.Classes;
 using TeleBot.SQLite;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TeleBot.Plugins
 {
@@ -303,9 +305,16 @@ namespace TeleBot.Plugins
             var apiLink = $"https://api.whatsapp.com/send?phone={nomor}";
             if (!string.IsNullOrWhiteSpace(text)) apiLink += $"&text={text.EncodeToUrl()}";
 
+            var buttonRows = new List<List<InlineKeyboardButton>>();
+            var buttonLink = new List<InlineKeyboardButton>
+            {
+                InlineKeyboardButton.WithUrl("Open with WhatsApp!", apiLink)
+            };
+            buttonRows.Add(buttonLink);
+            var buttons = new InlineKeyboardMarkup(buttonRows.ToArray());
             await BotClient.SendTextAsync(message.Chat.Id,
-                $"*WhatsApp* : [API Link]({apiLink})",
-                message.MessageId, ParseMode.Markdown, preview: false);
+                $"*WhatsApp API*\n—— —— —— ——\n\nGenerated Code :\n`{apiLink}`",
+                message.MessageId, ParseMode.Markdown, buttons, false);
         }
 
         private static async void RegCmd(Message message, string data)
