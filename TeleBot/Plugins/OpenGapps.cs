@@ -104,14 +104,14 @@ namespace TeleBot.Plugins
 
             await BotClient.EditOrSendTextAsync(_message, _message.MessageId,
                     $"*OpenGapps*\n" +
-                    $"\n—— Opsi ——\n" +
+                    $"—— Opsi ——\n" +
                     $"Platform : {arch}.\n" +
                     $"Android : {android}.\n" +
                     $"Variant : {variant}.\n" +
-                    $"\n—— Penggunaan ——\n" +
+                    $"—— Penggunaan ——\n" +
                     $"`/gapps platform android`\n" +
                     $"`/gapps platform android variant`\n" +
-                    $"\n—— Contoh ——\n" +
+                    $"—— Contoh ——\n" +
                     $"`/gapps arm 7.1`\n" +
                     $"`/gapps arm64 9.0 pico`",
                     ParseMode.Markdown, preview: false);
@@ -119,26 +119,25 @@ namespace TeleBot.Plugins
 
         public async void GetLatestRelease(string data)
         {
-            var regex = Regex.Match(data.ToLower(), @"([armx864_]+) ?([0-9.]+)? ?([a-zA-Z]+)?", RegexOptions.IgnoreCase);
+            Gapps gapps;
+            var regex = Regex.Match(data.ToLower(), @"([armx864_]+) ?([0-9]{1,2}.[0-9])? ?([a-zA-Z]+)?", RegexOptions.IgnoreCase);
             if (!regex.Success)
             {
                 SendUsage();
                 return;
             }
 
-            var arch = regex.Groups[1].Value;
+            var platform = regex.Groups[1].Value;
             var android = regex.Groups[2].Value;
             var variant = regex.Groups[3].Value;
 
-            if (string.IsNullOrWhiteSpace(arch) || string.IsNullOrWhiteSpace(android))
+            if (string.IsNullOrWhiteSpace(platform) || string.IsNullOrWhiteSpace(android))
             {
                 await BotClient.SendTextAsync(_message, "Kriteria minimal belum terpenuhi!\nGunakan /gapps untuk lebih jelasnya.");
                 return;
             }
 
-            _log.Debug("Platform: {0} | Android: {1} | Variant: {2} | Cari gapps...", arch, android, variant);
-
-            Gapps gapps;
+            _log.Debug("Platform: {0} | Android: {1} | Variant: {2} | Cari gapps...", platform, android, variant);
 
             try
             {
@@ -166,55 +165,81 @@ namespace TeleBot.Plugins
                 return;
             }
 
-            var found = false;
-            var result = $"<b>OpenGapps</b>\n\n—— —— ——\n";
-            foreach (var pArch in typeof(Archs).GetProperties())
+            var textResult = $"*OpenGapps*\n—— —— ——\n" +
+                $"Platform : `{platform}`\n" +
+                $"Android : `{android}`\n";
+
+            if (string.IsNullOrWhiteSpace(variant))
+                textResult += $"Variant : `all`";
+            else
+                textResult += $"Variant : `{variant}`";
+
+            var listGapps = new List<Tuple<string, string>>();
+            foreach (var propArch in typeof(Archs).GetProperties())
             {
-                var gArch = (Arch)pArch.GetValue(gapps.archs);
-                if (gArch == null) continue;
-                if (pArch.Name.ToLower() != arch) continue;
+                if (propArch.Name != platform) continue;
 
-                result += $"Release Date : <code>{gArch.human_date}</code>\n" +
-                    $"Platform : <code>{pArch.Name}</code>\n";
-                foreach (var pAndroid in typeof(Apis).GetProperties())
+                var arch = (Arch)propArch.GetValue(gapps.archs);
+                if (arch == null) continue;
+
+                textResult += $"\nRelease : `{arch.date}`";
+                foreach (var propAndroid in typeof(Apis).GetProperties())
                 {
-                    var androidName = pAndroid.GetCustomAttribute<JsonPropertyAttribute>().PropertyName;
-                    if (androidName != android) continue;
+                    var version = propAndroid.GetCustomAttribute<JsonPropertyAttribute>().PropertyName;
+                    if (version != android) continue;
 
-                    var gAndroid = (Variants)pAndroid.GetValue(gArch.apis);
-                    if (gAndroid == null) continue;
+                    var api = (Variants)propAndroid.GetValue(arch.apis);
+                    if (api == null) continue;
 
-                    result += $"Android : <code>{androidName}</code>\nVariant : ";
-                    foreach (var gVariant in gAndroid.variants)
+                    foreach (var package in api.variants)
                     {
-                        var zip = Path.GetFileName(gVariant.zip);
-                        if (string.IsNullOrWhiteSpace(variant))
-                        {
-                            if (!found)
-                                result += "<code>all</code>\n\n—— Downloads ——";
+                        if (!string.IsNullOrWhiteSpace(variant) && package.name != variant) continue;
 
-                            found = true;
-                            result += $"\n• <a href=\"{gVariant.zip}\">{zip}</a>";
-                        }
-                        else if (gVariant.name == variant)
-                        {
-                            found = true;
-                            result += $"<code>{gVariant.name}</code>\n\n" +
-                                $"—— Downloads ——\n" +
-                                $"Link : <a href=\"{gVariant.zip}\">{zip}</a>";
-                        }
+                        listGapps.Add(new Tuple<string, string>(package.name, package.zip));
                     }
                 }
             }
 
-            if (!found)
+            var buttonRows = new List<List<InlineKeyboardButton>>();
+            if (listGapps.Count == 0)
             {
-                await BotClient.EditOrSendTextAsync(_message, _message.MessageId,
-                    "Mohon maaf... Kriteria yang dicari tidak ada atau tidak ketemu 🙁");
-                return;
+                textResult += $"\n—— —— ——\nTidak ada atau tidak ketemu!";
+                var buttonLink = new List<InlineKeyboardButton>
+                        {
+                            InlineKeyboardButton.WithUrl("Visit Website!", "https://opengapps.org")
+                        };
+                buttonRows.Add(buttonLink);
+            }
+            else if (listGapps.Count == 1)
+            {
+                var name = Path.GetFileName(listGapps[0].Item2);
+                var buttonLink = new List<InlineKeyboardButton>
+                        {
+                            InlineKeyboardButton.WithUrl(name, listGapps[0].Item2)
+                        };
+                buttonRows.Add(buttonLink);
+            }
+            else
+            {
+                var skip = 0;
+                while (true)
+                {
+                    var take = listGapps.Skip(skip).Take(3);
+                    if (take.Count() == 0) break;
+
+                    var buttonRow = new List<InlineKeyboardButton>();
+                    foreach (var t in take)
+                    {
+                        buttonRow.Add(InlineKeyboardButton.WithUrl(t.Item1, t.Item2));
+                    }
+
+                    buttonRows.Add(buttonRow);
+                    skip += 3;
+                }
             }
 
-            await BotClient.EditOrSendTextAsync(_message, _message.MessageId, result, ParseMode.Html, preview: false);
+            var buttons = new InlineKeyboardMarkup(buttonRows.ToArray());
+            await BotClient.EditOrSendTextAsync(_message, _message.MessageId, textResult, ParseMode.Markdown, buttons, false);
         }
     }
 }
