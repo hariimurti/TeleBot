@@ -137,6 +137,10 @@ namespace TeleBot.Plugins
                     RegCmd(message, data);
                     break;
 
+                case "reload":
+                    ReloadChatBot(message);
+                    break;
+
                 default:
                     _log.Ignore("Perintah: {0} -- tdk ada", cmd);
                     break;
@@ -328,6 +332,19 @@ namespace TeleBot.Plugins
             if (string.IsNullOrWhiteSpace(data)) return;
 
             new KeyGenerator(message).Generate(data);
+        }
+
+        private static async void ReloadChatBot(Message message)
+        {
+            if (!message.IsGodMode())
+            {
+                await BotClient.SendTextAsync(message, "Kamu siapa? Kok berani-beraninya nyuruh aku 😡😡");
+                return;
+            }
+
+            ChatBot.LoadLibrary();
+
+            await BotClient.SendTextAsync(message, "Okey...", true);
         }
     }
 }
