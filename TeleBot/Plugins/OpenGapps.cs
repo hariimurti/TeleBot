@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RestSharp;
 using TeleBot.BotClass;
@@ -80,6 +81,43 @@ namespace TeleBot.Plugins
             public Archs archs { get; set; }
         }
 
+        public class Option
+        {
+            public static List<string> Archs()
+            {
+                var retval = new List<string>();
+                foreach (var prop in typeof(Archs).GetProperties())
+                    retval.Add(prop.Name);
+
+                return retval;
+            }
+
+            public static List<string> AndroidVerions()
+            {
+                var retval = new List<string>();
+                foreach (var prop in typeof(Apis).GetProperties())
+                {
+                    var name = prop.GetCustomAttribute<JsonPropertyAttribute>().PropertyName;
+                    retval.Add(name);
+                }
+
+                return retval;
+            }
+
+            public static List<string> Variants()
+            {
+                return new List<string>() { "pico", "nano", "micro", "mini", "full", "stock", "super", "aroma", "tvstock" };
+            }
+        }
+
+        public class Value
+        {
+            public string Arch { get; set; }
+            public string Android { get; set; }
+            public string Variant { get; set; }
+            public bool Error { get; set; }
+        }
+
         #endregion
 
         public OpenGapps(Message message)
@@ -89,55 +127,99 @@ namespace TeleBot.Plugins
 
         private async void SendUsage()
         {
-            var arch = string.Empty;
-            foreach (var prop in typeof(Archs).GetProperties())
-                arch = arch.JoinWithComma($"`{prop.Name}`");
+            var arch = Option.Archs().JoinWithComma(ParseMode.Markdown);
+            var android = Option.AndroidVerions().JoinWithComma(ParseMode.Markdown);
+            var variant = Option.Variants().JoinWithComma(ParseMode.Markdown);
 
-            var android = string.Empty;
-            foreach (var prop in typeof(Apis).GetProperties())
-            {
-                var name = prop.GetCustomAttribute<JsonPropertyAttribute>().PropertyName;
-                android = android.JoinWithComma($"`{name}`");
-            }
-
-            var variant = "`pico`, `nano`, `micro`, `mini`, `full`, `stock`, `super`, `aroma`, `tvstock`";
-
-            await BotClient.EditOrSendTextAsync(_message, _message.MessageId,
+            await BotClient.SendTextAsync(_message,
                     $"*OpenGapps*\n" +
                     $"—— Opsi ——\n" +
-                    $"Platform : {arch}.\n" +
-                    $"Android : {android}.\n" +
-                    $"Variant : {variant}.\n" +
+                    $"Platform : {arch}\n" +
+                    $"Android : {android}\n" +
+                    $"Variant : {variant}\n" +
                     $"—— Penggunaan ——\n" +
                     $"`/gapps platform android`\n" +
                     $"`/gapps platform android variant`\n" +
                     $"—— Contoh ——\n" +
                     $"`/gapps arm 7.1`\n" +
-                    $"`/gapps arm64 9.0 pico`",
-                    ParseMode.Markdown, preview: false);
+                    $"`/gapps arm64 9.0 pico`", parse: ParseMode.Markdown);
+        }
+
+        private async Task<Value> GetOption(string data)
+        {
+            var value = new Value() { Error = true };
+            if (string.IsNullOrWhiteSpace(data))
+            {
+                SendUsage();
+                return value;
+            }
+
+            var regex = Regex.Match(data.ToLower(), @"([armx864_]+) ?([0-9]{1,2}.[0-9])? ?([a-zA-Z]+)?", RegexOptions.IgnoreCase);
+            if (!regex.Success)
+            {
+                SendUsage();
+                return value;
+            }
+
+            value.Arch = regex.Groups[1].Value;
+            value.Android = regex.Groups[2].Value;
+            value.Variant = regex.Groups[3].Value;
+
+            if (string.IsNullOrWhiteSpace(value.Arch) || string.IsNullOrWhiteSpace(value.Android))
+            {
+                await BotClient.SendTextAsync(_message,
+                    "Definisikan `platform` dan `android` terlebih dahulu!\nGunakan /gapps untuk lebih jelasnya.",
+                    true, parse: ParseMode.Markdown);
+                return value;
+            }
+
+            var arch = Option.Archs();
+            if (!arch.IsContain(value.Arch))
+            {
+                var opsi = arch.JoinWithComma(ParseMode.Markdown);
+                await BotClient.SendTextAsync(_message,
+                    $"Platform `{value.Arch}` tidak ada dalam data!\nOpsi : {opsi}",
+                    true, parse: ParseMode.Markdown);
+                return value;
+            }
+
+            var android = Option.AndroidVerions();
+            if (!android.IsContain(value.Android))
+            {
+                var opsi = android.JoinWithComma(ParseMode.Markdown);
+                await BotClient.SendTextAsync(_message,
+                    $"Android `{value.Android}` tidak ada dalam data!\nOpsi : {opsi}",
+                    true, parse: ParseMode.Markdown);
+                return value;
+            }
+
+            if (string.IsNullOrWhiteSpace(value.Variant))
+            {
+                value.Error = false;
+                return value;
+            }
+
+            var variant = Option.Variants();
+            if (!variant.IsContain(value.Variant))
+            {
+                var opsi = variant.JoinWithComma(ParseMode.Markdown);
+                await BotClient.SendTextAsync(_message,
+                    $"Variant `{value.Variant}` tidak ada dalam data!\nOpsi : {opsi}",
+                    true, parse: ParseMode.Markdown);
+                return value;
+            }
+
+            value.Error = false;
+            return value;
         }
 
         public async void GetLatestRelease(string data)
         {
             Gapps gapps;
-            var regex = Regex.Match(data.ToLower(), @"([armx864_]+) ?([0-9]{1,2}.[0-9])? ?([a-zA-Z]+)?", RegexOptions.IgnoreCase);
-            if (!regex.Success)
-            {
-                SendUsage();
-                return;
-            }
+            var value = await GetOption(data);
+            if (value.Error) return;
 
-            var platform = regex.Groups[1].Value;
-            var android = regex.Groups[2].Value;
-            var variant = regex.Groups[3].Value;
-
-            if (string.IsNullOrWhiteSpace(platform) || string.IsNullOrWhiteSpace(android))
-            {
-                await BotClient.SendTextAsync(_message, "Kriteria minimal belum terpenuhi!\nGunakan /gapps untuk lebih jelasnya.");
-                return;
-            }
-
-            _log.Debug("Platform: {0} | Android: {1} | Variant: {2} | Cari gapps...", platform, android, variant);
+            _log.Debug("Platform: {0} | Android: {1} | Variant: {2} | Cari gapps...", value.Arch, value.Android, value.Variant);
 
             try
             {
@@ -149,7 +231,7 @@ namespace TeleBot.Plugins
                 req.AddHeader("User-Agent", App.UserAgent);
                 req.AddHeader("DNT", "1");
 
-                _message = await BotClient.SendTextAsync(_message, "Tunggu sebentar, aku carikan di websitenya dulu...");
+                _message = await BotClient.SendTextAsync(_message, "Tunggu sebentar, aku carikan dulu...");
 
                 _log.Debug("Getting json from api...");
                 var res = await client.ExecuteTaskAsync(req);
@@ -166,18 +248,18 @@ namespace TeleBot.Plugins
             }
 
             var textResult = $"*OpenGapps*\n—— —— ——\n" +
-                $"Platform : `{platform}`\n" +
-                $"Android : `{android}`\n";
+                $"Platform : `{value.Arch}`\n" +
+                $"Android : `{value.Android}`\n";
 
-            if (string.IsNullOrWhiteSpace(variant))
+            if (string.IsNullOrWhiteSpace(value.Variant))
                 textResult += $"Variant : `all`";
             else
-                textResult += $"Variant : `{variant}`";
+                textResult += $"Variant : `{value.Variant}`";
 
             var listGapps = new List<Tuple<string, string>>();
             foreach (var propArch in typeof(Archs).GetProperties())
             {
-                if (propArch.Name != platform) continue;
+                if (propArch.Name != value.Arch) continue;
 
                 var arch = (Arch)propArch.GetValue(gapps.archs);
                 if (arch == null) continue;
@@ -185,17 +267,16 @@ namespace TeleBot.Plugins
                 textResult += $"\nRelease : `{arch.date}`";
                 foreach (var propAndroid in typeof(Apis).GetProperties())
                 {
-                    var version = propAndroid.GetCustomAttribute<JsonPropertyAttribute>().PropertyName;
-                    if (version != android) continue;
+                    if (propAndroid.GetJsonPropertyName() != value.Android) continue;
 
-                    var api = (Variants)propAndroid.GetValue(arch.apis);
-                    if (api == null) continue;
+                    var package = (Variants)propAndroid.GetValue(arch.apis);
+                    if (package == null) continue;
 
-                    foreach (var package in api.variants)
+                    foreach (var variant in package.variants)
                     {
-                        if (!string.IsNullOrWhiteSpace(variant) && package.name != variant) continue;
+                        if (!string.IsNullOrWhiteSpace(value.Variant) && variant.name != value.Variant) continue;
 
-                        listGapps.Add(new Tuple<string, string>(package.name, package.zip));
+                        listGapps.Add(new Tuple<string, string>(variant.name, variant.zip));
                     }
                 }
             }

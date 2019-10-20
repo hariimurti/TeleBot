@@ -1,8 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.Net;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Web;
 using TeleBot.BotClass;
+using Telegram.Bot.Types.Enums;
 
 namespace TeleBot.Classes
 {
@@ -124,9 +128,35 @@ namespace TeleBot.Classes
             return value.ToString("0.00");
         }
 
-        public static string JoinWithComma(this string text, string newone)
+        public static string JoinWithComma(this List<string> list, ParseMode parse = ParseMode.Default)
         {
-            return string.IsNullOrEmpty(text) ? newone : $"{text}, {newone}";
+            var retval = string.Empty;
+            foreach (var text in list)
+            {
+                var value = text;
+                if (parse == ParseMode.Html) value = $"<code>{text}</code>";
+                if (parse == ParseMode.Markdown) value = $"`{text}`";
+                retval = string.IsNullOrEmpty(retval) ? value : $"{retval}, {value}";
+            }
+            return retval;
+        }
+
+        public static bool IsContain(this List<string> list, string text)
+        {
+            return list.Find(x => x == text)?.Length > 0;
+        }
+
+        public static string GetJsonPropertyName(this PropertyInfo info)
+        {
+            try
+            {
+                return info.GetCustomAttribute<JsonPropertyAttribute>()?.PropertyName;
+            }
+            catch (Exception e)
+            {
+                _log.Error(e.Message);
+                return string.Empty;
+            }
         }
     }
 }
