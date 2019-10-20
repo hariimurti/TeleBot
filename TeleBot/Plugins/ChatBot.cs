@@ -62,6 +62,8 @@ namespace TeleBot.Plugins
         public async void SendResponse()
         {
             var text = _message.Text;
+
+            /*
             var language = "id";
             var inEnglish = false;
             var detect = await _yandex.DetectLanguage(text);
@@ -77,6 +79,7 @@ namespace TeleBot.Plugins
                 if (translate.Success)
                     text = translate.Text;
             }
+            */
             
             var chatRequest = new ChatRequest(text, _user);
             var chatResult = _siml.Chat(chatRequest);
@@ -88,12 +91,15 @@ namespace TeleBot.Plugins
             }
 
             var response = chatResult.BotMessage;
+
+            /*
             if (!inEnglish)
             {
                 var translate = await _yandex.Translate("en", language, response);
                 if (translate.Success)
                     response = translate.Text;
             }
+            */
             
             await BotClient.SendTextAsync(_message, response);
         }
