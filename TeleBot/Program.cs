@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using TeleBot.BotClass;
 using TeleBot.Classes;
+using TeleBot.Plugins;
 
 namespace TeleBot
 {
@@ -30,7 +31,7 @@ namespace TeleBot
 
         public static readonly DateTime StartTime = DateTime.Now;
 
-        private static void Main(string[] args)
+        private static async Task Main(string[] args)
         {
             // set debug level
             foreach (var arg in args)
@@ -55,10 +56,7 @@ namespace TeleBot
                 {
                     log.Debug("Mengakses akun bot...");
 
-                    var receive = BotClient
-                        .StartReceivingMessage()
-                        .GetAwaiter()
-                        .GetResult();
+                    var receive = await BotClient.StartReceivingMessage();
 
                     if (receive) break;
                 }
@@ -70,6 +68,9 @@ namespace TeleBot
 
             // reSchedule
             Schedule.ReSchedule();
+
+            // chatbot load library
+            ChatBot.LoadLibrary();
 
             // tunggu key ctrl+c untuk keluar dari aplikasi
             var exitEvent = new ManualResetEvent(false);

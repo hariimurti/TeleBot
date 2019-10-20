@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using Syn.Bot.Siml;
 using TeleBot.BotClass;
@@ -16,11 +17,15 @@ namespace TeleBot.Plugins
         private BotUser _user;
         private Message _message;
 
-        public ChatBot(Message message)
+        public static async void LoadLibrary()
         {
-            _message = message;
-            
-            if (_siml == null)
+            await LoadLibraryAsync();
+        }
+
+        public static async Task LoadLibraryAsync()
+        {
+            if (_siml != null) return;
+            await Task.Run(() =>
             {
                 _log.Debug("Creating new chatbot...");
                 _yandex = new Yandex();
@@ -33,7 +38,7 @@ namespace TeleBot.Plugins
                     try
                     {
                         _log.Debug($"Loading {name}");
-                        
+
                         var simlDocument = XDocument.Load(simlFile);
                         _siml.Import(simlDocument);
                     }
@@ -42,7 +47,14 @@ namespace TeleBot.Plugins
                         _log.Error(e.Message);
                     }
                 }
-            }
+            });
+        }
+
+        public ChatBot(Message message)
+        {
+            _message = message;
+
+            LoadLibraryAsync().GetAwaiter();
             
             _user = _siml.CreateUser(message.Chat.Id.ToString());
         }
