@@ -17,11 +17,6 @@ namespace TeleBot.Plugins
         private BotUser _user;
         private Message _message;
 
-        public static async void LoadLibrary()
-        {
-            await LoadLibraryAsync();
-        }
-
         public static async Task LoadLibraryAsync()
         {
             if (_siml != null) return;
@@ -59,29 +54,24 @@ namespace TeleBot.Plugins
             _user = _siml.CreateUser(message.Chat.Id.ToString());
         }
 
+        public async void Reload()
+        {
+            if (!_message.IsGodMode())
+            {
+                await BotClient.SendTextAsync(_message, "Kamu siapa? Kok berani-beraninya nyuruh aku 😡😡");
+                return;
+            }
+            
+            _message = await BotClient.SendTextAsync(_message, "Please wait...", true);
+
+            await LoadLibraryAsync();
+
+            await BotClient.EditOrSendTextAsync(_message, _message.MessageId, "Okey, it's done...");
+        }
+
         public async void SendResponse()
         {
-            var text = _message.Text;
-
-            /*
-            var language = "id";
-            var inEnglish = false;
-            var detect = await _yandex.DetectLanguage(text);
-            if (detect.Success)
-            {
-                language = detect.Text;
-                inEnglish = detect.Text == "en";
-            }
-            
-            if (!inEnglish)
-            {
-                var translate = await _yandex.Translate(language, "en", text);
-                if (translate.Success)
-                    text = translate.Text;
-            }
-            */
-            
-            var chatRequest = new ChatRequest(text, _user);
+            var chatRequest = new ChatRequest(_message.Text, _user);
             var chatResult = _siml.Chat(chatRequest);
             if (!chatResult.Success)
             {
@@ -90,18 +80,7 @@ namespace TeleBot.Plugins
                 return;
             }
 
-            var response = chatResult.BotMessage;
-
-            /*
-            if (!inEnglish)
-            {
-                var translate = await _yandex.Translate("en", language, response);
-                if (translate.Success)
-                    response = translate.Text;
-            }
-            */
-            
-            await BotClient.SendTextAsync(_message, response);
+            await BotClient.SendTextAsync(_message, chatResult.BotMessage);
         }
     }
 }

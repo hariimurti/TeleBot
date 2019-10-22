@@ -138,7 +138,7 @@ namespace TeleBot.Plugins
                     break;
 
                 case "reload":
-                    ReloadChatBot(message);
+                    new ChatBot(message).Reload();
                     break;
 
                 default:
@@ -332,19 +332,6 @@ namespace TeleBot.Plugins
             if (string.IsNullOrWhiteSpace(data)) return;
 
             new KeyGenerator(message).Generate(data);
-        }
-
-        private static async void ReloadChatBot(Message message)
-        {
-            if (!message.IsGodMode())
-            {
-                await BotClient.SendTextAsync(message, "Kamu siapa? Kok berani-beraninya nyuruh aku 😡😡");
-                return;
-            }
-
-            ChatBot.LoadLibrary();
-
-            await BotClient.SendTextAsync(message, "Okey...", true);
         }
     }
 }

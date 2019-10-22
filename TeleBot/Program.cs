@@ -70,7 +70,7 @@ namespace TeleBot
             Schedule.ReSchedule();
 
             // chatbot load library
-            ChatBot.LoadLibrary();
+            await ChatBot.LoadLibraryAsync();
 
             // tunggu key ctrl+c untuk keluar dari aplikasi
             var exitEvent = new ManualResetEvent(false);
