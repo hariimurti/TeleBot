@@ -67,6 +67,9 @@ namespace TeleBot.BotClass
             // pesan berisi hashtag
             else if (message.Text.Contains("#"))
                 new Bookmark(message).FindHashtags();
+            // pesan berisi link twitter
+            else if (message.Text.Contains("twitter.com/"))
+                new Twitter(message).GetMedia(message.Text);
             // pesan teks lain
             else
                 Talk.Response(message);
