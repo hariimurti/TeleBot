@@ -276,6 +276,33 @@ namespace TeleBot.BotClass
                 return null;
             }
         }
+        
+        public static async Task<Message> SendVideoAsync(Message msg, string videoUrl, string thumbUrl = null, string caption = null, bool reply = false)
+        {
+            var replyId = reply ? msg.MessageId : 0;
+            return await SendVideoAsync(msg.Chat.Id, videoUrl, thumbUrl, caption, replyId);
+        }
+        
+        public static async Task<Message> SendVideoAsync(ChatId chatId, string videoUrl, string thumbUrl = null, string caption = null, int replyId = 0)
+        {
+            try
+            {
+                Message message;
+                await _bot.SendChatActionAsync(chatId, ChatAction.UploadVideo);
+
+                _log.Debug("SendVideoAsync: {0}", chatId);
+
+                message = await _botFile.SendVideoAsync(chatId, videoUrl, thumb : thumbUrl, caption : caption, supportsStreaming: true, replyToMessageId: replyId);
+
+                await _db.InsertMessageOutgoing(message);
+                return message;
+            }
+            catch (Exception ex)
+            {
+                _log.Error(ex.Message);
+                return null;
+            }
+        }
 
         #endregion
     }
