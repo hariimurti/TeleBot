@@ -90,6 +90,14 @@ namespace TeleBot.Plugins
                 return;
             }
 
+            // respon pesan link
+            if (Regex.IsMatch(message.Text, @"^(https?://)"))
+            {
+                _log.Debug("Pesan {0} | Alasan: tidak support link!", message.MessageId);
+                await BotClient.SendTextAsync(message, "link apa ini?", true);
+                return;
+            }
+
             // respon dgn chatbot
             _log.Debug("Pesan {0} | Respon: tanya chatbot", message.MessageId);
             new ChatBot(message).SendResponse();
