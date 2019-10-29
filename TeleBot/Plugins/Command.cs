@@ -120,9 +120,11 @@ namespace TeleBot.Plugins
                     new OpenGapps(message).GetLatestRelease(data);
                     break;
 
+                /*
                 case "eset":
                     new Eset(message).GetKeys();
                     break;
+                */
 
                 case "translate":
                 case "terjemah":
