@@ -83,7 +83,9 @@ namespace TeleBot.Plugins
             if (!regex.Success) return;
 
             ulong.TryParse(regex.Groups[1].Value, out ulong statusId);
-            
+
+            _log.Debug("Found twitter id : {0}", statusId);
+
             _message = await BotClient.SendTextAsync(_message, "Tunggu sebentar...", true);
             
             var status = await _twitter.Status
@@ -100,7 +102,9 @@ namespace TeleBot.Plugins
                     .Where(x => x.ContentType == "video/mp4")
                     .OrderByDescending(x => x.BitRate)
                     .First();
-                
+
+                _log.Debug("Found video : {0}", video.Url);
+
                 await BotClient.SendVideoAsync(_message, video.Url, media.MediaUrlHttps, status.FullText);
             }
             
