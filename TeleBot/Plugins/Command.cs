@@ -193,6 +193,10 @@ namespace TeleBot.Plugins
                                 "• `/welcome` — pengaturan.\n" +
                                 "• _alias: selamatdatang._\n" +
                                 "\n" +
+                                "Facebook & Twitter Video Downloader\n" +
+                                "• PM: kirim link video.\n" +
+                                "• Grup: tdk support.\n" +
+                                "\n" +
                                 "Teman obrolan\n" +
                                 "• PM: chat teks spt biasa.\n" +
                                 "• Grup: reply pesan atau mention {alias}.";
