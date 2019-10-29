@@ -36,18 +36,25 @@ namespace TeleBot.Plugins
 
         public Yandex()
         {
-            if (!File.Exists(JsonFile))
+            try
             {
-                var key = new JsonKey();
-                var json = JsonConvert.SerializeObject(key, Program.JsonSettings);
+                if (!File.Exists(JsonFile))
+                {
+                    var key = new JsonKey();
+                    var json = JsonConvert.SerializeObject(key, Program.JsonSettings);
 
-                File.WriteAllText(JsonFile, json);
+                    File.WriteAllText(JsonFile, json);
+                }
+                else
+                {
+                    var json = File.ReadAllText(JsonFile);
+                    var key = JsonConvert.DeserializeObject<JsonKey>(json);
+                    apiKey = key.ApiKey;
+                }
             }
-            else
+            catch (Exception e)
             {
-                var json = File.ReadAllText(JsonFile);
-                var key = JsonConvert.DeserializeObject<JsonKey>(json);
-                apiKey = key.ApiKey;
+                _log.Error(e.Message);
             }
         }
 
