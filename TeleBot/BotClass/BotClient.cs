@@ -276,7 +276,11 @@ namespace TeleBot.BotClass
                 return null;
             }
         }
-        
+
+        #endregion
+
+        #region SendVideoAsync
+
         public static async Task<Message> SendVideoAsync(Message msg, string videoUrl, string thumbUrl = null, string caption = null, bool reply = false)
         {
             var replyId = reply ? msg.MessageId : 0;
@@ -291,8 +295,15 @@ namespace TeleBot.BotClass
                 await _bot.SendChatActionAsync(chatId, ChatAction.UploadVideo);
 
                 _log.Debug("SendVideoAsync: {0}", chatId);
-
-                message = await _botFile.SendVideoAsync(chatId, videoUrl, thumb : thumbUrl, caption : caption, supportsStreaming: true, replyToMessageId: replyId);
+                if (caption?.Length > 200)
+                {
+                    message = await _botFile.SendVideoAsync(chatId, videoUrl, thumb: thumbUrl, supportsStreaming: true, replyToMessageId: replyId);
+                    await _bot.SendTextMessageAsync(chatId, caption, disableWebPagePreview: true, replyToMessageId: message.MessageId);
+                }
+                else
+                {
+                    message = await _botFile.SendVideoAsync(chatId, videoUrl, thumb: thumbUrl, caption: caption, supportsStreaming: true, replyToMessageId: replyId);
+                }
 
                 await _db.InsertMessageOutgoing(message);
                 return message;
@@ -300,6 +311,9 @@ namespace TeleBot.BotClass
             catch (Exception ex)
             {
                 _log.Error(ex.Message);
+
+                await SendTextAsync(chatId, videoUrl);
+
                 return null;
             }
         }
