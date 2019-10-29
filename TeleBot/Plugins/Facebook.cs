@@ -31,18 +31,25 @@ namespace TeleBot.Plugins
                 await BotClient.SendTextAsync(_message, "Link facebook salah?", true);
                 return;
             }
+            var facebookUrl = matchUrl.Groups[1].Value;
+
+            _log.Debug("Found link : {0}", facebookUrl);
 
             _message = await BotClient.SendTextAsync(_message, "Tunggu sebentar...", true);
 
             try
             {
-                var videourl = await GetVideoUrl(matchUrl.Groups[1].Value);
+                var videourl = await GetVideoUrl(facebookUrl);
                 
                 if (string.IsNullOrWhiteSpace(videourl))
                 {
+                    _log.Debug("Video not available!");
+
                     await BotClient.EditOrSendTextAsync(_message.Chat.Id, _message.MessageId, "Gak ada videonya!");
                     return;
                 }
+
+                _log.Debug("Found video : {0}", videourl);
 
                 await BotClient.SendVideoAsync(_message, videourl);
             }
@@ -72,10 +79,14 @@ namespace TeleBot.Plugins
         {
             if (url.Contains("comment_id="))
             {
+                _log.Debug("Get link video in comment : {0}", url);
+
                 var commentSrc = await GetSourceText(url);
                 var comment = Regex.Match(commentSrc, @"(https?://www\.facebook\.com/[a-zA-Z0-9\.\-_]+/videos/[0-9]+/)");
                 if (comment.Success) url = comment.Groups[1].Value.Replace("\\", "");
             }
+
+            _log.Debug("Scrapping video : {0}", url);
 
             var src = await GetSourceText(url);
 
