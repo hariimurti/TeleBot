@@ -25,7 +25,7 @@ namespace TeleBot.Plugins
         {
             if (!_message.IsPrivateChat()) return;
 
-            var matchUrl = Regex.Match(data, "(http.*facebook.com/.*[0-9]+/?)");
+            var matchUrl = Regex.Match(data, @"(https?://www.facebook\.com/.*[0-9]+/?)");
             if (!matchUrl.Success)
             {
                 await BotClient.SendTextAsync(_message, "Link facebook salah?", true);
@@ -53,7 +53,7 @@ namespace TeleBot.Plugins
             }
         }
 
-        private async Task<string> GetVideoUrl(string url)
+        private async Task<string> GetSourceText(string url)
         {
             var client = new RestClient(url);
             var request = new RestRequest();
@@ -65,11 +65,25 @@ namespace TeleBot.Plugins
             if (response.StatusCode != HttpStatusCode.OK)
                 throw new Exception(response.StatusDescription);
 
-            var mHd = Regex.Match(response.Content, "hd_src_no_ratelimit\"?:\"(.*?)\"");
-            if (mHd.Success) return mHd.Groups[1].Value;
+            return response.Content;
+        }
 
-            var mSd = Regex.Match(response.Content, "sd_src_no_ratelimit\"?:\"(.*?)\"");
-            if (mSd.Success) return mSd.Groups[1].Value;
+        private async Task<string> GetVideoUrl(string url)
+        {
+            if (url.Contains("comment_id="))
+            {
+                var commentSrc = await GetSourceText(url);
+                var comment = Regex.Match(commentSrc, @"(https?://www\.facebook\.com/[a-zA-Z0-9\.\-_]+/videos/[0-9]+/)");
+                if (comment.Success) url = comment.Groups[1].Value.Replace("\\", "");
+            }
+
+            var src = await GetSourceText(url);
+
+            var mHd = Regex.Match(src, "hd_src_no_ratelimit\"?:\"(.*?)\"");
+            if (mHd.Success) return mHd.Groups[1].Value.Replace("\\", "");
+
+            var mSd = Regex.Match(src, "sd_src_no_ratelimit\"?:\"(.*?)\"");
+            if (mSd.Success) return mSd.Groups[1].Value.Replace("\\", "");
 
             return string.Empty;
         }
