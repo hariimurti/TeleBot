@@ -481,9 +481,13 @@ namespace TeleBot.Plugins
             var respon = $"<b>{title}</b>" +
                          $"\n—— —— —— —— —— ——\n" +
                          $"Requirements : {require}\n" +
-                         $"Download Instructions :\n{link}" +
+                         $"Download Instructions :\n{link}";
+
+            if (_message.IsGroupChat())
+                respon = respon +
                          $"\n—— —— —— —— —— ——\n" +
                          $"Requested By : {request}";
+            
             await BotClient.SendTextAsync(_message, respon, parse: ParseMode.Html, preview: false);
         }
     }
