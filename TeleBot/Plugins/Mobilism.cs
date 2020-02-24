@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -459,9 +459,9 @@ namespace TeleBot.Plugins
 
             _log.Debug("Regex link download...");
 
-            var pattern = "<div.*class=\"content\".*<span.*>(.+)<\\/span><br \\/>.*" +
-                          "Requirements.*<\\/span>(.+)<br \\/>.*Overview:.*" +
-                          "Instructions:(.+).*<\\/div>";
+            var pattern = "<div.+class=\"content\".+<span.*>(.+?)</span><br />.+" +
+                "Requirements:(.+?)<br />[\\s\\S]+" +
+                "Download Instructions:([\\s\\S]+?)</div>";
 
             var post = Regex.Match(content, pattern);
             if (!post.Success)
