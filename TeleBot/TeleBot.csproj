@@ -1,9 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <AssemblyVersion>2019.10.29</AssemblyVersion>
-    <FileVersion>2019.10.29</FileVersion>
+    <AssemblyVersion>2020.02.24</AssemblyVersion>
+    <FileVersion>2020.02.24</FileVersion>
     <Version>2.2.7</Version>
     <Authors>Harimurti</Authors>
     <Company>Harimurti.net</Company>
