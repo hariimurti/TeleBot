@@ -52,8 +52,13 @@ namespace TeleBot.Classes
             return result;
         }
 
-        public static string RemoveHtmlTag(this string text)
+        public static string RemoveHtmlTag(this string text, bool brToNewLine = false)
         {
+            if (brToNewLine)
+            {
+                text = Regex.Replace(text, "[\r\n]+", "<br />");
+                text = Regex.Replace(text, "(<br />\n?){1,}", "\n");
+            }
             return Regex.Replace(text, "<.*?>", string.Empty).Trim();
         }
 

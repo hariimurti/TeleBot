@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -475,7 +475,7 @@ namespace TeleBot.Plugins
 
             var title = post.Groups[1].Value.RemoveHtmlTag();
             var require = post.Groups[2].Value.RemoveHtmlTag();
-            var link = post.Groups[3].Value.Replace("<br />", "\n").RemoveHtmlTag();
+            var link = post.Groups[3].Value.RemoveHtmlTag(true);
             var request = _message.FromNameWithMention(ParseMode.Html, true);
 
             var respon = $"<b>{title}</b>" +
