@@ -61,7 +61,16 @@ namespace TeleBot.Plugins
             }
             else
             {
-                text = _message.ReplyToMessage.Text;
+                text = _message.ReplyToMessage.IsTextMessage() ?
+                    _message.ReplyToMessage.Text : _message.ReplyToMessage.Caption;
+
+                if (string.IsNullOrWhiteSpace(text)) {
+                    if (_message.ReplyToMessage.IsTextMessage()) SendUsage();
+                    else await BotClient.SendTextAsync(_message, "Pesan yg dibalas tidak ada keterangannya!");
+
+                    return;
+                }
+
                 if (!string.IsNullOrWhiteSpace(data))
                 {
                     var regex = Regex.Match(data, @"^([a-z]{2}(?:-[a-z]{2})?)$", RegexOptions.IgnoreCase);
