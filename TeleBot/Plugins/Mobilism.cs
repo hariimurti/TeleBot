@@ -459,9 +459,9 @@ namespace TeleBot.Plugins
 
             _log.Debug("Regex link download...");
 
-            var pattern = "<div.*class=\"content\".*<span.*>(.+)<\\/span><br \\/>.*" +
-                          "Requirements.*<\\/span>(.+)<br \\/>.*Overview:.*" +
-                          "Instructions:(.+).*<\\/div>";
+            var pattern = "<div.+class=\"content\".+<span.*>(.+?)</span><br />.+" +
+                "Requirements:(.+?)<br />[\\s\\S]+" +
+                "Download Instructions:([\\s\\S]+?)</div>";
 
             var post = Regex.Match(content, pattern);
             if (!post.Success)
@@ -475,15 +475,19 @@ namespace TeleBot.Plugins
 
             var title = post.Groups[1].Value.RemoveHtmlTag();
             var require = post.Groups[2].Value.RemoveHtmlTag();
-            var link = post.Groups[3].Value.Replace("<br />", "\n").RemoveHtmlTag();
+            var link = post.Groups[3].Value.RemoveHtmlTag(true);
             var request = _message.FromNameWithMention(ParseMode.Html, true);
 
             var respon = $"<b>{title}</b>" +
                          $"\n—— —— —— —— —— ——\n" +
                          $"Requirements : {require}\n" +
-                         $"Download Instructions :\n{link}" +
+                         $"Download Instructions :\n{link}";
+
+            if (_message.IsGroupChat())
+                respon = respon +
                          $"\n—— —— —— —— —— ——\n" +
                          $"Requested By : {request}";
+            
             await BotClient.SendTextAsync(_message, respon, parse: ParseMode.Html, preview: false);
         }
     }

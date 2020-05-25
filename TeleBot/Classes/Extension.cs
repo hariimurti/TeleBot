@@ -1,8 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.Net;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Web;
 using TeleBot.BotClass;
+using Telegram.Bot.Types.Enums;
 
 namespace TeleBot.Classes
 {
@@ -48,8 +52,13 @@ namespace TeleBot.Classes
             return result;
         }
 
-        public static string RemoveHtmlTag(this string text)
+        public static string RemoveHtmlTag(this string text, bool brToNewLine = false)
         {
+            if (brToNewLine)
+            {
+                text = Regex.Replace(text, "[\r\n]+", "<br />");
+                text = Regex.Replace(text, "(<br />\n?){1,}", "\n");
+            }
             return Regex.Replace(text, "<.*?>", string.Empty).Trim();
         }
 
@@ -122,6 +131,37 @@ namespace TeleBot.Classes
             if (value >= 10)
                 return value.ToString("0.0");
             return value.ToString("0.00");
+        }
+
+        public static string JoinWithComma(this List<string> list, ParseMode parse = ParseMode.Default)
+        {
+            var retval = string.Empty;
+            foreach (var text in list)
+            {
+                var value = text;
+                if (parse == ParseMode.Html) value = $"<code>{text}</code>";
+                if (parse == ParseMode.Markdown) value = $"`{text}`";
+                retval = string.IsNullOrEmpty(retval) ? value : $"{retval}, {value}";
+            }
+            return retval;
+        }
+
+        public static bool IsContain(this List<string> list, string text)
+        {
+            return list.Find(x => x == text)?.Length > 0;
+        }
+
+        public static string GetJsonPropertyName(this PropertyInfo info)
+        {
+            try
+            {
+                return info.GetCustomAttribute<JsonPropertyAttribute>()?.PropertyName;
+            }
+            catch (Exception e)
+            {
+                _log.Error(e.Message);
+                return string.Empty;
+            }
         }
     }
 }

@@ -1,18 +1,21 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
-    <AssemblyVersion>2019.05.13</AssemblyVersion>
-    <FileVersion>2019.05.13</FileVersion>
-    <Version>2.0</Version>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <AssemblyVersion>2020.05.26</AssemblyVersion>
+    <FileVersion>2020.05.26</FileVersion>
+    <Version>2.2.7</Version>
     <Authors>Harimurti</Authors>
     <Company>Harimurti.net</Company>
     <Description>Telegram Bot</Description>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="sqlite-net-pcl" Version="1.5.231" />
-    <PackageReference Include="Telegram.Bot" Version="14.10.0" />
+    <PackageReference Include="linqtotwitter" Version="5.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="RestSharp" Version="106.6.10" />
+    <PackageReference Include="sqlite-net-pcl" Version="1.6.292" />
+    <PackageReference Include="Syn.Bot" Version="3.4.0" />
+    <PackageReference Include="Telegram.Bot" Version="15.0.0" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Service-Installer.sh">

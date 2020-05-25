@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -8,6 +9,7 @@ using TeleBot.Classes;
 using TeleBot.SQLite;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TeleBot.Plugins
 {
@@ -56,9 +58,9 @@ namespace TeleBot.Plugins
                     Status(message);
                     break;
 
-                case "token":
+                /*case "token":
                     Token(message, data);
-                    break;
+                    break;*/
 
                 case "selamatdatang":
                 case "welcome":
@@ -115,7 +117,18 @@ namespace TeleBot.Plugins
 
                 case "gapps":
                 case "opengapps":
-                    new OpenGapps(message).SelectArch();
+                    new OpenGapps(message).GetLatestRelease(data);
+                    break;
+
+                /*
+                case "eset":
+                    new Eset(message).GetKeys();
+                    break;
+                */
+
+                case "translate":
+                case "terjemah":
+                    new Translator(message).Translate(data);
                     break;
 
                 case "wa":
@@ -124,6 +137,10 @@ namespace TeleBot.Plugins
                 
                 case "reg":
                     RegCmd(message, data);
+                    break;
+
+                case "reload":
+                    new ChatBot(message).Reload();
                     break;
 
                 default:
@@ -159,8 +176,14 @@ namespace TeleBot.Plugins
                                 "• _alias: g, search, img, photo._\n" +
                                 "\n" +
                                 "OpenGapps\n" +
-                                "• `/gapps` — link dl gapps.\n" +
+                                "• `/gapps platform android` — kriteria minimal.\n" +
+                                "• `/gapps platform android variant` — kriteria spesifik.\n" +
                                 "• _alias: opengapps._\n" +
+                                "\n" +
+                                "Translator\n" +
+                                "• `/translate [code]` — terjemahkan pesan yg dibalas.\n" +
+                                "• `/translate [code] teks asli` — terjemahkan teks.\n" +
+                                "• _alias: terjemah._\n" +
                                 "\n" +
                                 "WhatsApp Api\n" +
                                 "• `/wa nomor` — link tnp teks.\n" +
@@ -170,9 +193,13 @@ namespace TeleBot.Plugins
                                 "• `/welcome` — pengaturan.\n" +
                                 "• _alias: selamatdatang._\n" +
                                 "\n" +
+                                "Facebook & Twitter Video Downloader\n" +
+                                "• PM: kirim link video.\n" +
+                                "• Grup: tdk support.\n" +
+                                "\n" +
                                 "Teman obrolan\n" +
                                 "• PM: chat teks spt biasa.\n" +
-                                "• Grup: reply pesan atau mention {alias}.\n";
+                                "• Grup: reply pesan atau mention {alias}.";
 
             await BotClient.SendTextAsync(message, help.ReplaceWithBotValue(), parse: ParseMode.Markdown);
         }
@@ -237,7 +264,7 @@ namespace TeleBot.Plugins
                 $"UpTime : {timespan}\n" +
                 $"Messages : {BotOnMessage.Count}\n";
 
-            // cek token
+            /* cek token
             try
             {
                 var tokens = await _db.GetTokens();
@@ -247,13 +274,13 @@ namespace TeleBot.Plugins
             catch (Exception ex)
             {
                 _log.Error(ex.Message);
-            }
+            }*/
 
             // kirim status
             await BotClient.SendTextAsync(message, respon, parse: ParseMode.Markdown);
         }
 
-        private static async void Token(Message message, string data)
+        /*private static async void Token(Message message, string data)
         {
             if (!string.IsNullOrWhiteSpace(data))
                 new Simsimi(message).SaveToken(data);
@@ -261,7 +288,7 @@ namespace TeleBot.Plugins
                 await BotClient.SendTextAsync(message,
                     BotResponse.SimsimiHowToGetToken(),
                     parse: ParseMode.Markdown);
-        }
+        }*/
 
         private static async void Whatsapp(Message message, string data)
         {
@@ -288,9 +315,16 @@ namespace TeleBot.Plugins
             var apiLink = $"https://api.whatsapp.com/send?phone={nomor}";
             if (!string.IsNullOrWhiteSpace(text)) apiLink += $"&text={text.EncodeToUrl()}";
 
+            var buttonRows = new List<List<InlineKeyboardButton>>();
+            var buttonLink = new List<InlineKeyboardButton>
+            {
+                InlineKeyboardButton.WithUrl("Open with WhatsApp!", apiLink)
+            };
+            buttonRows.Add(buttonLink);
+            var buttons = new InlineKeyboardMarkup(buttonRows.ToArray());
             await BotClient.SendTextAsync(message.Chat.Id,
-                $"*WhatsApp* : [API Link]({apiLink})",
-                message.MessageId, ParseMode.Markdown, preview: false);
+                $"*WhatsApp API*\n—— —— —— ——\n\nGenerated Code :\n`{apiLink}`",
+                message.MessageId, ParseMode.Markdown, buttons, false);
         }
 
         private static async void RegCmd(Message message, string data)

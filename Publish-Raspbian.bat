@@ -16,8 +16,11 @@ CD %ProjectDir%
 dotnet publish -c Release -r linux-arm -o %BuildDir%
 
 ECHO.
-ECHO Upload into Raspbian?
-PAUSE
+SET /p upload="Upload into Raspbian? [y/N] : "
+IF NOT "%upload%" == "y" (
+	GOTO exit
+)
+SET /p update="Update all library? [y/N] : "
 
 TITLE Stop bot service...
 CD ..
@@ -39,8 +42,14 @@ ECHO %Password%>> %FTPCommands%
 ECHO binary>> %FTPCommands%
 ECHO cd %UploadTo%>> %FTPCommands%
 ECHO prompt>> %FTPCommands%
-ECHO mdel *>> %FTPCommands%
-ECHO mput "%~dp0%ProjectDir%\%BuildDir%\*">> %FTPCommands%
+
+IF "%update%" == "y" (
+	ECHO mdel *>> %FTPCommands%
+    ECHO mput "%~dp0%ProjectDir%\%BuildDir%\*">> %FTPCommands%
+) ELSE (
+    ECHO mdel TeleBot*>> %FTPCommands%
+    ECHO mput "%~dp0%ProjectDir%\%BuildDir%\TeleBot*">> %FTPCommands%
+)
 ECHO quit>> %FTPCommands%
 
 ECHO.
@@ -61,4 +70,4 @@ IF EXIST %FTPCommands% DEL %FTPCommands%
 
 TITLE Finish!
 ECHO.
-PAUSE
+TIMEOUT 10
